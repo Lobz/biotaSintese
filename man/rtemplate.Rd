@@ -6,6 +6,6 @@
 \title{rtemplate}
 \description{
 \itemize{
-\item Github: https://github.com/JGCRI/rtemplate
+\item Github: https://github.com/Lobz/biotaSintese
 \item Webpage: https://jgcri.github.io/rtemplate/}
 }
