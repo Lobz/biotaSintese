@@ -29,7 +29,7 @@ knitr::opts_chunk$set(collapse = TRUE,
                       echo = TRUE)
 ```
 
-```{r load, echo = FALSE, eval = TRUE, include=FALSE}
+```{r load, echo = FALSE, eval = FALSE, include=FALSE}
 devtools::load_all() # for development
 ```
 
