@@ -1,26 +1,20 @@
-Package: rtemplate
-Title: Template to build R packages
+Package: biotaSintese
+Title: Biota Síntese
 Version: 1.0.0
-Authors@R: c(person("Zarrar", "Khan", email = "zarrar.khan@pnnl.gov", role = c("aut", "cre"),
-		   comment = c(ORCID ="0000-0002-8147-8553")),
-		   person("Chris", "Vernon", role = c("aut"), comment = c(ORCID="0000-0002-3406-6214")),
-		   person("Mengqi", "Zhao", , "mengqi.zhao@pnnl.gov", role = c("aut"),comment = c(ORCID = "0000-0001-5385-2758")))
-Description: Template to build R packages with GitHub actions and CI/CD, tests, codecov and documentation.
-URL: https://github.com/JGCRI/rtemplate
-BugReports: https://github.com/JGCRI/rtemplate/issues
-Depends: R (>= 2.10)
-License: BSD_2_clause + file LICENSE
+Authors@R: c(person("Mali Oz", "Salles", email = "malicsalles@gmail.com", role = c("aut", "cre")))
+Description: Build species list for any conservation unit in Brazil
+Depends: R (>= 4.10)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.1
-Imports: 
-	rlang	
-Suggests: 
+Imports:
+	plantR
+Suggests:
     rmarkdown,
     testthat (>= 3.0.0),
     knitr
-Remotes: 
-	github::JGCRI/jgcricolors
-VignetteBuilder: 
+Remotes:
+	github::LimaRAF/plantR
+VignetteBuilder:
     knitr
 Config/testthat/edition: 3

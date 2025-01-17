@@ -9,12 +9,12 @@ Before you start:
 
 ## Did you find a bug?
 
-* Make sure the bug was not already reported in the Github [Issues](https://github.com/JGCRI/rtemplate/issues).
-* [Open an issue](https://github.com/JGCRI/rtemplate/issues/new) and clearly describe the issue with as much information as possible. A code sample or an executable test case are recommended.
-  
+* Make sure the bug was not already reported in the Github [Issues](https://github.com/Lobz/biotaSintese/issues).
+* [Open an issue](https://github.com/Lobz/biotaSintese/issues/new) and clearly describe the issue with as much information as possible. A code sample or an executable test case are recommended.
+
 ## Did you plan to write a patch that fixes a bug?
 
-  * [Open an issue](https://github.com/JGCRI/rtemplate/issues/new) and clearly describe the problem and discuss how your solution will affect `rtemplate`.
+  * [Open an issue](https://github.com/Lobz/biotaSintese/issues/new) and clearly describe the problem and discuss how your solution will affect `rtemplate`.
   * Fork the repository on GitHub to work on the patch.
   * Interact with the project maintainers to refine/change/prioritize your issue.
 

@@ -20,7 +20,7 @@ Author, I., 2022. rtemplate: A template to build R packages using GitHub Actions
   author = {First Last1 and First Last2},
   year = {2022},
   note = {In Progress},
-  url = {https://github.com/JGCRI/rtemplate},
+  url = {https://github.com/Lobz/biotaSintese},
   doi = {xxx},
   journal={Journal}
 }
