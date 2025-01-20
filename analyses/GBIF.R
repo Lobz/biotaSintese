@@ -8,13 +8,16 @@ gbifsp_texto <- remove_empty_cols(gbifsp_texto)
 str(gbifsp_texto)
 dim(gbifsp_texto)
 sort(table(gbifsp_texto$stateProvince))
-summary(gbifsp_texto$hasCoordinate == "true") # 281297 têm coordenada
+summary(gbifsp_texto$hasCoordinate == "true") # 281297 têm coordenada e 549405 não têm
 
 gbifsp_gps <- read.gbif("~/BIOTA/GBIF/0061636-241126133413365/occurrence.tsv")
 gbifsp_gps <- filter_fields.gbif(gbifsp_gps)
 gbifsp_gps <- remove_empty_cols(gbifsp_gps)
 sort(table(gbifsp_gps$stateProvince))
 dim(gbifsp_gps) # 367790 linhas
+
+unlabeled <- subset(gbifsp_gps, stateProvince == "")
+sort(table(unlabeled$verbatimLocality == "")) # 28022 cases of no locality. gotta find a way to deal with that
 
 # merge
 ids <- intersect(sort(gbifsp_gps$gbifID), sort(gbifsp_texto$gbifID))
