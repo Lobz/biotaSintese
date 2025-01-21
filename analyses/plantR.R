@@ -15,10 +15,10 @@ str(occs_splink)
 dim(occs_splink)
 table(is.na(occs_splink$locality))
 # read data from file
-gbif_raw <- readData("./data/0071227-241126133413365.zip")
+gbif_raw <- readData("../../BIOTA/GBIF/0061636-241126133413365.zip")
 str(gbif_raw)
 
-occs <- formatDwc(gbif_data = gbif_raw[[1]], splink_data = occs_splink)
+occs <- formatDwc(gbif_data = gbif_raw[[1]])
 str(occs)
 
 # read data directly from GBIF
