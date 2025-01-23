@@ -50,19 +50,65 @@ dim(occs)
 summary(is.na(occs$locality))
 
 # Clean data
-
 # occs <- formatOcc(occs) # see issue 125 in plantR
+# Copying from formatOccs
+occs <- getCode(occs)
+# Collector number
+occs$recordNumber.new <- colNumber(occs$recordNumber, noNumb = "s.n.")
+
+# Collection year
+occs$year.new <- getYear(occs$year, noYear = "n.d.")
+
+# Identifier name
+occs$identifiedBy.new <- fixName(occs$identifiedBy)
+
+# Identification year
+occs$yearIdentified.new <- getYear(occs$dateIdentified, noYear = "n.d.")
+
+## Putting people's names into the default name notation and
+#separating main and auxiliary names
+recordedBy.new <- fixName(occs$recordedBy)
+# occs$recordedBy.aux <- prepName(recordedBy.new,
+#                             fix.names = FALSE,
+#                             sep.out = "; ",
+#                             output = "aux")
+occs$recordedBy.new <- prepName(recordedBy.new,
+                            fix.names = FALSE,
+                            output = "first")
+
+occs$identifiedBy.aux <- prepName(occs$identifiedBy.new,
+                                fix.names = FALSE,
+                                sep.out = "; ",
+                                output = "aux")
+occs$identifiedBy.new <- prepName(occs$identifiedBy.new,
+                                fix.names = FALSE,
+                                output = "first")
+
+## Standardize the notation for missing names
+occs$recordedBy.new <- missName(occs$recordedBy.new,
+                            type = "collector",
+                            noName = "s.n.")
+occs$identifiedBy.new <- missName(occs$identifiedBy.new,
+                                type = "identificator",
+                                noName = "s.n.")
+
+## Extract the last name of the collector
+occs$last.name <- lastName(occs$recordedBy.new,
+                        noName = "s.n.")
+
+
+
 occs <- formatLoc(occs)
 occs <- formatCoord(occs)
 occs <- formatTax(occs)
 occs <- validateLoc(occs)
 occs <- validateCoord(occs) # resourse intensive - optimize?
 occs <- validateTax(occs) # what the diff between this and formatTax?
-occs <- validateDup(occs, cat.code = "collectionCode") # this removes dups? shouldn't we do this before other checks?
+occs <- validateDup(occs) # this removes dups? shouldn't we do this before other checks?
 summ <- summaryData(occs)
 
 # Create sf points for all records
-    my_points <- st_as_sf(occs, coords = c("decimalLongitude.new", "decimalLatitude.new"))
+my_points <- st_as_sf(occs, coords = c("decimalLongitude.new", "decimalLatitude.new"))
 plot(my_points[,"municipality"])
 plot(shapes_sp[2], col="grey", add= TRUE) ## WHY NOT WORK????
 
