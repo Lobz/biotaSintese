@@ -50,7 +50,7 @@ dim(occs)
 summary(is.na(occs$locality))
 
 # Clean data
-# occs <- formatOcc(occs) # see issue 125 in plantR
+# occs <- formatOcc(occs) # see issue 125 in plantR # this is slow
 # Copying from formatOccs
 occs <- getCode(occs)
 # Collector number
@@ -59,28 +59,26 @@ occs$recordNumber.new <- colNumber(occs$recordNumber, noNumb = "s.n.")
 # Collection year
 occs$year.new <- getYear(occs$year, noYear = "n.d.")
 
-# Identifier name
-occs$identifiedBy.new <- fixName(occs$identifiedBy)
-
 # Identification year
 occs$yearIdentified.new <- getYear(occs$dateIdentified, noYear = "n.d.")
 
 ## Putting people's names into the default name notation and
 #separating main and auxiliary names
-recordedBy.new <- fixName(occs$recordedBy)
-# occs$recordedBy.aux <- prepName(recordedBy.new,
-#                             fix.names = FALSE,
-#                             sep.out = "; ",
-#                             output = "aux")
-occs$recordedBy.new <- prepName(recordedBy.new,
+x <- fixName(occs$recordedBy)
+occs$recordedBy.aux <- prepName(x,
+                            fix.names = FALSE,
+                            sep.out = "; ",
+                            output = "aux")
+occs$recordedBy.new <- prepName(x,
                             fix.names = FALSE,
                             output = "first")
 
-occs$identifiedBy.aux <- prepName(occs$identifiedBy.new,
+x <- fixName(occs$identifiedBy)
+occs$identifiedBy.aux <- prepName(x,
                                 fix.names = FALSE,
                                 sep.out = "; ",
                                 output = "aux")
-occs$identifiedBy.new <- prepName(occs$identifiedBy.new,
+occs$identifiedBy.new <- prepName(x,
                                 fix.names = FALSE,
                                 output = "first")
 
