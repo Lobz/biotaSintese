@@ -38,7 +38,7 @@ table(gbif_raw$verbatimCoordinateSystem)
 # verbatim Locality?
 table(is.na(gbif_raw$locality), is.na(gbif_raw$verbatimLocality))
 # Seems to me like we should use verbatimLocality whenever locality is missing
-gbif_raw$locality[is.na(occs$locality)] <- gbif_raw$verbatimLocality[is.na(occs$locality)]
+gbif_raw$locality[is.na(gbif_raw$locality)] <- gbif_raw$verbatimLocality[is.na(gbif_raw$locality)]
 
 occs <- formatDwc(gbif_data = gbif_raw
     # , drop = TRUE
