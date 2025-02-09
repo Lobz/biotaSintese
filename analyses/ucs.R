@@ -1,7 +1,7 @@
 library(sf) # used for spatial operations
 library(plantR) # used foi reading and cleaning occurrence data
 
-UC_de_interesse <- "Campos do Jordão"
+UC_de_interesse <- "AVARÉ"
 
 ucs <- read.csv("~/BIOTA/unidades-de-conservacao/cnuc_2024_10.csv", sep=";", dec=",")
 str(ucs)
@@ -15,6 +15,8 @@ ucs_sp <- subset(ucs, in_SP)
 table(ucs_sp$Grupo)
 table(ucs_sp$Plano.de.Manejo)
 sapply(ucs_sp, table)
+
+sample(ucs_sp$Nome.da.UC,10)
 
 ucs_sp[,c(2,4)]
 subset(ucs, grepl(UC_de_interesse, Nome.da.UC, ignore.case=T))
@@ -113,7 +115,6 @@ plot(shapes_sp[2], col="grey", add= TRUE) ## WHY NOT WORK????
 
 
 # Select records occuring in each UC
-
 # figure out datum
 datum <- toupper(gbif_raw$geodeticDatum)
 table(datum)
@@ -144,20 +145,42 @@ plot(my_points[lst[[1]],], col="red", add=T)
 plot(my_points[lst[[2]],], col="blue", add=T)
 str(my_points)
 
+
 # now lets see what we can get from each UC
-pecj <- my_points[lst[[1]],]
-dim(pecj)
-str(pecj)
-sort(table(pecj$locality))
+ucoccs_gps <- my_points[lst[[1]],]
+dim(ucoccs_gps)
+sort(table(ucoccs_gps$locality.new))
+plot(st_geometry(my_UC))
+plot(ucoccs_gps[,"locality.new"], add=T)
+savePlot("EtsEcolAvare.png")
 
-locs <- unlist(strsplit(tolower(pecj$locality),",|;| - "))
+locs <- unlist(strsplit(tolower(ucoccs_gps$locality),",|;| - "))
 locs <- gsub("[ .]$","",locs)
-state <- unique(tolower(pecj$stateProvince))
+state <- unique(tolower(ucoccs_gps$stateProvince))
 
-table(locs)[table(locs)>10]
+table(locs)[table(locs)>15]
+table(is.na(ucoccs_gps$locality))
+
+subset(ucoccs_gps, is.na(locality))
+
+# by locality
+uc_string <- "esta[çc?][aã?]o ecol[óo?]gica de avar[ée?]"
+ucoccs_byloc <- subset(my_points, grepl(uc_string, locality, ignore.case = TRUE))
+dim(ucoccs_byloc)
+
+plot(st_geometry(my_UC))
+plot(ucoccs_byloc[,1], col="blue", add=T)
+savePlot("EtsEcolAvare_byloc.png")
+
+ucoccs <- ucoccs_byloc
 
 # Create checklist
-summ <- summaryData(occs)
+sp1 <- unique(ucoccs$scientificName.new1)
+sp_gps <- unique(ucoccs_gps$scientificName.new1)
+setdiff(sp_gps, sp1)
+setdiff(sp1, sp_gps)
+
+summ <- summaryData(ucoccs[1:50,])
 list <- checkList(occs,
             n.vouch=3, # max number of vouchers per species (hopefully it will order from best to worst?)
             type = "selected", # unsure what the options mean
