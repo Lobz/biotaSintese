@@ -28,14 +28,16 @@ occs_gbif <- rgbif2(species = familia,
     n.records = 450000)
 dim(occs_gbif)
 # Check GBIF docs - what's the diff between locality and verbatimLocality
+# A: locality is what's left after removing country, state, mun. info
 table(is.na(occs_gbif$locality), is.na(occs_gbif$verbatimLocality))
-# And how is it possible to have only one of them ???
+# And how is it possible to have only one of them ?
+# A: gbif removes the duplicated data, usually
 subset(occs_gbif, is.na(locality) &! is.na(verbatimLocality))$verbatimLocality
 unique(subset(occs_gbif, !is.na(locality) & is.na(verbatimLocality))$locality)
 t(subset(occs_gbif, !is.na(locality) &! is.na(verbatimLocality))
     [,c("verbatimLocality","locality")])
 # Seems to me like we should use either one like
-occs$locality[is.na(occs$locality)] <- occs$verbatimLocality[is.na(occs$locality)]
+# occs$locality[is.na(occs$locality)] <- occs$verbatimLocality[is.na(occs$locality)]
 
 head(occs_gbif)
 occs <- formatDwc(gbif_data = occs_gbif, splink_data = occs_splink)
@@ -47,6 +49,8 @@ occs[samp,"locality"]
 occs <- formatOcc(occs)
 names(occs)
 occs <- formatLoc(occs)
+table(is.na(occs$locality))
+# ok formatLoc solves this issue. of course
 t(occs[samp,c("locality", "locality.new", "stateProvince", "municipality", "loc")])
 
 occs[samp, 167:187]
