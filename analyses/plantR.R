@@ -284,7 +284,6 @@ flags <- summaryFlags(occs)
 # the main course:
 list <- checkList(occs,
             n.vouch=3, # max number of vouchers per species (hopefully it will order from best to worst?)
-            type = "selected", # unsure what the options mean
             rm.dup = TRUE, # remove duplicates!! (does it unify duplicates??)
             rank.type = 5 # this controls voucher ranking I think?
             )
