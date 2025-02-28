@@ -29,83 +29,12 @@ my_UC <- subset(shapes, grepl(UC_de_interesse, nome_uc, ignore.case=T))
 plot(my_UC[c(3,1,2),"nome_uc"])
 
 # read data from file
-gbif_raw <- readData("../../BIOTA/GBIF/0061636-241126133413365.zip", quote = "", na.strings = c("", "NA"))
-str(gbif_raw)
-gbif_raw <- gbif_raw[[1]]
-names(gbif_raw)
-# where is datum?
-table(gbif_raw$geodeticDatum)
-table(gbif_raw$verbatimCoordinateSystem)
+occs <- read.csv("data/occs_sp.csv")
 
-# verbatim Locality?
-table(is.na(gbif_raw$locality), is.na(gbif_raw$verbatimLocality))
-# Seems to me like we should use verbatimLocality whenever locality is missing
-gbif_raw$locality[is.na(gbif_raw$locality)] <- gbif_raw$verbatimLocality[is.na(gbif_raw$locality)]
-
-occs <- formatDwc(gbif_data = gbif_raw
-    # , drop = TRUE
-    # , drop.opt = TRUE
-    # , drop.empty = TRUE
-)
 str(occs)
 dim(occs)
 summary(is.na(occs$locality))
 
-# Clean data
-# occs <- formatOcc(occs) # see issue 125 in plantR # this is slow
-# Copying from formatOccs
-occs <- getCode(occs)
-# Collector number
-occs$recordNumber.new <- colNumber(occs$recordNumber, noNumb = "s.n.")
-
-# Collection year
-occs$year.new <- getYear(occs$year, noYear = "n.d.")
-
-# Identification year
-occs$yearIdentified.new <- getYear(occs$dateIdentified, noYear = "n.d.")
-
-## Putting people's names into the default name notation and
-#separating main and auxiliary names
-x <- fixName(occs$recordedBy)
-occs$recordedBy.aux <- prepName(x,
-                            fix.names = FALSE,
-                            sep.out = "; ",
-                            output = "aux")
-occs$recordedBy.new <- prepName(x,
-                            fix.names = FALSE,
-                            output = "first")
-
-x <- fixName(occs$identifiedBy)
-occs$identifiedBy.aux <- prepName(x,
-                                fix.names = FALSE,
-                                sep.out = "; ",
-                                output = "aux")
-occs$identifiedBy.new <- prepName(x,
-                                fix.names = FALSE,
-                                output = "first")
-
-## Standardize the notation for missing names
-occs$recordedBy.new <- missName(occs$recordedBy.new,
-                            type = "collector",
-                            noName = "s.n.")
-occs$identifiedBy.new <- missName(occs$identifiedBy.new,
-                                type = "identificator",
-                                noName = "s.n.")
-
-## Extract the last name of the collector
-occs$last.name <- lastName(occs$recordedBy.new,
-                        noName = "s.n.")
-
-
-
-occs <- formatLoc(occs)
-occs <- formatCoord(occs)
-occs <- formatTax(occs)
-occs <- validateLoc(occs)
-occs <- validateCoord(occs) # resourse intensive - optimize?
-occs <- validateTax(occs) # what the diff between this and formatTax?
-occs <- validateDup(occs) # this removes dups? shouldn't we do this before other checks?
-summ <- summaryData(occs)
 
 # Create sf points for all records
 my_points <- st_as_sf(occs, coords = c("decimalLongitude.new", "decimalLatitude.new"))
