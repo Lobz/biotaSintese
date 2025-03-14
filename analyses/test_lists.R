@@ -1,6 +1,6 @@
 library(plantR) # used foi reading and cleaning occurrence data
-library(readxl)
 library(stringr)
+devtools::load_all()
 
 # The point of this is to create and compare lists from different techniques
 # For this exercise, we are using data about Estação Ecológica de Avaré
@@ -12,6 +12,7 @@ cl0 <- read.csv(("../../BIOTA/catalogoUCs/lista_CatUCS_avare.csv"))
 UC_de_interesse <- "ESTAÇÃO ECOLÓGICA DE AVARÉ"
 uc_name <- prepLoc(UC_de_interesse)
 uc_string <- "e(st(a[çc?][aã?]o|)?)?.? e(col([óo?]gica)?)?.?( de)? avar[ée?]"
+county <- "Avaré"
 
 # GBIF data
 # gbif_raw_gps <- readData("../../BIOTA/GBIF/0061636-241126133413365.zip", quote = "", na.strings = c("", "NA"))
@@ -21,23 +22,27 @@ uc_string <- "e(st(a[çc?][aã?]o|)?)?.? e(col([óo?]gica)?)?.?( de)? avar[ée?]
 # gbif_raw <- merge(gbif_raw_gps$occurrence, gbif_raw_texto$occurrence, all=T)
 # dim(gbif_raw)
 # write.csv(gbif_raw, "data/gbif_saopaulo.csv")
-gbif_raw <- read.csv("data/gbif_saopaulo.csv")
+gbif_raw <- data.table::fread("data/gbif_saopaulo.csv")
 
 sum(grepl(uc_string, gbif_raw$locality, ignore.case = T, perl = T))
+sum(grepl(uc_string, gbif_raw$verbatimLocality, ignore.case = T, perl = T))
 
 
 # Splink data
-splinkkey <- 'eZOGLZyihOoCLlAWs3Tx'
-splink_raw <- rspeciesLink(stateProvince = "Sao Paulo", key = splinkkey)
+splinkkey <- 'qUe5HQpZDZH3yFNKnjMj'
+splink_raw <- rspeciesLink(stateProvince = "Sao Paulo", county = county, key = splinkkey, save = TRUE, dir = "data/", filename = "splink_county", MaxRecords = 2000)
+# splink_raw <- data.table::fread("data/splink_sp.csv")
+dim(splink_raw)
 
 sum(grepl(uc_string, splink_raw$locality, ignore.case = T, perl = T))
+
 # Jabot data
 jabot_raw <- read.csv("../../BIOTA/JABOT/JABOT_SaoPaulo_DarwinCore.csv", sep="|")
 jabot_raw$county <- NA
 sum(grepl(uc_string, jabot_raw$locality, ignore.case = T, perl = T))
 
 # Reflora data
-reflora_raw <- read_excel("../../BIOTA/REFLORA/REFLORA.xlsx")
+reflora_raw <- data.table::fread("../../BIOTA/REFLORA/REFLORA.csv")
 names(reflora_raw)
 reflora_raw <- parseReflora(reflora_raw)
 sum(grepl(uc_string, reflora_raw$locality, ignore.case = T, perl = T))
@@ -45,7 +50,7 @@ sum(grepl(uc_string, reflora_raw$locality, ignore.case = T, perl = T))
 # Merge and treat data
 occs <- formatDwc(
     gbif_data = gbif_raw,
-    splink_data = splink_raw
+    # splink_data = splink_raw
     , user_data = jabot_raw
     )
 occs <- formatOcc(occs)
@@ -67,12 +72,14 @@ occs <- read.csv("data/occs_sp.csv")
 avare <- subset(occs, municipality.new == "avare")
 dim(avare)
 avare1 <- subset(avare, grepl(uc_string, locality, ignore.case = TRUE, perl = TRUE))
-table(avare1$locality.new)
+avare2 <- subset(occs, grepl(uc_string, locality, ignore.case = TRUE, perl = TRUE))
+table(avare2$locality.new)
+dim()
 dim(avare1) # 176 records
 
 summ <- summaryData(occs)
 
-cl1 <- checkList(avare1)
+cl1 <- checkList(avare2)
 dim(cl1) # 124 different species??
 table(cl1$family)
 subset(cl1, family.new == "Fabaceae")
