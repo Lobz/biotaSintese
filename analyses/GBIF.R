@@ -1,7 +1,6 @@
 devtools::load_all()
 
 
-
 gbifsp_texto <- read.gbif("~/BIOTA/GBIF/0061630-241126133413365/occurrence.tsv")
 gbifsp_texto <- filter_fields.gbif(gbifsp_texto)
 gbifsp_texto <- remove_empty_cols(gbifsp_texto)
