@@ -15,7 +15,6 @@ Suggests:
     testthat (>= 3.0.0),
     knitr
 Remotes:
-	JGCRI/jgcricolors
 	LimaRAF/plantR
 VignetteBuilder:
     knitr
