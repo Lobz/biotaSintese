@@ -31,7 +31,7 @@ sum(grepl(uc_string, gbif_raw$verbatimLocality, ignore.case = T, perl = T))
 # Splink data
 splinkkey <- 'qUe5HQpZDZH3yFNKnjMj'
 splink_raw <- rspeciesLink(stateProvince = "Sao Paulo", county = county, key = splinkkey, save = TRUE, dir = "data/", filename = "splink_county", MaxRecords = 2000)
-# splink_raw <- data.table::fread("data/splink_sp.csv")
+splink_raw <- data.table::fread("data/splink_sp.csv")
 dim(splink_raw)
 
 sum(grepl(uc_string, splink_raw$locality, ignore.case = T, perl = T))
@@ -66,7 +66,7 @@ occs <- validateTax(occs) # what the diff between this and formatTax?
 occs <- validateDup(occs) # this removes dups? shouldn't we do this before other checks?
 
 write.csv(occs, "data/occs_sp.csv")
-occs <- read.csv("data/occs_sp.csv")
+occs <- data.table::fread("data/occs_sp.csv")
 
 # Filter occs in the selected CU
 avare <- subset(occs, municipality.new == "avare")
@@ -74,8 +74,12 @@ dim(avare)
 avare1 <- subset(avare, grepl(uc_string, locality, ignore.case = TRUE, perl = TRUE))
 avare2 <- subset(occs, grepl(uc_string, locality, ignore.case = TRUE, perl = TRUE))
 table(avare2$locality.new)
-dim()
+table(avare2$municipality)
+table(avare1$locality.new)
+dim(avare2)
 dim(avare1) # 176 records
+
+write.csv(avare2, "data/occs_avare.csv")
 
 summ <- summaryData(occs)
 
