@@ -9,7 +9,10 @@ LazyData: true
 RoxygenNote: 7.2.1
 Imports:
 	rlang,
-	plantR
+	plantR,
+    utils,
+    stringr,
+    measurements
 Suggests:
     rmarkdown,
     testthat (>= 3.0.0),
