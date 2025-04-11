@@ -1,7 +1,7 @@
 library(stringr)
 library(dplyr)
 
-parseReflora <- function(data) {
+parseRefloraCatUC <- function(data) {
     # data$Gênero[952] %>% stringr::str_to_title()
     print(paste0('n. registros: ', nrow(data)))
     print(paste0('n. colunas: ', ncol(data)))
