@@ -14,59 +14,44 @@ uc_name <- prepLoc(UC_de_interesse)
 uc_string <- "e(st(a[çc?][aã?]o|)?)?.? e(col([óo?]gica)?)?.?( de)? avar[ée?]"
 county <- "Avaré"
 
-# GBIF data
-# gbif_raw_gps <- readData("../../BIOTA/GBIF/0061636-241126133413365.zip", quote = "", na.strings = c("", "NA"))
-# gbif_raw_texto <- readData("../../BIOTA/GBIF/0061630-241126133413365.zip", quote = "", na.strings = c("", "NA"))
-# dim(gbif_raw_gps$occurrence)
-# dim(gbif_raw_texto$occurrence)
-# gbif_raw <- merge(gbif_raw_gps$occurrence, gbif_raw_texto$occurrence, all=T)
-# dim(gbif_raw)
-# write.csv(gbif_raw, "data/gbif_saopaulo.csv")
-gbif_raw <- data.table::fread("data/gbif_saopaulo.csv")
-
-sum(grepl(uc_string, gbif_raw$locality, ignore.case = T, perl = T))
-sum(grepl(uc_string, gbif_raw$verbatimLocality, ignore.case = T, perl = T))
-
-
 # Splink data
 splinkkey <- 'qUe5HQpZDZH3yFNKnjMj'
 splink_raw <- rspeciesLink(stateProvince = "Sao Paulo", county = county, key = splinkkey, save = TRUE, dir = "data/", filename = "splink_county", MaxRecords = 2000)
-splink_raw <- data.table::fread("data/splink_sp.csv")
+splink_raw <- data.table::fread("data/splink_county.csv")
 dim(splink_raw)
-
+splink_raw$downloadedFrom <- "SPLINK"
 sum(grepl(uc_string, splink_raw$locality, ignore.case = T, perl = T))
 
 # Jabot data
-jabot_raw <- read.csv("../../BIOTA/JABOT/JABOT_SaoPaulo_DarwinCore.csv", sep="|")
+jabot_raw <- read.csv("../../BIOTA/JABOT/JABOT_SaoPaulo_DarwinCore.csv", sep="|", na.strings=c("","NA"))
 jabot_raw$county <- NA
+jabot_raw$downloadedFrom <- "JABOT"
 sum(grepl(uc_string, jabot_raw$locality, ignore.case = T, perl = T))
+# Jabot stores
 
-# Reflora data
-reflora_raw <- data.table::fread("../../BIOTA/REFLORA/REFLORA.csv")
-names(reflora_raw)
-reflora_raw <- parseReflora(reflora_raw)
-sum(grepl(uc_string, reflora_raw$locality, ignore.case = T, perl = T))
+user.data <- dplyr::bind_rows(reflora_raw, jabot_raw)
 
 # Merge and treat data
 occs <- formatDwc(
-    gbif_data = gbif_raw,
-    # splink_data = splink_raw
-    , user_data = jabot_raw
+    splink_data = splink_raw
+    , user_data = user.data
     )
 occs <- formatOcc(occs)
 occs <- formatLoc(occs)
 # Filter occs in Sao Paulo
 occs <- subset(occs, grepl("sao paulo", stateProvince.new))
 
-occs <- formatCoord(occs)
+# taxonomist list from guilherme
+txlist <- readRDS("data/derived-data/raw_dic_taxonomists.rds")
+
+occs <- formatCoord(as.data.frame(occs))
 occs <- formatTax(occs)
 occs <- validateLoc(occs)
 occs <- validateCoord(occs) # resourse intensive - optimize?
-occs <- validateTax(occs) # what the diff between this and formatTax?
+occs <- validateTax(occs)
+occs <- validateTax(occs, taxonomist.list = txlist) # what the diff between this and formatTax?
 occs <- validateDup(occs) # this removes dups? shouldn't we do this before other checks?
 
-write.csv(occs, "data/occs_sp.csv")
-occs <- data.table::fread("data/occs_sp.csv")
 
 # Filter occs in the selected CU
 avare <- subset(occs, municipality.new == "avare")
