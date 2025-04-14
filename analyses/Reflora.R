@@ -12,6 +12,11 @@ user_colnames <- c("institutionCode", "collectionCode",
                               "identifiedBy", "dateIdentified",
                               "typeStatus", "family", "scientificName",
                               "scientificNameAuthorship")
+setdiff(user_colnames, minFields)
+d <- t(data.frame(minFields))
+names(d) <- minFields
+formatDwc(user_data=d) ## TODO open issue about this
+
 
 # Reflora data
 reflora_raw <- data.table::fread("../../BIOTA/REFLORA/REFLORA.csv")
@@ -24,7 +29,7 @@ reflora <- read.csv("data/derived-data/reflora.csv")
 setdiff(user_colnames, names(reflora))
 
 # Apply plantR
-occs <- formatDwc(user_data = data.frame(reflora))
+occs <- formatDwc(user_data = reflora)
 occs <- formatOcc(occs)
 occs <- formatLoc(occs)
 occs <- formatCoord(occs)
