@@ -17,7 +17,7 @@ county <- "Avaré"
 # Splink data
 splinkkey <- 'qUe5HQpZDZH3yFNKnjMj'
 splink_raw <- rspeciesLink(stateProvince = "Sao Paulo", county = county, key = splinkkey, save = TRUE, dir = "data/", filename = "splink_county", MaxRecords = 2000)
-splink_raw <- data.table::fread("data/splink_county.csv")
+splink_raw <- read.csv("data/splink_county.csv")
 dim(splink_raw)
 splink_raw$downloadedFrom <- "SPLINK"
 sum(grepl(uc_string, splink_raw$locality, ignore.case = T, perl = T))
@@ -29,51 +29,78 @@ jabot_raw$downloadedFrom <- "JABOT"
 sum(grepl(uc_string, jabot_raw$locality, ignore.case = T, perl = T))
 # Jabot stores
 
-user.data <- dplyr::bind_rows(reflora_raw, jabot_raw)
+
 
 # Merge and treat data
 occs <- formatDwc(
     splink_data = splink_raw
-    , user_data = user.data
+    , user_data = jabot_raw
     )
 occs <- formatOcc(occs)
 occs <- formatLoc(occs)
 # Filter occs in Sao Paulo
 occs <- subset(occs, grepl("sao paulo", stateProvince.new))
-
-# taxonomist list from guilherme
-txlist <- readRDS("data/derived-data/raw_dic_taxonomists.rds")
-
-occs <- formatCoord(as.data.frame(occs))
+occs <- formatCoord(occs)
 occs <- formatTax(occs)
 occs <- validateLoc(occs)
 occs <- validateCoord(occs) # resourse intensive - optimize?
 occs <- validateTax(occs)
-occs <- validateTax(occs, taxonomist.list = txlist) # what the diff between this and formatTax?
 occs <- validateDup(occs) # this removes dups? shouldn't we do this before other checks?
 
+# join with reflora and gbif
+reflora <- read.csv("data/derived-data/occs_reflora_post_plantR.csv")
+reflora <- subset(reflora, grepl("sao paulo", stateProvince.new))
+gbif <- read.csv("data/derived-data/occs_gbif_post_plantR.csv")
+gbif <- formatTax(gbif)
+gbif <- validateTax(gbif)
+gbif <- subset(gbif, grepl("sao paulo", stateProvince.new))
+
+reflora <- lapply(reflora, as.character)
+occs <- dplyr::bind_rows(occs, gbif)
+occs <- dplyr::bind_rows(occs, reflora)
+write.csv(occs, "data/derived-data/occs_sp_all_post_plantR.csv")
+occs <- read.csv("data/derived-data/occs_sp_all_post_plantR.csv")
+save(occs, file = "data/derived-data/occs_all_post_plantR.Rdata")
+load("data/derived-data/occs_all_post_plantR.Rdata")
+
+occs <- validateDup(as.data.frame(occs)) # this removes dups? shouldn't we do this before other checks?
 
 # Filter occs in the selected CU
 avare <- subset(occs, municipality.new == "avare")
 dim(avare)
-avare1 <- subset(avare, grepl(uc_string, locality, ignore.case = TRUE, perl = TRUE))
+avare1 <- subset(avare, grepl("horto florestal", locality, ignore.case = TRUE, perl = TRUE))
 avare2 <- subset(occs, grepl(uc_string, locality, ignore.case = TRUE, perl = TRUE))
 table(avare2$locality.new)
 table(avare2$municipality)
 table(avare1$locality.new)
 dim(avare2)
 dim(avare1) # 176 records
+avare3 <- merge(avare1, avare2, all=T)
+dim(avare3)
 
-write.csv(avare2, "data/occs_avare.csv")
+write.csv(avare3, "data/derived-data/occs_avare.csv")
+avare3 <- read.csv("data/derived-data/occs_avare.csv")
 
-summ <- summaryData(occs)
+avare3 <- formatCoord(avare3)
+avare3 <- formatTax(avare3)
+avare3 <- validateLoc(avare3)
+avare3 <- validateCoord(avare3) # resourse intensive - optimize?
+avare3 <- validateTax(avare3, generalist = T)
+avare3 <- validateDup(avare3, remove=T) # this removes dups? shouldn't we do this before other checks?
 
-cl1 <- checkList(avare2)
-dim(cl1) # 124 different species??
+table(avare3$scientificName.new, avare3$tax.check)
+
+summ <- summaryData(avare3[c(1:64),])
+
+write.csv(avare3[65:67,], "test_data_error_summaryData.csv")
+
+cl1 <- checkList(avare3)
+dim(cl1) # 129 different species??
 table(cl1$family)
 subset(cl1, family.new == "Fabaceae")
 
 # Didn't like this result. Try to create my own checklist from the data treated with plantR
+
 
 # Read list created with CatalogoUCsBr
 
