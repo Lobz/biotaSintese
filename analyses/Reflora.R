@@ -36,8 +36,9 @@ occs <- formatCoord(occs)
 occs <- formatTax(occs)
 occs <- validateLoc(occs)
 occs <- validateCoord(occs) # resourse intensive - optimize?
-txlist <- readRDS("data/derived-data/raw_dic_taxonomists.rds")
-occs <- validateTax(occs, taxonomist.list = txlist) # what the diff between this and formatTax?
+occs <- validateTax(occs) # what the diff between this and formatTax?
 occs <- validateDup(occs) # this removes dups? shouldn't we do this before other checks?
 
-write.csv(occs, "occs_reflora_post_plantR.csv")
+write.csv(occs, "data/derived-data/occs_reflora_post_plantR.csv")
+
+s <- checkList(occs)
