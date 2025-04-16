@@ -52,13 +52,7 @@ parseReflora <- function(data) {
         # source = 'reflora',
         # comments = '',
 
-        scientificName = ifelse(taxonRank=='Família',family,
-            ifelse(taxonRank=='Gênero',genus,
-            ifelse(taxonRank=='Espécie',paste0(genus,' ',species),
-            ifelse(taxonRank=='Variedade',paste0(genus,' ',species, ' var. ', infraspecificEpithet),
-            ifelse(taxonRank=='Subespécie',paste0(genus,' ',species, ' subsp. ', infraspecificEpithet),
-            ifelse(taxonRank=='Forma',paste0(genus,' ',species, ' form. ', infraspecificEpithet),
-            '')))))),
+        scientificName = substr(verbatimScientificName, nchar(family)+2, nchar(verbatimScientificName)),
 
         taxonRank = ifelse(taxonRank=='Família','FAMILY',
             ifelse(taxonRank=='Gênero','GENUS',
