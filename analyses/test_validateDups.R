@@ -39,8 +39,10 @@ dups.overwrite <- validateDup(occs, overwrite = T)
 dim(dups.overwrite)
 dups.removeoverwrite <- validateDup(occs, remove = T, overwrite = T)
 dim(dups.removeoverwrite)
+dups.specific <- validateDup(occs, comb.fields = list(c("family", "col.last.name", "col.number")), remove=T)
+dim(dups.specific)
 
-dups <- subset(dups.default, scientificName.new != scientificName.new1)
+dups <- subset(dups.specific, scientificName.new != scientificName.new1)
 head(dups)
 
 exID <- "[RB_1444837|SPSF_55309]"
