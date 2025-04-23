@@ -102,8 +102,7 @@ avare3 <- validateDup(avare3) # this removes dups? shouldn't we do this before o
 avare3$tax.check <- factor(avare3$tax.check, levels = c("unknown", "low", "medium", "high"), ordered = T)
 table(avare3$scientificName.new, avare3$tax.check)
 
-summ <- summaryData(avare3[1:4,])
-write.csv(avare3[1:4,], "test_data_error_summaryData.csv")
+summ <- summaryData(avare3)
 
 cl1 <- checkList(avare3)
 dim(cl1) # 129 different species??
