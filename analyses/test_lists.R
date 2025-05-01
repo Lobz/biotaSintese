@@ -180,3 +180,4 @@ finalList <- data.frame(
 )
 finalList <- finalList[order(finalList$ConfiançaID, decreasing = T),]
 write.csv(finalList, "data/derived-data/checklist_avare_modeloCatalogo.csv")
+l1<-read.csv("data/derived-data/checklist_avare_modeloCatalogo.csv")
