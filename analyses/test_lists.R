@@ -51,28 +51,13 @@ occs <- formatLoc(occs)
 
 # Filter occs in Sao Paulo
 occs <- subset(occs, grepl("sao paulo", stateProvince.new))
-occs <- formatCoord(occs)
-occs <- validateLoc(occs)
-dim(occs)
-dim(occs)
 
 # join with reflora and gbif
-reflora <- read.csv("data/derived-data/occs_reflora_post_plantR.csv")
-reflora <- subset(reflora, grepl("sao paulo", stateProvince.new))
-gbif <- read.csv("data/derived-data/occs_gbif_post_plantR.csv")
-gbif <- formatTax(gbif)
-gbif <- subset(gbif, grepl("sao paulo", stateProvince.new))
-reflora <- lapply(reflora, as.character)
-gbif <- lapply(gbif, as.character)
-reflora_gbif <- dplyr::bind_rows(reflora, gbif)
-
-occs <- lapply(occs, as.character)
+load("data/derived-data/reflora_gbif_saopaulo.RData")
 occs <- dplyr::bind_rows(occs, reflora_gbif)
-write.csv(occs, "data/derived-data/occs_sp_all_post_plantR.csv")
-save(occs, file = "data/derived-data/occs_all_post_plantR.Rdata")
-load("data/derived-data/occs_all_post_plantR.Rdata")
 
-occs <- validateDup(occs, comb.fields = list(c("family", "col.last.name", "col.number")) ) # this removes dups? shouldn't we do this before other checks?
+occs <- formatCoord(occs)
+occs <- validateLoc(occs)
 
 # Filter occs in the selected CU
 avare <- subset(occs, municipality.new == "avare")
