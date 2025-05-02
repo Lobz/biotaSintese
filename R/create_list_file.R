@@ -1,0 +1,26 @@
+
+create_list <- function(x, UC) {
+    # Get most recent specimen/identification combo
+    splitdf <- by(x, x$scientificName.new, function(x) {
+        x[order(x$tax.check, as.numeric(x$year.new), as.numeric(x$yearIdentified.new), na.last=F, decreasing = T)[1],]
+    }, simplify = F)
+    x <- do.call(rbind, splitdf)
+
+    finalList <- data.frame(
+        UC = UC,
+        #	Grupos
+        Família = x$family.new,
+        Gênero = x$genus.new,
+        Espécie =  sub("^.+ ","",x$species.new),
+        Autor = x$scientificNameAuthorship.new,
+        Táxon_completo = ifelse(is.na(x$scientificNameAuthorship.new), x$scientificName.new, paste(x$scientificName.new, x$scientificNameAuthorship.new)),
+        Barcode = ifelse(is.na(x$barcode),paste0(x$collectionCode,"000",x$catalogNumber),x$barcode),
+        Origem = x$downloadedFrom,
+        Herbário = x$collectionCode.new,
+        Coletor = x$identifiedBy.new,
+        Número_da_Coleta = x$recordNumber,
+        # Origem (segundo Flora & Funga do Brasil)
+        ConfiançaID = factor(x$tax.check, levels=c("unknown", "low", "medium", "high"), labels=c("Latão", "Bronze", "Prata", "Ouro"))
+    )
+    finalList[order(finalList$ConfiançaID, decreasing = T),]
+}

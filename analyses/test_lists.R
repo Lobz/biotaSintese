@@ -16,6 +16,7 @@ length(familiesRef)
 speciesRef <- unique(cl0$scientificName.new)
 length(speciesRef)
 str(cl0)
+cl0 <- get_species_and_genus(cl0)
 
 
 # Create list using plantR, GBIF, Reflora, splink
@@ -32,84 +33,102 @@ dim(splink_raw)
 splink_raw$downloadedFrom <- "SPLINK"
 sum(grepl(uc_string, splink_raw$locality, ignore.case = T, perl = T))
 
-# Jabot data
-jabot_raw <- read.csv("../../BIOTA/JABOT/JABOT_SaoPaulo_DarwinCore.csv", sep="|", na.strings=c("","NA"))
-jabot_raw$county <- NA
-jabot_raw$downloadedFrom <- "JABOT"
-sum(grepl(uc_string, jabot_raw$locality, ignore.case = T, perl = T))
-# Jabot stores
-
-
-
 # Merge and treat data
 occs <- formatDwc(
     splink_data = splink_raw
-    , user_data = jabot_raw
     )
 occs <- formatOcc(occs)
 occs <- formatLoc(occs)
 
-# Filter occs in Sao Paulo
-occs <- subset(occs, grepl("sao paulo", stateProvince.new))
-
 # join with reflora and gbif
-load("data/derived-data/reflora_gbif_saopaulo.RData")
-occs <- dplyr::bind_rows(occs, reflora_gbif)
+load("data/derived-data/reflora_gbif_jabot_saopaulo.RData")
+occs <- dplyr::bind_rows(occs, saopaulo)
 
-occs <- formatCoord(occs)
-occs <- validateLoc(occs)
+# occs <- formatCoord(occs)
+# occs <- validateLoc(occs)
 
 # Filter occs in the selected CU
 avare <- subset(occs, municipality.new == "avare")
 dim(avare)
-avare1 <- subset(avare, grepl("horto florestal", locality, ignore.case = TRUE, perl = TRUE))
-avare2 <- subset(occs, grepl(uc_string, locality, ignore.case = TRUE, perl = TRUE))
+avare1 <- subset(avare, grepl("horto florestal", locality.new, ignore.case = TRUE, perl = TRUE))
+avare2 <- subset(occs, grepl(uc_string, locality.new, ignore.case = TRUE, perl = TRUE))
 table(avare2$locality.new)
 table(avare2$municipality)
 table(avare1$locality.new)
 dim(avare2)
-dim(avare1) # 176 records
+dim(avare1) # 24
 avare3 <- merge(avare1, avare2, all=T)
-dim(avare3)
-avare3 <- subset(avare3, taxon.rank == "species")
+dim(avare3) # 371
 
 # drop empty cols
 avare3 <- avare3[,sapply(avare3, function(x) !all(is.na(x)))]
 dim(avare3)
 
-write.csv(avare3, "data/derived-data/occs_avare.csv")
-avare3 <- read.csv("data/derived-data/occs_avare.csv")
+avare3$scientificNameAuthorship[is.na(avare3$scientificNameAuthorship)] <-
+avare3$scientificNameAuthorship.x[is.na(avare3$scientificNameAuthorship)]
 
 avare3 <- formatCoord(avare3)
 avare3 <- formatTax(avare3)
 avare3 <- validateLoc(avare3)
 avare3 <- validateCoord(avare3) # resourse intensive - optimize?
 avare3 <- validateTax(avare3, generalist = T)
-avare3 <- validateDup(avare3, comb.fields = list(c("family", "col.last.name", "col.number")) ) # this removes dups? shouldn't we do this before other checks?
-
 avare3$tax.check <- factor(avare3$tax.check, levels = c("unknown", "low", "medium", "high"), ordered = T)
+
+
+# fix missing taxon rank
+table((avare3$taxon.rank))
+table(is.na(avare3$taxon.rank))
+avare3 <- avare3[order(avare3$taxon.rank),]
+fix_these <- which(is.na(avare3$taxon.rank))
+x<- avare3$scientificName.new[fix_these]
+avare3$taxon.rank[fix_these] <- avare3$taxon.rank[match(x, avare3$scientificName.new)]
+fix_these <- which(is.na(avare3$taxon.rank))
+x<- avare3$scientificName.new[fix_these]
+x <- sub(" sp.","",x)
+rank <- rep(NA,length(fix_these))
+rank[grepl(" ",x)] <- "species"
+rank[grepl("subsp",x)] <- "subspecies"
+rank[x == avare3$family.new[fix_these]] <- "family"
+rank[is.na(rank)] <- "genus"
+avare3$taxon.rank[fix_these] <- rank
+
+# get species and genus?
+avare3 <- get_species_and_genus(avare3)
+
+avare3 <- avare3[order(avare3$taxon.rank, avare3$tax.check, avare3$scientificName.new, as.numeric(avare3$year.new), as.numeric(avare3$yearIdentified.new), na.last=F, decreasing = T),]
+
+save(avare3, file="data/derived-data/occs_avare.RData")
+load("data/derived-data/occs_avare.RData")
+
+avare4 <- validateDup(avare3, comb.fields = list(c("family", "col.last.name", "col.number")) ) # this removes dups? shouldn't we do this before other checks?
+avare4[!is.na(avare4$dup.ID),]
+
 table(avare3$scientificName.new, avare3$tax.check)
+table(avare3$scientificName.new, avare3$taxon.rank, useNA = "always")
 
 summ <- summaryData(avare3)
 
-cl1 <- checkList(avare3)
 table(avare3$basisOfRecord, useNA="always")
-table(avare3$basisOfRecord, useNA="always")
-dim(cl1) # 129 different species??
-length(unique(cl1$family.new))
 
-# Didn't like this result. Try to create my own checklist from the data treated with plantR
-avaref <- avare3[, c("family.new", "scientificName.new", "scientificNameAuthorship.new", "year.new", "yearIdentified.new", "institutionCode", "collectionCode.new", "barcode", "identifiedBy.new", "tax.check", "taxon.rank", "downloadedFrom", "numTombo")]
-species <- subset(avaref, taxon.rank == "species")
+# Try to create my own checklist from the data treated with plantR
+species <- subset(avare3, taxon.rank %in% c("species","subspecies","variety"))
+    sp <- unique(species$species.new)
+    gen <- unique(species$genus.new)
+genus <- subset(avare3, !genus.new %in% gen)
+length(unique(avare3$genus.new[avare3$taxon.rank=="genus"]))
+length(unique(genus$genus.new))
+final <- rbind(species, genus)
 
 compareLists <- function(l1, l2 = cl0) {
-    sp1 <- unique(l1$scientificName.new)
-    sp2 <- unique(l2$scientificName.new)
+    sp1 <- unique(l1$species.new)
+    sp2 <- unique(l2$species.new)
+    gen1 <- unique(l1$genus.new)
+    gen2 <- unique(l2$genus.new)
     f1 <- unique(l1$family.new)
     f2 <- unique(l2$family.new)
 
-    print(c("List 1", length(sp1), length(f1)))
-    print(c("List 2", length(sp2), length(f2)))
+    print(c("List 1", sum(!is.na(sp1)), length(f1)))
+    print(c("List 2", sum(!is.na(sp2)), length(f2)))
 
     print("SPECIES")
     print(c(length(setdiff(sp1, sp2)), length(setdiff(sp2,sp1))))
@@ -118,17 +137,11 @@ compareLists <- function(l1, l2 = cl0) {
 }
 
 compareLists(species)
+compareLists(final)
 
-# Get most recent specimen/identification combo
-splitdf <- by(species, species$scientificName.new, function(x) {
-    x[order(x$tax.check, as.numeric(x$year.new), as.numeric(x$yearIdentified.new), na.last=F, decreasing = T),]
-}, simplify = F)
-species <- do.call(rbind, splitdf)
-table(species$tax.check)
-
-compareLists(subset(species, tax.check >= "low"))
-compareLists(subset(species, tax.check >= "medium"))
-compareLists(subset(species, tax.check >= "high"))
+compareLists(subset(final, tax.check >= "low"))
+compareLists(subset(final, tax.check >= "medium"))
+compareLists(subset(final, tax.check >= "high"))
 
 table(species$downloadedFrom)
 
@@ -140,29 +153,9 @@ occs <- formatDwc(gbif_data = cl2)
 occs <- formatTax(occs)
 compareLists(subset(occs, taxon.rank=="species"))
 
-splitdf <- by(species, species$scientificName.new, function(x) {
-    x[order(x$tax.check, as.numeric(x$year.new), as.numeric(x$yearIdentified.new), na.last=F, decreasing = T)[1],]
-}, simplify = F)
-species <- do.call(rbind, splitdf)
-table(species$tax.check)
+table(lista$tax.check)
+
 
 # Generate output file
-finalList <- data.frame(
-    UC = UC_de_interesse,
-    #	Grupos
-    Família = species$family.new,
-    Gênero = sub(" .+$","",species$scientificName.new),
-    Espécie =  sub("^.+ ","",species$scientificName.new),
-    Autor = species$scientificNameAuthorship.new,
-    Táxon_completo = paste(species$scientificName.new, species$scientificNameAuthorship.new),
-    Barcode = species$numTombo,
-    Origem = species$downloadedFrom,
-    Herbário = species$collectionCode.new,
-    Coletor = species$identifiedBy.new,
-    # Número da Coleta = species$recordNumber,
-    # Origem (segundo Flora & Funga do Brasil)
-    ConfiançaID = factor(species$tax.check, levels=c("unknown", "low", "medium", "high"), labels=c("Latão", "Bronze", "Prata", "Ouro"))
-)
-finalList <- finalList[order(finalList$ConfiançaID, decreasing = T),]
+finalList <- create_list(final, UC_de_interesse)
 write.csv(finalList, "data/derived-data/checklist_avare_modeloCatalogo.csv")
-l1<-read.csv("data/derived-data/checklist_avare_modeloCatalogo.csv")
