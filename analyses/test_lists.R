@@ -4,32 +4,31 @@ devtools::load_all()
 
 # The point of this is to create and compare lists from different techniques
 # For this exercise, we are using data about Estação Ecológica de Avaré
-
-# Read list from Catalogo das Plantas das UCs do Brasil
-cl0 <- read.csv(("data/raw-data/Dados_Catalogo_UCs_Brasil_EEAVARE.csv"))
-names(cl0)
-cl0$scientificName <- substr(cl0$Táxon, nchar(cl0$Família) + 2, nchar(cl0$Táxon))
-cl0 <- formatTax(cl0)
-dim(cl0)
-familiesRef <- unique(cl0$family.new)
-length(familiesRef)
-speciesRef <- unique(cl0$scientificName.new)
-length(speciesRef)
-str(cl0)
-cl0 <- get_species_and_genus(cl0)
-
+ucs <- read.csv("~/BIOTA/unidades-de-conservacao/cnuc_2024_10.csv", sep=";", dec=",")
 
 # Create list using plantR, GBIF, Reflora, splink
 UC_de_interesse <- "ESTAÇÃO ECOLÓGICA DE AVARÉ"
-uc_name <- prepLoc(UC_de_interesse)
+uc_data <- subset(ucs, grepl(UC_de_interesse, Nome.da.UC, ignore.case=T))
+Nome_UC <- uc_data$Nome.da.UC
 uc_string <- "e(st(a[çc?][aã?]o|)?)?.? e(col([óo?]gica)?)?.?( de)? avar[ée?]"
-county <- "Avaré"
+county <- str_squish(gsub("\\(.*\\)","",uc_data$Municípios.Abrangidos))
+county <- paste(county, rmLatin(county))
+
+UC_de_interesse <- "PORTO FERREIRA"
+uc_data <- subset(ucs, grepl(UC_de_interesse, Nome.da.UC, ignore.case=T))
+Nome_UC <- uc_data$Nome.da.UC
+nome_file <- gsub(" ","",tolower(rmLatin(Nome_UC)))
+uc_string <- generate_uc_string(Nome_UC)
+county <- str_squish(gsub("\\(.*\\)","",uc_data$Municípios.Abrangidos))
+county_splink <- paste(county, rmLatin(county))
+county_plantr <- tolower(rmLatin(county))
 
 # Splink data
 splinkkey <- 'qUe5HQpZDZH3yFNKnjMj'
-splink_raw <- rspeciesLink(stateProvince = "Sao Paulo", county = county, key = splinkkey, save = TRUE, dir = "data/", filename = "splink_county", MaxRecords = 2000)
+splink_raw <- rspeciesLink(stateProvince = "Sao Paulo", county = county_splink, key = splinkkey, save = TRUE, dir = "data/", filename = "splink_county", MaxRecords = 2000)
 splink_raw <- read.csv("data/splink_county.csv")
 dim(splink_raw)
+table(splink_raw$county)
 splink_raw$downloadedFrom <- "SPLINK"
 sum(grepl(uc_string, splink_raw$locality, ignore.case = T, perl = T))
 
@@ -48,74 +47,81 @@ occs <- dplyr::bind_rows(occs, saopaulo)
 # occs <- validateLoc(occs)
 
 # Filter occs in the selected CU
-avare <- subset(occs, municipality.new == "avare")
-dim(avare)
-avare1 <- subset(avare, grepl("horto florestal", locality.new, ignore.case = TRUE, perl = TRUE))
-avare2 <- subset(occs, grepl(uc_string, locality.new, ignore.case = TRUE, perl = TRUE))
-table(avare2$locality.new)
-table(avare2$municipality)
-table(avare1$locality.new)
-dim(avare2)
-dim(avare1) # 24
-avare3 <- merge(avare1, avare2, all=T)
-dim(avare3) # 371
+occs_mun <- subset(occs, municipality.new == county_plantr)
+dim(occs_mun)
+horto <- subset(occs_mun, grepl("horto florestal", locality.new, ignore.case = TRUE, perl = TRUE))
+parque <- subset(occs_mun, grepl("parque", locality.new, ignore.case = TRUE, perl = TRUE))
+occs_uc_name <- subset(occs, grepl(uc_string, locality.new, ignore.case = TRUE, perl = TRUE))
+table(parque$locality.new)
+table(parque$municipality.new)
+table(occs_uc_name$locality.new)
+table(occs_uc_name$municipality.new)
+dim(horto)
+dim(parque)
+dim(occs_uc_name) # 24
+total <- merge(occs_uc_name, parque, all=T)
+dim(total) # 371
 
 # drop empty cols
-avare3 <- avare3[,sapply(avare3, function(x) !all(is.na(x)))]
-dim(avare3)
+total <- total[,sapply(total, function(x) !all(is.na(x)))]
+dim(total)
 
-avare3$scientificNameAuthorship[is.na(avare3$scientificNameAuthorship)] <-
-avare3$scientificNameAuthorship.x[is.na(avare3$scientificNameAuthorship)]
-
-avare3 <- formatCoord(avare3)
-avare3 <- formatTax(avare3)
-avare3 <- validateLoc(avare3)
-avare3 <- validateCoord(avare3) # resourse intensive - optimize?
-avare3 <- validateTax(avare3, generalist = T)
-avare3$tax.check <- factor(avare3$tax.check, levels = c("unknown", "low", "medium", "high"), ordered = T)
+total <- formatCoord(total)
+total <- formatTax(total)
+total <- validateLoc(total)
+total <- validateCoord(total) # resourse intensive - optimize?
+total <- validateTax(total, generalist = T)
+total$tax.check <- factor(total$tax.check, levels = c("unknown", "low", "medium", "high"), ordered = T)
 
 
 # fix missing taxon rank
-table((avare3$taxon.rank))
-table(is.na(avare3$taxon.rank))
-avare3 <- avare3[order(avare3$taxon.rank),]
-fix_these <- which(is.na(avare3$taxon.rank))
-x<- avare3$scientificName.new[fix_these]
-avare3$taxon.rank[fix_these] <- avare3$taxon.rank[match(x, avare3$scientificName.new)]
-fix_these <- which(is.na(avare3$taxon.rank))
-x<- avare3$scientificName.new[fix_these]
+table((total$taxon.rank), useNA = "always")
+table(is.na(total$taxon.rank))
+total <- total[order(total$taxon.rank),]
+fix_these <- which(is.na(total$taxon.rank))
+x<- total$scientificName.new[fix_these]
+total$taxon.rank[fix_these] <- total$taxon.rank[match(x, total$scientificName.new)]
+fix_these <- which(is.na(total$taxon.rank))
+x<- total$scientificName.new[fix_these]
 x <- sub(" sp.","",x)
 rank <- rep(NA,length(fix_these))
 rank[grepl(" ",x)] <- "species"
-rank[grepl("subsp",x)] <- "subspecies"
-rank[x == avare3$family.new[fix_these]] <- "family"
+rank[grepl(" subsp[. ]",x)] <- "subspecies"
+rank[grepl(" var[. ]",x)] <- "subspecies"
+rank[x == total$family.new[fix_these]] <- "family"
 rank[is.na(rank)] <- "genus"
-avare3$taxon.rank[fix_these] <- rank
+total$taxon.rank[fix_these] <- rank
 
 # get species and genus?
-avare3 <- get_species_and_genus(avare3)
+total <- get_species_and_genus(total)
 
-avare3 <- avare3[order(avare3$taxon.rank, avare3$tax.check, avare3$scientificName.new, as.numeric(avare3$year.new), as.numeric(avare3$yearIdentified.new), na.last=F, decreasing = T),]
+total <- total[order(total$taxon.rank, total$tax.check, total$scientificName.new, as.numeric(total$year.new), as.numeric(total$yearIdentified.new), na.last=F, decreasing = T),]
 
-save(avare3, file="data/derived-data/occs_avare.RData")
-load("data/derived-data/occs_avare.RData")
+save(total, file=paste0("data/derived-data/occs_",nome_file,".RData"))
 
-avare4 <- validateDup(avare3, comb.fields = list(c("family", "col.last.name", "col.number")) ) # this removes dups? shouldn't we do this before other checks?
-avare4[!is.na(avare4$dup.ID),]
+checkdup <- validateDup(total, comb.fields = list(c("family", "col.last.name", "col.number")) ) # this removes dups? shouldn't we do this before other checks?
+checkdup <-checkdup[!is.na(checkdup$dup.ID),]
+testdup <- aggregate(checkdup$scientificName.new, list(checkdup$dup.ID),
+    function(x) {
+        # all(x$scientificName.new == s$scientificName.new[1])
+        all(x==x[1])
+    }
+)
+checkdup[checkdup$dup.ID == "UB_142145|UEC_49387",]
 
-table(avare3$scientificName.new, avare3$tax.check)
-table(avare3$scientificName.new, avare3$taxon.rank, useNA = "always")
+table(total$scientificName.new, total$tax.check)
+table(total$scientificName.new, total$taxon.rank, useNA = "always")
 
-summ <- summaryData(avare3)
+summ <- summaryData(total)
 
-table(avare3$basisOfRecord, useNA="always")
+table(total$basisOfRecord, useNA="always")
 
 # Try to create my own checklist from the data treated with plantR
-species <- subset(avare3, taxon.rank %in% c("species","subspecies","variety"))
+species <- subset(total, taxon.rank %in% c("species","subspecies","variety"))
     sp <- unique(species$species.new)
     gen <- unique(species$genus.new)
-genus <- subset(avare3, !genus.new %in% gen)
-length(unique(avare3$genus.new[avare3$taxon.rank=="genus"]))
+genus <- subset(total, !genus.new %in% gen)
+length(unique(total$genus.new[total$taxon.rank=="genus"]))
 length(unique(genus$genus.new))
 final <- rbind(species, genus)
 
@@ -128,7 +134,6 @@ compareLists <- function(l1, l2 = cl0) {
     f2 <- unique(l2$family.new)
 
     print(c("List 1", sum(!is.na(sp1)), length(f1)))
-    print(c("List 2", sum(!is.na(sp2)), length(f2)))
 
     print("SPECIES")
     print(c(length(setdiff(sp1, sp2)), length(setdiff(sp2,sp1))))
@@ -145,17 +150,6 @@ compareLists(subset(final, tax.check >= "high"))
 
 table(species$downloadedFrom)
 
-# Read list from GBIF species list tool
-cl2 <- readData("data/gbif_estecolavare_specieslist.zip", quote = "", na.strings = c("", "NA"))
-cl2 <- read.gbif("plantR_input/data/gbif_estecolavare_specieslist/0002783-250127130748423.csv")
-dim(cl2) # 125 species
-occs <- formatDwc(gbif_data = cl2)
-occs <- formatTax(occs)
-compareLists(subset(occs, taxon.rank=="species"))
-
-table(lista$tax.check)
-
-
 # Generate output file
-finalList <- create_list(final, UC_de_interesse)
+finalList <- create_list(final, Nome_UC)
 write.csv(finalList, "data/derived-data/checklist_avare_modeloCatalogo.csv")
