@@ -99,16 +99,6 @@ total <- total[order(total$taxon.rank, total$tax.check, total$scientificName.new
 
 save(total, file=paste0("data/derived-data/occs_",nome_file,".RData"))
 
-checkdup <- validateDup(total, comb.fields = list(c("family", "col.last.name", "col.number")) ) # this removes dups? shouldn't we do this before other checks?
-checkdup <-checkdup[!is.na(checkdup$dup.ID),]
-testdup <- aggregate(checkdup$scientificName.new, list(checkdup$dup.ID),
-    function(x) {
-        # all(x$scientificName.new == s$scientificName.new[1])
-        all(x==x[1])
-    }
-)
-checkdup[checkdup$dup.ID == "UB_142145|UEC_49387",]
-
 table(total$scientificName.new, total$tax.check)
 table(total$scientificName.new, total$taxon.rank, useNA = "always")
 
