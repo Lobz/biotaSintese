@@ -6,4 +6,11 @@ occs <- subset(occs, grepl("sao paulo", stateProvince.new))
 reflora_gbif <- dplyr::bind_rows(occs, occsR)
 load(file="data/derived-data/jabot_saopaulo_dwc.RData")
 saopaulo <- dplyr::bind_rows(reflora_gbif, jabot)
+
+
+saopaulo$scientificNameAuthorship[is.na(saopaulo$scientificNameAuthorship)] <-
+saopaulo$scientificNameAuthorship.x[is.na(saopaulo$scientificNameAuthorship)]
+saopaulo$scientificNameAuthorship[is.na(saopaulo$scientificNameAuthorship)] <-
+saopaulo$scientificNameAuthorship.y[is.na(saopaulo$scientificNameAuthorship)]
+saopaulo$scientificNameAuthorship.x <- NULL
 save(saopaulo,file="data/derived-data/reflora_gbif_jabot_saopaulo.RData")
