@@ -1,10 +1,14 @@
 library(sf) # used for spatial operations
 library(plantR) # used foi reading and cleaning occurrence data
 
-UC_de_interesse <- "AVARÉ"
+UC_de_interesse <- "ESTAÇÃO ECOLÓGICA DE AVARÉ"
+# UC_de_interesse <- "PORTO FERREIRA"
 
 ucs <- read.csv("~/BIOTA/unidades-de-conservacao/cnuc_2024_10.csv", sep=";", dec=",")
 str(ucs)
+uc_data <- subset(ucs, grepl(UC_de_interesse, Nome.da.UC, ignore.case=T))
+Nome_UC <- uc_data$Nome.da.UC
+nome_file <- gsub(" ","",tolower(rmLatin(Nome_UC)))
 
 table(ucs$Grupo)
 table(ucs$Plano.de.Manejo)
@@ -29,15 +33,15 @@ my_UC <- subset(shapes, grepl(UC_de_interesse, nome_uc, ignore.case=T))
 plot(my_UC[c(3,1,2),"nome_uc"])
 
 # read data from file
-occs <- read.csv("data/occs_sp.csv")
+load(paste0("data/derived-data/occs_",nome_file,".RData"))
 
-str(occs)
-dim(occs)
-summary(is.na(occs$locality))
+str(total)
+dim(total)
+summary(is.na(total$locality))
 
 
 # Create sf points for all records
-my_points <- st_as_sf(occs, coords = c("decimalLongitude.new", "decimalLatitude.new"))
+my_points <- st_as_sf(total, coords = c("decimalLongitude.new", "decimalLatitude.new"))
 plot(my_points[,"municipality"])
 plot(shapes_sp[2], col="grey", add= TRUE) ## WHY NOT WORK????
 
@@ -76,41 +80,41 @@ str(my_points)
 
 
 # now lets see what we can get from each UC
-ucoccs_gps <- my_points[lst[[1]],]
-dim(ucoccs_gps)
-sort(table(ucoccs_gps$locality.new))
+uctotal_gps <- my_points[lst[[1]],]
+dim(uctotal_gps)
+sort(table(uctotal_gps$locality.new))
 plot(st_geometry(my_UC))
-plot(ucoccs_gps[,"locality.new"], add=T)
+plot(uctotal_gps[,"municipality.new"], add=T)
 savePlot("EtsEcolAvare.png")
 
-locs <- unlist(strsplit(tolower(ucoccs_gps$locality),",|;| - "))
+locs <- unlist(strsplit(tolower(uctotal_gps$locality),",|;| - "))
 locs <- gsub("[ .]$","",locs)
-state <- unique(tolower(ucoccs_gps$stateProvince))
+state <- unique(tolower(uctotal_gps$stateProvince))
 
 table(locs)[table(locs)>15]
-table(is.na(ucoccs_gps$locality))
+table(is.na(uctotal_gps$locality))
 
-subset(ucoccs_gps, is.na(locality))
+subset(uctotal_gps, is.na(locality))
 
 # by locality
 uc_string <- "esta[çc?][aã?]o ecol[óo?]gica de avar[ée?]"
-ucoccs_byloc <- subset(my_points, grepl(uc_string, locality, ignore.case = TRUE))
-dim(ucoccs_byloc)
+uctotal_byloc <- subset(my_points, grepl(uc_string, locality, ignore.case = TRUE))
+dim(uctotal_byloc)
 
 plot(st_geometry(my_UC))
-plot(ucoccs_byloc[,1], col="blue", add=T)
+plot(uctotal_byloc[,1], col="blue", add=T)
 savePlot("EtsEcolAvare_byloc.png")
 
-ucoccs <- ucoccs_byloc
+uctotal <- uctotal_byloc
 
 # Create checklist
-sp1 <- unique(ucoccs$scientificName.new1)
-sp_gps <- unique(ucoccs_gps$scientificName.new1)
+sp1 <- unique(uctotal$scientificName.new1)
+sp_gps <- unique(uctotal_gps$scientificName.new1)
 setdiff(sp_gps, sp1)
 setdiff(sp1, sp_gps)
 
-summ <- summaryData(ucoccs[1:50,])
-list <- checkList(occs,
+summ <- summaryData(uctotal[1:50,])
+list <- checkList(total,
             n.vouch=3, # max number of vouchers per species (hopefully it will order from best to worst?)
             type = "selected", # unsure what the options mean
             rm.dup = TRUE, # remove duplicates!! (does it unify duplicates??)
