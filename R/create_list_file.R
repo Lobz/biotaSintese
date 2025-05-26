@@ -13,7 +13,7 @@ create_list <- function(x, UC) {
         Gênero = x$genus.new,
         Espécie =  sub("^.+ ","",x$species.new),
         Autor = x$scientificNameAuthorship.new,
-        Táxon_completo = x$scientificNameFull,
+        Táxon_completo = paste(toupper(x$family.new), x$scientificNameFull),
         Barcode = ifelse(is.na(x$barcode),x$catalogNumber,x$barcode),
         Origem = x$downloadedFrom,
         Herbário = x$collectionCode.new,
