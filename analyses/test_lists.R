@@ -21,7 +21,11 @@ county_plantr <- tolower(rmLatin(county))
 
 # Splink data
 splinkkey <- 'qUe5HQpZDZH3yFNKnjMj'
-splink_raw <- rspeciesLink(stateProvince = "Sao Paulo", county = county_splink, key = splinkkey, save = TRUE, dir = "data/", filename = "splink_county", MaxRecords = 2000)
+splink_raw <- rspeciesLink(
+    scope = "p",
+    stateProvince = "Sao Paulo", county = county_splink,
+    key = splinkkey,
+    save = TRUE, dir = "data/", filename = "splink_county", MaxRecords = 2000)
 splink_raw <- read.csv("data/splink_county.csv")
 dim(splink_raw)
 table(splink_raw$county)
