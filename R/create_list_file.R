@@ -17,7 +17,7 @@ create_list <- function(x, UC) {
         Barcode = ifelse(is.na(x$barcode),x$catalogNumber,x$barcode),
         Origem = x$downloadedFrom,
         Herbário = x$collectionCode.new,
-        Coletor = x$identifiedBy.new,
+        Coletor = x$recordedBy.new,
         Número_da_Coleta = x$recordNumber,
         # Origem (segundo Flora & Funga do Brasil)
         ConfiançaID = factor(x$tax.check, levels=c("unknown", "low", "medium", "high"), labels=c("Latão", "Bronze", "Prata", "Ouro")),
