@@ -22,11 +22,11 @@ county_plantr <- tolower(rmLatin(county))
 # Splink data
 splinkkey <- 'qUe5HQpZDZH3yFNKnjMj'
 splink_raw <- rspeciesLink(
-    scope = "p",
+    Scope = "p",
     stateProvince = "Sao Paulo", county = county_splink,
     key = splinkkey,
     save = TRUE, dir = "data/", filename = "splink_county", MaxRecords = 2000)
-splink_raw <- read.csv("data/splink_county.csv")
+# splink_raw <- read.csv("data/splink_county.csv")
 dim(splink_raw)
 table(splink_raw$county)
 splink_raw$downloadedFrom <- "SPLINK"
@@ -106,6 +106,7 @@ total <- get_species_and_genus(total)
 total <- total[order(total$taxon.rank, total$tax.check, total$scientificName.new, as.numeric(total$year.new), as.numeric(total$yearIdentified.new), na.last=F, decreasing = T),]
 
 save(total, file=paste0("data/derived-data/occs_",nome_file,".RData"))
+# load(file=paste0("data/derived-data/occs_",nome_file,".RData"))
 
 table(total$scientificName.new, total$tax.check)
 table(total$scientificName.new, total$taxon.rank, useNA = "always")
@@ -155,7 +156,7 @@ compareLists(subset(final, tax.check >= "high"))
 
 # Generate output file
 finalList <- create_list(final, Nome_UC)
-listed <- finalList$Táxon_completo %in% UC_catalogo$scientificNameFull
+listed <- finalList$Táxon_completo %in% UC_catalogo$Táxon
 finalList[,"Já listada"] <- ifelse(listed, "Sim", "Não")
 
 table(finalList$Origem)
