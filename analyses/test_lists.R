@@ -11,11 +11,11 @@ ucs <- read.csv("~/BIOTA/unidades-de-conservacao/cnuc_2024_10.csv", sep=";", dec
 UC_de_interesse <- "ESTAÇÃO ECOLÓGICA DE AVARÉ"
 uc_string <- "e(st(a[çc?][aã?]o|)?)?.? e(col([óo?]gica)?)?.?( de)? avar[ée?]"
 
-UC_de_interesse <- "PORTO FERREIRA"
+# UC_de_interesse <- "PORTO FERREIRA"
 uc_data <- subset(ucs, grepl(UC_de_interesse, Nome.da.UC, ignore.case=T))
 Nome_UC <- uc_data$Nome.da.UC
 nome_file <- gsub(" ","",tolower(rmLatin(Nome_UC)))
-uc_string <- generate_uc_string(Nome_UC)
+# uc_string <- generate_uc_string(Nome_UC)
 county <- str_squish(gsub("\\(.*\\)","",uc_data$Municípios.Abrangidos))
 county_splink <- paste(county, rmLatin(county))
 county_plantr <- tolower(rmLatin(county))
@@ -77,6 +77,26 @@ total <- total[,sapply(total, function(x) !all(is.na(x)))]
 dim(total)
 
 total <- formatCoord(total)
+total <- validateLoc(total)
+total <- validateCoord(total) # resourse intensive - optimize?
+
+# Some records don't have scientificName for some reason
+noName <- is.na(total$scientificName)
+table(noName)
+# if species is present, use that
+total$scientificName[noName] <- total$species[noName]
+noName <- is.na(total$scientificName)
+table(noName)
+# else, use genus
+total$scientificName[noName] <- total$genus[noName]
+noName <- is.na(total$scientificName)
+table(noName)
+# last resort, use family
+total$scientificName[noName] <- total$family[noName]
+noName <- is.na(total$scientificName)
+table(noName)
+
+# Match scientificName to oficial F&FBR backbone
 total <- formatTax(total)
 # we're gonna try again without author (see issue #170 in plantR)
 unmatched <- which(total$tax.notes == "not found")
@@ -86,11 +106,38 @@ rematch <- formatTax(rematch, use.authors = F)
 rematched <- unmatched[rematch$tax.notes != "not found"] # let's replace these
 rematch <- rematch[rematch$tax.notes != "not found",names(total)]
 total[rematched,] <- rematch
-total <- validateLoc(total)
-total <- validateCoord(total) # resourse intensive - optimize?
+
+# What's still unmatched? Genus rank
+rankgenus <- which(total$tax.notes == "not found"& total$taxonRank=="GENUS")
+rematch <- total[rankgenus, ]
+rematch$genus.new <- NULL
+rematch <- formatTax(rematch, tax.name = "genus")
+rematched <- rankgenus[rematch$tax.notes != "not found"] # let's replace these
+rematch <- rematch[rematch$tax.notes != "not found",names(total)]
+total[rematched,] <- rematch
+# What's still unmatched? Vars and subspecies
+unmatched <- which(total$tax.notes == "not found" & grepl("\\w+ \\w+ \\w", total$scientificName))
+rematch <- total[unmatched, ]
+rematch$genus.new <- NULL
+saved <- rematch$scientificName
+rematch$scientificName <- sub("(\\w+ \\w+ )", "\\1 var. ", rematch$scientificName)
+rematch <- formatTax(rematch)
+rematch$scientificName <- saved
+rematched <- unmatched[rematch$tax.notes != "not found"] # let's replace these
+rematch <- rematch[rematch$tax.notes != "not found",names(total)]
+total[rematched,] <- rematch
+# What's still unmatched? Try again with less rigor?
+unmatched <- which(total$tax.notes == "not found")
+rematch <- total[unmatched, ]
+rematch$genus.new <- NULL
+rematch <- formatTax(rematch, sug.dist=0.8)
+rematched <- unmatched[rematch$tax.notes != "not found"] # let's replace these
+rematch <- rematch[rematch$tax.notes != "not found",names(total)]
+total[rematched,] <- rematch
+
+# Finish plantR workflow
 total <- validateTax(total, generalist = T)
 total$tax.check <- factor(total$tax.check, levels = c("unknown", "low", "medium", "high"), ordered = T)
-
 
 # fix missing taxon rank
 table((total$taxon.rank), useNA = "always")
@@ -98,6 +145,7 @@ table(is.na(total$taxon.rank))
 total <- total[order(total$taxon.rank),]
 fix_these <- which(is.na(total$taxon.rank))
 x<- total$scientificName.new[fix_these]
+# If there's another entry of the same taxon, get the taxon rank fron there
 total$taxon.rank[fix_these] <- total$taxon.rank[match(x, total$scientificName.new)]
 fix_these <- which(is.na(total$taxon.rank))
 x<- total$scientificName.new[fix_these]
@@ -168,7 +216,7 @@ compareLists(subset(final, tax.check >= "high"))
 # Get best records for each taxon
 top <- top_records(final, n = 1)
 top <- remove_empty_cols(top)
-write.csv(top, paste0("data/derived-data/checklist_",nome_file,".csv"), na="")
+write.csv(top, paste0("results/checklist_",nome_file,".csv"), na="")
 
 # Get info from  F&FBR
 # get_florabr(output_dir = "data/raw-data", #directory to save the data
@@ -180,18 +228,20 @@ matches <- match(ids, bf$id)
 unmatched <- which(is.na(ids))
 # Try with original name (catches some errors)
 matches[unmatched] <- match(top$scientificName[unmatched], bf$scientificName)
-unmatched <- is.na(matches)
+unmatched <- which(is.na(matches))
 # Try with species names (helps with errors with authorship, eliminates subspecies though)
 matches[unmatched] <- match(top$species.new[unmatched], bf$species)
-unmatched <- is.na(matches)
+unmatched <- which(is.na(matches))
 
 top$scientificName[unmatched]
 top$scientificNameAuthorship[unmatched]
 top$scientificNameStatus[unmatched]
 top$scientificNameFull[unmatched]
-bf[grepl(top$genus[unmatched],bf$scientificName),]
 
+# Extract origin and group information
 top$origin <-bf$origin[matches]
+# Group is probably dependent on family innit
+matches[unmatched] <- match(top$family.new[unmatched], bf$family)
 top$group <-bf$group[matches]
 
 table(top$origin)
@@ -208,4 +258,4 @@ table(finalList$BD_Origem[!listed])
 table(finalList$Localidade[!listed])
 table(is.na(finalList$Barcode))
 
-write.csv(finalList, paste0("data/derived-data/checklist_",nome_file,"_modeloCatalogo.csv"), na="")
+write.csv(finalList, paste0("results/checklist_",nome_file,"_modeloCatalogo.csv"), na="")
