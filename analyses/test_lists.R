@@ -1,5 +1,6 @@
-library(plantR) # used foi reading and cleaning occurrence data
+library(plantR) # used for reading and cleaning occurrence data
 library(stringr)
+library(florabr)
 devtools::load_all()
 
 # The point of this is to create and compare lists from different techniques
@@ -10,11 +11,11 @@ ucs <- read.csv("~/BIOTA/unidades-de-conservacao/cnuc_2024_10.csv", sep=";", dec
 UC_de_interesse <- "ESTAÇÃO ECOLÓGICA DE AVARÉ"
 uc_string <- "e(st(a[çc?][aã?]o|)?)?.? e(col([óo?]gica)?)?.?( de)? avar[ée?]"
 
-# UC_de_interesse <- "PORTO FERREIRA"
+UC_de_interesse <- "PORTO FERREIRA"
 uc_data <- subset(ucs, grepl(UC_de_interesse, Nome.da.UC, ignore.case=T))
 Nome_UC <- uc_data$Nome.da.UC
 nome_file <- gsub(" ","",tolower(rmLatin(Nome_UC)))
-# uc_string <- generate_uc_string(Nome_UC)
+uc_string <- generate_uc_string(Nome_UC)
 county <- str_squish(gsub("\\(.*\\)","",uc_data$Municípios.Abrangidos))
 county_splink <- paste(county, rmLatin(county))
 county_plantr <- tolower(rmLatin(county))
@@ -22,12 +23,13 @@ county_plantr <- tolower(rmLatin(county))
 # Splink data
 splinkkey <- 'qUe5HQpZDZH3yFNKnjMj'
 splink_raw <- rspeciesLink(
-    Scope = "p",
+    Scope = "p", # this should filter out animals, but unreliable in filtering out fungi, bacteria, etc
     stateProvince = "Sao Paulo", county = county_splink,
     key = splinkkey,
     save = TRUE, dir = "data/", filename = "splink_county", MaxRecords = 2000)
-# splink_raw <- read.csv("data/splink_county.csv")
 dim(splink_raw)
+table(splink_raw$kingdom, useNA="always")
+splink_raw <- subset(splink_raw, kingdom == "Plantae")
 table(splink_raw$county)
 splink_raw$downloadedFrom <- "SPLINK"
 sum(grepl(uc_string, splink_raw$locality, ignore.case = T, perl = T))
@@ -76,6 +78,14 @@ dim(total)
 
 total <- formatCoord(total)
 total <- formatTax(total)
+# we're gonna try again without author (see issue #170 in plantR)
+unmatched <- which(total$tax.notes == "not found")
+rematch <- total[unmatched, ]
+rematch$genus.new <- NULL
+rematch <- formatTax(rematch, use.authors = F)
+rematched <- unmatched[rematch$tax.notes != "not found"] # let's replace these
+rematch <- rematch[rematch$tax.notes != "not found",names(total)]
+total[rematched,] <- rematch
 total <- validateLoc(total)
 total <- validateCoord(total) # resourse intensive - optimize?
 total <- validateTax(total, generalist = T)
@@ -124,6 +134,8 @@ length(unique(total$genus.new[total$taxon.rank=="genus"]))
 length(unique(genus$genus.new))
 final <- rbind(species, genus)
 
+summ <- summaryData(final)
+
 # load comparison data
 load("data/raw-data/catalogoCompleto.RData")
 UC_catalogo <- subset(catalogoCompleto, grepl(Nome_UC, Unidade.Conservação, perl = T, ignore.case = T))
@@ -153,14 +165,46 @@ compareLists(final)
 compareLists(subset(final, tax.check >= "medium"))
 compareLists(subset(final, tax.check >= "high"))
 
+# Get best records for each taxon
+top <- top_records(final, n = 1)
+top <- remove_empty_cols(top)
+write.csv(top, paste0("data/derived-data/checklist_",nome_file,".csv"), na="")
+
+# Get info from  F&FBR
+# get_florabr(output_dir = "data/raw-data", #directory to save the data
+            # data_version = "latest", #get the most recent version available
+            # overwrite = T) #Overwrite data, if it exists
+bf <- load_florabr(data_dir = "data/raw-data")
+ids <- substr(top$id, 5, nchar(top$id))
+matches <- match(ids, bf$id)
+unmatched <- which(is.na(ids))
+# Try with original name (catches some errors)
+matches[unmatched] <- match(top$scientificName[unmatched], bf$scientificName)
+unmatched <- is.na(matches)
+# Try with species names (helps with errors with authorship, eliminates subspecies though)
+matches[unmatched] <- match(top$species.new[unmatched], bf$species)
+unmatched <- is.na(matches)
+
+top$scientificName[unmatched]
+top$scientificNameAuthorship[unmatched]
+top$scientificNameStatus[unmatched]
+top$scientificNameFull[unmatched]
+bf[grepl(top$genus[unmatched],bf$scientificName),]
+
+top$origin <-bf$origin[matches]
+top$group <-bf$group[matches]
+
+table(top$origin)
+table(top$group)
+table(UC_catalogo$Origem)
 
 # Generate output file
-finalList <- create_list(final, Nome_UC)
+finalList <- format_list(top, Nome_UC)
 listed <- finalList$Táxon_completo %in% UC_catalogo$Táxon
 finalList[,"Já listada"] <- ifelse(listed, "Sim", "Não")
 
-table(finalList$Origem)
-table(finalList$Origem[!listed])
+table(finalList$BD_Origem)
+table(finalList$BD_Origem[!listed])
 table(finalList$Localidade[!listed])
 table(is.na(finalList$Barcode))
 
