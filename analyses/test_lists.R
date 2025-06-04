@@ -15,7 +15,10 @@ uc_string <- "e(st(a[çc?][aã?]o|)?)?.? e(col([óo?]gica)?)?.?( de)? avar[ée?]
 uc_data <- subset(ucs, grepl(UC_de_interesse, Nome.da.UC, ignore.case=T))
 Nome_UC <- uc_data$Nome.da.UC
 nome_file <- gsub(" ","",tolower(rmLatin(Nome_UC)))
-# uc_string <- generate_uc_string(Nome_UC)
+# fix a couple common misspellings
+Nome_UC <- sub("AREA", "ÁREA", Nome_UC, fixed = T)
+Nome_UC <- sub("PATRIMONIO", "PATRIMÔNIO", Nome_UC, fixed = T)
+uc_string <- generate_uc_string(Nome_UC)
 county <- str_squish(gsub("\\(.*\\)","",uc_data$Municípios.Abrangidos))
 county_splink <- paste(county, rmLatin(county))
 county_plantr <- tolower(rmLatin(county))
@@ -45,7 +48,6 @@ occs <- formatLoc(occs)
 load("data/derived-data/reflora_gbif_jabot_saopaulo.RData")
 occs <- dplyr::bind_rows(occs, saopaulo)
 
-occs[occs==""] <- NA
 
 # occs <- formatCoord(occs)
 # occs <- validateLoc(occs)
@@ -57,7 +59,7 @@ horto <- subset(occs_mun, grepl("horto florestal", locality.new, ignore.case = T
 table(grepl(county,ucs$Municípios.Abrangidos))
 parque <- subset(occs_mun, grepl("parque", locality.new, ignore.case = TRUE, perl = TRUE))
 parque <- subset(parque,!grepl("parque estadual da vassununga", locality.new, perl = TRUE)) # todo: generalize this
-occs_uc_name <- subset(occs, grepl(uc_string, locality.new, ignore.case = TRUE, perl = TRUE))
+occs_uc_name <- subset(occs, grepl(uc_string, locality, ignore.case = TRUE, perl = TRUE))
 table(parque$locality.new)
 table(parque$municipality.new)
 table(occs_uc_name$locality.new)
