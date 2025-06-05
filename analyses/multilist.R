@@ -49,6 +49,9 @@ for(i in 1:sample_size){
     # join with jabot, reflora and gbif
     occs <- dplyr::bind_rows(occs, saopaulo)
 
+    # this looks like a good place to force garbage collection
+    gc()
+
     # Filter occs in the selected CU
     # Records in the municipality and in locality by type of CU
     occs_mun <- subset(occs, municipality.new == county_plantr)
@@ -57,6 +60,14 @@ for(i in 1:sample_size){
     occs_uc_name <- subset(occs, grepl(uc_string, locality, ignore.case = TRUE, perl = TRUE))
     if(grepl("PARQUE",Nome_UC)) {
         total <- merge(occs_uc_name, parque, all=T)
+    } else {
+        total <- occs_uc_name
+    }
+
+    if(nrow(total) == 0) {
+        print("No records found for CU:")
+        print(Nome_UC)
+        next()
     }
 
     # drop empty cols
@@ -153,52 +164,12 @@ for(i in 1:sample_size){
     save(total, file=paste0("data/derived-data/occs_",nome_file,".RData"))
     # load(file=paste0("data/derived-data/occs_",nome_file,".RData"))
 
-    table(total$scientificName.new, total$tax.check)
-    table(total$scientificName.new, total$taxon.rank, useNA = "always")
-
-    summ <- summaryData(total)
-
-    table(total$basisOfRecord, useNA="always")
-
-    # Try to create my own checklist from the data treated with plantR
-    species <- subset(total, taxon.rank %in% c("species","subspecies","variety")) # todo: check if this is correct
-        sp <- unique(species$species.new)
-        gen <- unique(species$genus.new)
+    # Create my own checklist from the data treated with plantR
+    species <- subset(total, taxon.rank %in% c("species","subspecies","variety","form")) # todo: check if this is correct
+    sp <- unique(species$species.new)
+    gen <- unique(species$genus.new)
     genus <- subset(total, !genus.new %in% gen) #TODO: add similar for family-level ids
-    length(unique(total$genus.new[total$taxon.rank=="genus"]))
-    length(unique(genus$genus.new))
     final <- rbind(species, genus)
-
-    summ <- summaryData(final)
-
-    # load comparison data
-    load("data/raw-data/catalogoCompleto.RData")
-    UC_catalogo <- subset(catalogoCompleto, grepl(Nome_UC, Unidade.Conservação, perl = T, ignore.case = T))
-    dim(UC_catalogo)
-    speciesCatalogo <- unique(UC_catalogo$scientificNameFull)
-
-    compareLists <- function(l1, l2 = UC_catalogo) {
-        sp1 <- unique(l1$species.new)
-        sp2 <- unique(l2$species.new)
-        gen1 <- unique(l1$genus.new)
-        gen2 <- unique(l2$genus.new)
-        f1 <- unique(l1$family.new)
-        f2 <- unique(l2$family.new)
-
-        print(c("List 1", sum(!is.na(sp1)), length(f1)))
-
-        print("SPECIES")
-        print(c(length(setdiff(sp1, sp2)), length(setdiff(sp2,sp1))))
-        print("FAMILIES")
-        print(c(length(setdiff(f1, f2)), length(setdiff(f2,f1))))
-    }
-
-    compareLists(UC_catalogo)
-    compareLists(final)
-
-    # compareLists(subset(final, tax.check >= "low"))
-    compareLists(subset(final, tax.check >= "medium"))
-    compareLists(subset(final, tax.check >= "high"))
 
     # Get best records for each taxon
     top <- top_records(final, n = 1)
@@ -206,9 +177,6 @@ for(i in 1:sample_size){
     write.csv(top, paste0("results/checklist_",nome_file,".csv"), na="")
 
     # Get info from  F&FBR
-    # get_florabr(output_dir = "data/raw-data", #directory to save the data
-                # data_version = "latest", #get the most recent version available
-                # overwrite = T) #Overwrite data, if it exists
     bf <- load_florabr(data_dir = "data/raw-data")
     ids <- substr(top$id, 5, nchar(top$id))
     matches <- match(ids, bf$id)
@@ -220,30 +188,16 @@ for(i in 1:sample_size){
     matches[unmatched] <- match(top$species.new[unmatched], bf$species)
     unmatched <- which(is.na(matches))
 
-    top$scientificName[unmatched]
-    top$scientificNameAuthorship[unmatched]
-    top$scientificNameStatus[unmatched]
-    top$scientificNameFull[unmatched]
-
     # Extract origin and group information
     top$origin <-bf$origin[matches]
     # Group is probably dependent on family innit
     matches[unmatched] <- match(top$family.new[unmatched], bf$family)
     top$group <-bf$group[matches]
 
-    table(top$origin)
-    table(top$group)
-    table(UC_catalogo$Origem)
-
     # Generate output file
     finalList <- format_list(top, Nome_UC)
     listed <- finalList$Táxon_completo %in% UC_catalogo$Táxon
     finalList[,"Já listada"] <- ifelse(listed, "Sim", "Não")
-
-    table(finalList$BD_Origem)
-    table(finalList$BD_Origem[!listed])
-    table(finalList$Localidade[!listed])
-    table(is.na(finalList$Barcode))
 
     write.csv(finalList, paste0("results/checklist_",nome_file,"_modeloCatalogo.csv"), na="")
 }
