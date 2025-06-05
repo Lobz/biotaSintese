@@ -142,6 +142,7 @@ for(i in 1:sample_size){
     rank[grepl(" var[. ]",x)] <- "subspecies"
     rank[x == total$family.new[fix_these]] <- "family"
     rank[is.na(rank)] <- tolower(total$taxonRank)
+    rank[is.na(rank)] <- "genus"
     total$taxon.rank[fix_these] <- rank
 
     # get species and genus?
