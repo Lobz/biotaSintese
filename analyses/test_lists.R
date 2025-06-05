@@ -100,42 +100,26 @@ table(noName)
 
 # Match scientificName to oficial F&FBR backbone
 total <- formatTax(total)
+
 # we're gonna try again without author (see issue #170 in plantR)
-unmatched <- which(total$tax.notes == "not found")
-rematch <- total[unmatched, ]
-rematch$genus.new <- NULL
-rematch <- formatTax(rematch, use.authors = F)
-rematched <- unmatched[rematch$tax.notes != "not found"] # let's replace these
-rematch <- rematch[rematch$tax.notes != "not found",names(total)]
-total[rematched,] <- rematch
+total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, use.author = F)
 
 # What's still unmatched? Genus rank
-rankgenus <- which(total$tax.notes == "not found"& total$taxonRank=="GENUS")
-rematch <- total[rankgenus, ]
-rematch$genus.new <- NULL
-rematch <- formatTax(rematch, tax.name = "genus")
-rematched <- rankgenus[rematch$tax.notes != "not found"] # let's replace these
-rematch <- rematch[rematch$tax.notes != "not found",names(total)]
-total[rematched,] <- rematch
+total <- tryAgain(total, condition = function(x) x$tax.notes == "not found"& x$taxonRank=="GENUS", FUN = formatTax, tax.name = "genus")
+
 # What's still unmatched? Vars and subspecies
-unmatched <- which(total$tax.notes == "not found" & grepl("\\w+ \\w+ \\w", total$scientificName))
-rematch <- total[unmatched, ]
-rematch$genus.new <- NULL
-saved <- rematch$scientificName
-rematch$scientificName <- sub("(\\w+ \\w+ )", "\\1 var. ", rematch$scientificName)
-rematch <- formatTax(rematch)
-rematch$scientificName <- saved
-rematched <- unmatched[rematch$tax.notes != "not found"] # let's replace these
-rematch <- rematch[rematch$tax.notes != "not found",names(total)]
-total[rematched,] <- rematch
+total <- tryAgain(total,
+    condition = function(x) x$tax.notes == "not found" & grepl("\\w+ \\w+ \\w", x$scientificName),
+    FUN = function(x) {
+        saved <- x$scientificName
+        x$scientificName <- sub("(\\w+ \\w+ )", "\\1 var. ", x$scientificName)
+        x <- formatTax(x)
+        x$scientificName <- saved
+        x
+    })
+
 # What's still unmatched? Try again with less rigor?
-unmatched <- which(total$tax.notes == "not found")
-rematch <- total[unmatched, ]
-rematch$genus.new <- NULL
-rematch <- formatTax(rematch, sug.dist=0.8)
-rematched <- unmatched[rematch$tax.notes != "not found"] # let's replace these
-rematch <- rematch[rematch$tax.notes != "not found",names(total)]
-total[rematched,] <- rematch
+total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, sug.dist=0.8 )
 
 # Finish plantR workflow
 total <- validateTax(total, generalist = T)
