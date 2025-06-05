@@ -31,20 +31,13 @@ for(i in 1:sample_size){
     # This is to help look for municipality in plantR's municipality.new field
     county_plantr <- tolower(rmLatin(county))
 
-
     # Splink data
     splinkkey <- 'qUe5HQpZDZH3yFNKnjMj'
     splink_raw <- rspeciesLink(
         Scope = "p", # this should filter out animals, but unreliable in filtering out fungi, bacteria, etc
         stateProvince = "Sao Paulo", county = county_splink,
         key = splinkkey,
-        save = TRUE, dir = "data/", filename = "splink_county", MaxRecords = 2000)
-    dim(splink_raw)
-    table(splink_raw$kingdom, useNA="always")
-    splink_raw <- subset(splink_raw, kingdom == "Plantae")
-    table(splink_raw$county)
-    splink_raw$downloadedFrom <- "SPLINK"
-    sum(grepl(uc_string, splink_raw$locality, ignore.case = T, perl = T))
+        save = TRUE, dir = "data/", filename = "splink_county", MaxRecords = 5000)
 
     # Merge and treat data
     occs <- formatDwc(
@@ -53,43 +46,25 @@ for(i in 1:sample_size){
     occs <- formatOcc(occs)
     occs <- formatLoc(occs)
 
-    # join with reflora and gbif
-    load("data/derived-data/reflora_gbif_jabot_saopaulo.RData")
+    # join with jabot, reflora and gbif
     occs <- dplyr::bind_rows(occs, saopaulo)
 
-
-    # occs <- formatCoord(occs)
-    # occs <- validateLoc(occs)
-
     # Filter occs in the selected CU
+    # Records in the municipality and in locality by type of CU
     occs_mun <- subset(occs, municipality.new == county_plantr)
-    dim(occs_mun)
-    horto <- subset(occs_mun, grepl("horto florestal", locality.new, ignore.case = TRUE, perl = TRUE))
-    table(grepl(county,ucs$Municípios.Abrangidos))
     parque <- subset(occs_mun, grepl("parque", locality.new, ignore.case = TRUE, perl = TRUE))
-    parque <- subset(parque,!grepl("parque estadual da vassununga", locality.new, perl = TRUE)) # todo: generalize this
+    # parque <- subset(parque,!grepl("parque estadual da vassununga", locality.new, perl = TRUE)) # todo: generalize this
     occs_uc_name <- subset(occs, grepl(uc_string, locality, ignore.case = TRUE, perl = TRUE))
-    table(parque$locality.new)
-    table(parque$municipality.new)
-    table(occs_uc_name$locality.new)
-    table(occs_uc_name$municipality.new)
-    dim(horto)
-    dim(parque)
-    dim(occs_uc_name) # 24
     if(grepl("PARQUE",Nome_UC)) {
         total <- merge(occs_uc_name, parque, all=T)
-    } else {
-        total <- merge(occs_uc_name, horto, all=T)
     }
-    dim(total) # 371
 
     # drop empty cols
-    total <- total[,sapply(total, function(x) !all(is.na(x)))]
-    dim(total)
+    total <- remove_empty_cols(total)
 
-    total <- formatCoord(total)
     total <- validateLoc(total)
-    total <- validateCoord(total) # resourse intensive - optimize?
+
+    # Fix some issues with taxonomy:
 
     # Some records don't have scientificName for some reason
     noName <- is.na(total$scientificName)
@@ -146,7 +121,7 @@ for(i in 1:sample_size){
     rematch <- rematch[rematch$tax.notes != "not found",names(total)]
     total[rematched,] <- rematch
 
-    # Finish plantR workflow
+    # Finished; validate taxonomist
     total <- validateTax(total, generalist = T)
     total$tax.check <- factor(total$tax.check, levels = c("unknown", "low", "medium", "high"), ordered = T)
 
@@ -166,7 +141,7 @@ for(i in 1:sample_size){
     rank[grepl(" subsp[. ]",x)] <- "subspecies"
     rank[grepl(" var[. ]",x)] <- "subspecies"
     rank[x == total$family.new[fix_these]] <- "family"
-    rank[is.na(rank)] <- "genus"
+    rank[is.na(rank)] <- tolower(total$taxonRank)
     total$taxon.rank[fix_these] <- rank
 
     # get species and genus?
