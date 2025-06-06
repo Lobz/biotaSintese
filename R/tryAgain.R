@@ -9,7 +9,7 @@
 #' @details You may pass aditional parameters to the function
 tryAgain <- function(x, condition, FUN, ...) {
     unmatched <- condition(x)
-    if(!any(unmatched)) {
+    if(!any(unmatched, na.rm=T)) {
         print("No lines satisfy condition")
         return(x)
     }
@@ -18,7 +18,7 @@ tryAgain <- function(x, condition, FUN, ...) {
     rematch <- x[unmatched, ]
     rematch <- FUN(rematch, ...)
     rematched <- !condition(rematch)
-    if(!any(rematched)) {
+    if(!any(rematched, na.rm=T)) {
         print("Retrying wielded no results")
         return(x)
     } else {
