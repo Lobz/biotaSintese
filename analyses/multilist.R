@@ -50,6 +50,7 @@ for(i in 1:sample_size){
         stateProvince = "Sao Paulo", county = county_splink,
         key = splinkkey,
         save = TRUE, dir = "data/", filename = "splink_county", MaxRecords = 5000)
+    splink_raw$downloadedFrom <- "SPLINK"
 
     # Merge and treat data
     occs <- formatDwc(
@@ -87,9 +88,6 @@ for(i in 1:sample_size){
 
     print(paste("Found",nrow(total),"records."))
     ucs[i,]$NumRecords <- nrow(total)
-
-    # drop empty cols
-    total <- remove_empty_cols(total)
 
     total <- validateLoc(total)
 
@@ -183,7 +181,6 @@ for(i in 1:sample_size){
     ucs[i,]$NumGenus <- length(unique(top$genus.new))
     ucs[i,]$NumFamilies <- length(unique(top$family.new))
 
-    top <- remove_empty_cols(top)
     write.csv(top, paste0("results/checklist_",nome_file,".csv"), na="")
 
     # Get info from  F&FBR

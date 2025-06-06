@@ -201,7 +201,6 @@ compareLists(subset(final, tax.check >= "high"))
 
 # Get best records for each taxon
 top <- top_records(final, n = 1)
-top <- remove_empty_cols(top)
 write.csv(top, paste0("results/checklist_",nome_file,".csv"), na="")
 
 # Get info from  F&FBR
