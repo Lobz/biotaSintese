@@ -6,6 +6,9 @@ devtools::load_all()
 # Pre-treated data from GBIF, REflora and JABOT
 load("data/derived-data/reflora_gbif_jabot_saopaulo.RData")
 
+# Data from Catalogo
+load("data/raw-data/catalogoCompleto.RData")
+
 # Data about UCs from CNUC
 ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
 ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC", "Municípios.Abrangidos"))
@@ -14,9 +17,17 @@ ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC", "Municíp
 sample_size = 10
 ucs <- ucs[sample(1:nrow(ucs), 10), ]
 
+# Make a summary table
+ucs$NumRecords <- NA
+ucs$NumTaxons <- NA
+ucs$NumSpecies <- NA
+ucs$NumGenus <- NA
+ucs$NumFamilies <- NA
+
 for(i in 1:sample_size){
 
     uc_data <- ucs[i,]
+    print("Getting data for UC:")
     print(uc_data)
     Nome_UC <- uc_data$Nome.da.UC
     nome_file <- gsub(" ","",tolower(rmLatin(Nome_UC)))
@@ -68,8 +79,14 @@ for(i in 1:sample_size){
     if(nrow(total) == 0) {
         print("No records found for CU:")
         print(Nome_UC)
+
+        ucs[i,]$Num_Records <- 0
+        ucs[i,]$Num_Taxons <- 0
         next
     }
+
+    print(paste("Found",nrow(total),"records."))
+    ucs[i,]$NumRecords <- nrow(total)
 
     # drop empty cols
     total <- remove_empty_cols(total)
@@ -159,6 +176,13 @@ for(i in 1:sample_size){
 
     # Get best records for each taxon
     top <- top_records(final, n = 1)
+
+    print(paste("Found",nrow(top),"taxons."))
+    ucs[i,]$NumTaxons <- nrow(top)
+    ucs[i,]$NumSpecies <- length(unique(top$species.new))
+    ucs[i,]$NumGenus <- length(unique(top$genus.new))
+    ucs[i,]$NumFamilies <- length(unique(top$family.new))
+
     top <- remove_empty_cols(top)
     write.csv(top, paste0("results/checklist_",nome_file,".csv"), na="")
 
@@ -182,8 +206,15 @@ for(i in 1:sample_size){
 
     # Generate output file
     finalList <- format_list(top, Nome_UC)
+
+    # Add info about being new to catalogo
+    UC_catalogo <- subset(catalogoCompleto, grepl(Nome_UC, Unidade.Conservação, perl = T, ignore.case = T))
+    speciesCatalogo <- unique(UC_catalogo$scientificNameFull)
     listed <- finalList$Táxon_completo %in% UC_catalogo$Táxon
     finalList[,"Já listada"] <- ifelse(listed, "Sim", "Não")
 
     write.csv(finalList, paste0("results/checklist_",nome_file,"_modeloCatalogo.csv"), na="")
 }
+
+# Save summary
+write.csv(ucs, "data/derived-data/summary_multilist.csv")
