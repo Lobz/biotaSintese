@@ -22,7 +22,7 @@ ucs <- subset(ucs, !Nome.da.UC %in% done$Nome.da.UC)
 
 # Select a subset of UCs (for testing)
 ucs <- subset(ucs, !grepl("-",Municípios.Abrangidos))
-ucs <- ucs[sample(1:nrow(ucs), 10), ]
+# ucs <- ucs[sample(1:nrow(ucs), 10), ]
 sample_size = nrow(ucs)
 
 # Make a summary table
