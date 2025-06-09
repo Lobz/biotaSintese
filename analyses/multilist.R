@@ -9,13 +9,21 @@ load("data/derived-data/reflora_gbif_jabot_saopaulo.RData")
 # Data from Catalogo
 load("data/raw-data/catalogoCompleto.RData")
 
+# Data from previous runs
+done <- read.csv("data/derived-data/summary_multilist.csv")
+done <- na.exclude(done)
+
 # Data about UCs from CNUC
 ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
 ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC", "Municípios.Abrangidos"))
 
+# Remove done
+ucs <- subset(ucs, !Nome.da.UC %in% done$Nome.da.UC)
+
 # Select a subset of UCs (for testing)
-sample_size = 10
+ucs <- subset(ucs, !grepl("-",Municípios.Abrangidos))
 ucs <- ucs[sample(1:nrow(ucs), 10), ]
+sample_size = nrow(ucs)
 
 # Make a summary table
 ucs$NumRecords <- NA
@@ -25,6 +33,7 @@ ucs$NumGenus <- NA
 ucs$NumFamilies <- NA
 
 for(i in 1:sample_size){
+try({
 
     uc_data <- ucs[i,]
     print("Getting data for UC:")
@@ -49,7 +58,8 @@ for(i in 1:sample_size){
         Scope = "p", # this should filter out animals, but unreliable in filtering out fungi, bacteria, etc
         stateProvince = "Sao Paulo", county = county_splink,
         key = splinkkey,
-        save = TRUE, dir = "data/", filename = "splink_county", MaxRecords = 5000)
+        MaxRecords = 5000)
+    splink_raw <- subset(splink_raw, kingdom == "Plantae")
     splink_raw$downloadedFrom <- "SPLINK"
 
     # Merge and treat data
@@ -68,21 +78,23 @@ for(i in 1:sample_size){
     # Filter occs in the selected CU
     # Records in the municipality and in locality by type of CU
     occs_mun <- subset(occs, municipality.new == county_plantr)
-    parque <- subset(occs_mun, grepl("parque", locality.new, ignore.case = TRUE, perl = TRUE))
+    # parque <- subset(occs_mun, grepl("parque", locality.new, ignore.case = TRUE, perl = TRUE))
     # parque <- subset(parque,!grepl("parque estadual da vassununga", locality.new, perl = TRUE)) # todo: generalize this
     occs_uc_name <- subset(occs, grepl(uc_string, locality, ignore.case = TRUE, perl = TRUE))
-    if(grepl("PARQUE",Nome_UC)) {
-        total <- merge(occs_uc_name, parque, all=T)
-    } else {
+    # if(grepl("PARQUE",Nome_UC)) {
+        # total <- merge(occs_uc_name, parque, all=T)
+    # } else {
         total <- occs_uc_name
-    }
+    # }
+
+    # TODO get records based on gps??
 
     if(nrow(total) == 0) {
         print("No records found for CU:")
         print(Nome_UC)
 
-        ucs[i,]$Num_Records <- 0
-        ucs[i,]$Num_Taxons <- 0
+        ucs[i,3:7] <- 0
+
         next
     }
 
@@ -211,7 +223,9 @@ for(i in 1:sample_size){
     finalList[,"Já listada"] <- ifelse(listed, "Sim", "Não")
 
     write.csv(finalList, paste0("results/checklist_",nome_file,"_modeloCatalogo.csv"), na="")
+})
 }
 
 # Save summary
-write.csv(ucs, "data/derived-data/summary_multilist.csv")
+ucs <- dplyr::bind_rows(done, ucs)
+write.csv(ucs, "results/summary_multilist.csv")
