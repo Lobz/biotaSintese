@@ -228,4 +228,6 @@ try({
 
 # Save summary
 ucs <- dplyr::bind_rows(done, ucs)
-write.csv(done, "results/summary_multilist.csv", row.names=FALSE)
+write.csv(ucs, "results/summary_multilist.csv", row.names=FALSE)
+summary(ucs==0)
+summary(ucs<20)
