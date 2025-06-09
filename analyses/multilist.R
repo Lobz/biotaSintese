@@ -10,7 +10,7 @@ load("data/derived-data/reflora_gbif_jabot_saopaulo.RData")
 load("data/raw-data/catalogoCompleto.RData")
 
 # Data from previous runs
-done <- read.csv("data/derived-data/summary_multilist.csv")
+done <- read.csv("results/summary_multilist.csv")
 done <- na.exclude(done)
 
 # Data about UCs from CNUC
@@ -21,7 +21,7 @@ ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC", "Municíp
 ucs <- subset(ucs, !Nome.da.UC %in% done$Nome.da.UC)
 
 # Select a subset of UCs (for testing)
-ucs <- subset(ucs, !grepl("-",Municípios.Abrangidos))
+# ucs <- subset(ucs, !grepl("-",Municípios.Abrangidos))
 # ucs <- ucs[sample(1:nrow(ucs), 10), ]
 sample_size = nrow(ucs)
 
@@ -77,7 +77,7 @@ try({
 
     # Filter occs in the selected CU
     # Records in the municipality and in locality by type of CU
-    occs_mun <- subset(occs, municipality.new == county_plantr)
+    # occs_mun <- subset(occs, municipality.new == county_plantr)
     # parque <- subset(occs_mun, grepl("parque", locality.new, ignore.case = TRUE, perl = TRUE))
     # parque <- subset(parque,!grepl("parque estadual da vassununga", locality.new, perl = TRUE)) # todo: generalize this
     occs_uc_name <- subset(occs, grepl(uc_string, locality, ignore.case = TRUE, perl = TRUE))
@@ -193,7 +193,7 @@ try({
     ucs[i,]$NumGenus <- length(unique(top$genus.new))
     ucs[i,]$NumFamilies <- length(unique(top$family.new))
 
-    write.csv(top, paste0("results/checklist_",nome_file,".csv"), na="")
+    write.csv(top, paste0("results/checklist_",nome_file,".csv"), na="", row.names=FALSE)
 
     # Get info from  F&FBR
     bf <- load_florabr(data_dir = "data/raw-data")
@@ -222,10 +222,10 @@ try({
     listed <- finalList$Táxon_completo %in% UC_catalogo$Táxon
     finalList[,"Já listada"] <- ifelse(listed, "Sim", "Não")
 
-    write.csv(finalList, paste0("results/checklist_",nome_file,"_modeloCatalogo.csv"), na="")
+    write.csv(finalList, paste0("results/checklist_",nome_file,"_modeloCatalogo.csv"), na="", row.names=FALSE)
 })
 }
 
 # Save summary
 ucs <- dplyr::bind_rows(done, ucs)
-write.csv(ucs, "results/summary_multilist.csv")
+write.csv(done, "results/summary_multilist.csv", row.names=FALSE)
