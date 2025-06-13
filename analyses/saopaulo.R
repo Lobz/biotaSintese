@@ -114,4 +114,6 @@ saopaulo <- subset(saopaulo, !NAME_1 %in% otherstates)
 # table(saopaulo$NAME_2, useNA="always")
 # dim(saopaulo)
 
+saopaulo <- remove_fields(saopaulo)
+
 save(saopaulo,file="data/derived-data/reflora_gbif_jabot_saopaulo.RData")

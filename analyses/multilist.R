@@ -1,7 +1,7 @@
-library(plantR) # used for reading and cleaning occurrence data
-library(stringr)
-library(florabr)
-devtools::load_all()
+    library(plantR) # used for reading and cleaning occurrence data
+    library(stringr)
+    library(florabr)
+    devtools::load_all()
 
 # Pre-treated data from GBIF, REflora and JABOT
 load("data/derived-data/reflora_gbif_jabot_saopaulo.RData")
@@ -46,7 +46,11 @@ try({
     # Generate string for regex grepl in locality data
     uc_string <- generate_uc_string(Nome_UC)
     # Get municípios
-    county <- str_squish(gsub("\\(.*\\)","",uc_data$Municípios.Abrangidos))
+    # TODO: split municipios, remove ones in other states (?), download each separately
+    counties <- strsplit(uc_data$Municípios.Abrangidos, " - ")[[1]]
+    counties <- counties[endsWith(counties,"(SP)")]
+    counties <- substr(counties, 0, nchar(counties)-5)
+    county <- paste(counties, collapse = " ")
     # Splink search has some issues with special characters so we look for both options
     county_splink <- paste(county, rmLatin(county))
     # This is to help look for municipality in plantR's municipality.new field
@@ -59,6 +63,9 @@ try({
         stateProvince = "Sao Paulo", county = county_splink,
         key = splinkkey,
         MaxRecords = 5000)
+    if(nrow(splink_raw)==5000) {
+        print("HIT MAX LIMIT")
+    }
     splink_raw <- subset(splink_raw, kingdom == "Plantae")
     splink_raw$downloadedFrom <- "SPLINK"
 
@@ -70,6 +77,7 @@ try({
     occs <- formatLoc(occs)
 
     # join with jabot, reflora and gbif
+    occs <- consolidateCase(occs, names(saopaulo))
     occs <- dplyr::bind_rows(occs, saopaulo)
 
     # this looks like a good place to force garbage collection
@@ -228,6 +236,7 @@ try({
 
 # Save summary
 ucs <- dplyr::bind_rows(done, ucs)
+ucs <- ucs[order(ucs$Nome.da.UC),]
 write.csv(ucs, "results/summary_multilist.csv", row.names=FALSE)
 summary(ucs==0)
 summary(ucs<20)
