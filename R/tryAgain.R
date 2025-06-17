@@ -22,10 +22,10 @@ tryAgain <- function(x, condition, FUN, ...) {
         print("Retrying wielded no results")
         return(x)
     } else {
-        print(paste("Replaced", sum(rematched), "lines"))
+        print(paste("Replaced", sum(rematched, na.rm=T), "lines"))
     }
 
-    newresults <- unmatched[rematched] # let's replace these
+    newresults <- unmatched[which(rematched)] # let's replace these
     rematch <- rematch[rematched, names(x)]
     x[newresults,] <- rematch
     x

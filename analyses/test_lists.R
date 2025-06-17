@@ -11,8 +11,8 @@ ucs <- read.csv("~/BIOTA/unidades-de-conservacao/cnuc_2024_10.csv", sep=";", dec
 UC_de_interesse <- "ESTAÇÃO ECOLÓGICA DE AVARÉ"
 uc_string <- "e(st(a[çc?][aã?]o|)?)?.? e(col([óo?]gica)?)?.?( de)? avar[ée?]"
 
-# UC_de_interesse <- "PORTO FERREIRA"
-uc_data <- subset(ucs, grepl(UC_de_interesse, Nome.da.UC, ignore.case=T))
+UC_de_interesse <- "Campos do Jordão"
+uc_data <- subset(ucs, grepl(UC_de_interesse, Nome.da.UC, ignore.case=T))[3,]
 Nome_UC <- uc_data$Nome.da.UC
 nome_file <- gsub(" ","",tolower(rmLatin(Nome_UC)))
 # fix a couple common misspellings
@@ -82,6 +82,7 @@ total <- formatCoord(total)
 total <- validateLoc(total)
 total <- validateCoord(total) # resourse intensive - optimize?
 
+
 # Some records don't have scientificName for some reason
 noName <- is.na(total$scientificName)
 table(noName)
@@ -117,6 +118,19 @@ total <- tryAgain(total,
         x$scientificName <- saved
         x
     })
+
+
+# For records that have authorship inside scientific name, we want to remove that
+total <- tryAgain(total,
+    condition = function(x) x$tax.notes == "not found" & pairwiseMap(x$scientificNameAuthorship, x$scientificName, grepl),
+    FUN = function(x) {
+        saved <- x$scientificName
+
+        x$scientificName <- str_squish(pairwiseMap(x$scientificNameAuthorship, x$scientificName, function(x,y) sub(x, "", y)))
+        x <- formatTax(x)
+        x
+    })
+
 
 # What's still unmatched? Try again with less rigor?
 total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, sug.dist=0.8 )
@@ -213,8 +227,8 @@ matches <- match(ids, bf$id)
 unmatched <- which(is.na(ids))
 # Try with original name (catches some errors)
 matches[unmatched] <- match(top$scientificName[unmatched], bf$scientificName)
-unmatched <- which(is.na(matches))
 # Try with species names (helps with errors with authorship, eliminates subspecies though)
+unmatched <- which(is.na(matches) & !is.na(top$species.new))
 matches[unmatched] <- match(top$species.new[unmatched], bf$species)
 unmatched <- which(is.na(matches))
 

@@ -4,7 +4,7 @@
     devtools::load_all()
 
 # Pre-treated data from GBIF, REflora and JABOT
-load("data/derived-data/reflora_gbif_jabot_saopaulo.RData")
+load("data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
 
 # Data from Catalogo
 load("data/raw-data/catalogoCompleto.RData")
@@ -46,49 +46,21 @@ try({
     # Generate string for regex grepl in locality data
     uc_string <- generate_uc_string(Nome_UC)
     # Get municípios
-    # TODO: split municipios, remove ones in other states (?), download each separately
+    # split municipios
+    # Remove ones in other states (?), download each separately
     counties <- strsplit(uc_data$Municípios.Abrangidos, " - ")[[1]]
     counties <- counties[endsWith(counties,"(SP)")]
     counties <- substr(counties, 0, nchar(counties)-5)
     county <- paste(counties, collapse = " ")
-    # Splink search has some issues with special characters so we look for both options
-    county_splink <- paste(county, rmLatin(county))
     # This is to help look for municipality in plantR's municipality.new field
     county_plantr <- tolower(rmLatin(county))
-
-    # Splink data
-    splinkkey <- 'qUe5HQpZDZH3yFNKnjMj'
-    splink_raw <- rspeciesLink(
-        Scope = "p", # this should filter out animals, but unreliable in filtering out fungi, bacteria, etc
-        stateProvince = "Sao Paulo", county = county_splink,
-        key = splinkkey,
-        MaxRecords = 5000)
-    if(nrow(splink_raw)==5000) {
-        print("HIT MAX LIMIT")
-    }
-    splink_raw <- subset(splink_raw, kingdom == "Plantae")
-    splink_raw$downloadedFrom <- "SPLINK"
-
-    # Merge and treat data
-    occs <- formatDwc(
-        splink_data = splink_raw
-        )
-    occs <- formatOcc(occs)
-    occs <- formatLoc(occs)
-
-    # join with jabot, reflora and gbif
-    occs <- consolidateCase(occs, names(saopaulo))
-    occs <- dplyr::bind_rows(occs, saopaulo)
-
-    # this looks like a good place to force garbage collection
-    gc()
 
     # Filter occs in the selected CU
     # Records in the municipality and in locality by type of CU
     # occs_mun <- subset(occs, municipality.new == county_plantr)
     # parque <- subset(occs_mun, grepl("parque", locality.new, ignore.case = TRUE, perl = TRUE))
     # parque <- subset(parque,!grepl("parque estadual da vassununga", locality.new, perl = TRUE)) # todo: generalize this
-    occs_uc_name <- subset(occs, grepl(uc_string, locality, ignore.case = TRUE, perl = TRUE))
+    occs_uc_name <- subset(saopaulo, grepl(uc_string, locality, ignore.case = TRUE, perl = TRUE))
     # if(grepl("PARQUE",Nome_UC)) {
         # total <- merge(occs_uc_name, parque, all=T)
     # } else {
@@ -131,6 +103,38 @@ try({
 
     # Match scientificName to oficial F&FBR backbone
     total <- formatTax(total)
+
+    # For records that have authorship inside scientific name, we want to remove that
+    total <- tryAgain(total,
+        condition = function(x) {
+            auth <- gsub("\\(","\\\\(",x$scientificNameAuthorship.new)
+            auth <- gsub("\\)","\\\\)",auth)
+            x$tax.notes == "not found" & pairwiseMap(auth, x$scientificName, grepl)
+            },
+        FUN = function(x) {
+            auth <- gsub("\\(","\\\\(",x$scientificNameAuthorship.new)
+            auth <- gsub("\\)","\\\\)",auth)
+            x$scientificName <- str_squish(pairwiseMap(auth, x$scientificName, function(x,y) sub(x, "", y)))
+            x$scientificName <- sub(", \\d+","",x$scientificName)
+            x <- formatTax(x)
+            x
+        })
+
+    total <- tryAgain(total,
+        condition = function(x) {
+            auth <- gsub("\\(","\\\\(",x$scientificNameAuthorship)
+            auth <- gsub("\\)","\\\\)",auth)
+            x$tax.notes == "not found" & pairwiseMap(auth, x$scientificName, grepl)
+            },
+        FUN = function(x) {
+            auth <- gsub("\\(","\\\\(",x$scientificNameAuthorship)
+            auth <- gsub("\\)","\\\\)",auth)
+            x$scientificName <- str_squish(pairwiseMap(auth, x$scientificName, function(x,y) sub(x, "", y)))
+            x$scientificName <- sub(", \\d+","",x$scientificName)
+            x <- formatTax(x)
+            x
+        })
+
 
     # we're gonna try again without author (see issue #170 in plantR)
     total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, use.author = F)
@@ -210,8 +214,8 @@ try({
     unmatched <- which(is.na(ids))
     # Try with original name (catches some errors)
     matches[unmatched] <- match(top$scientificName[unmatched], bf$scientificName)
-    unmatched <- which(is.na(matches))
     # Try with species names (helps with errors with authorship, eliminates subspecies though)
+    unmatched <- which(is.na(matches) & !is.na(top$species.new))
     matches[unmatched] <- match(top$species.new[unmatched], bf$species)
     unmatched <- which(is.na(matches))
 
@@ -235,8 +239,8 @@ try({
 }
 
 # Save summary
-ucs <- dplyr::bind_rows(done, ucs)
-ucs <- ucs[order(ucs$Nome.da.UC),]
-write.csv(ucs, "results/summary_multilist.csv", row.names=FALSE)
-summary(ucs==0)
-summary(ucs<20)
+total <- dplyr::bind_rows(done, ucs)
+total <- total[order(total$Nome.da.UC),]
+write.csv(total, "results/summary_multilist.csv", row.names=FALSE)
+summary(total==0)
+summary(total<20)
