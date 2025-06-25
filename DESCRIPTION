@@ -12,6 +12,8 @@ Imports:
 	plantR,
     utils,
     stringr,
+    florabr,
+    geobr,
     measurements
 Suggests:
     rmarkdown,

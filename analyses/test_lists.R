@@ -1,11 +1,11 @@
+devtools::load_all()
 library(plantR) # used for reading and cleaning occurrence data
 library(stringr)
 library(florabr)
-devtools::load_all()
 
 # The point of this is to create and compare lists from different techniques
 # For this exercise, we are using data about Estação Ecológica de Avaré
-ucs <- read.csv("~/BIOTA/unidades-de-conservacao/cnuc_2024_10.csv", sep=";", dec=",")
+ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
 
 # Create list using plantR, GBIF, Reflora, splink
 UC_de_interesse <- "ESTAÇÃO ECOLÓGICA DE AVARÉ"
