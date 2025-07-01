@@ -85,14 +85,14 @@ for(i in 2:nrow(togo)) {
     save(splsaopaulo, file="data/raw-data/spl_saopaulo.RData")
 }
 
+save(splsaopaulo, file="data/raw-data/spl_saopaulo.RData")
+# todo: decide what to do with barcode NA
+
     # Merge and treat data
 spl <- formatDwc(
     splink_data = splsaopaulo
     )
 
-# Remove a problem case that anyway isn't very useful
-spl <- subset(spl, barcode != "IPA0014822" | is.na(barcode))
-# todo: decide what to do with barcode NA
 
 spl <- formatOcc(spl)
 spl <- formatLoc(spl)

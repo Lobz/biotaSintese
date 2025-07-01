@@ -1,33 +1,50 @@
-
+devtools::load_all()
 library(geobr)
 library(plantR)
 
-load("data/derived-data/occsR_reflora.RData")
+load("data/raw-data/gbif_saopaulo_raw.RData")
+gbif$downloadedFrom <- "GBIF"
+goodNames <- names(gbif)
+gbif <- remove_fields(gbif)
+load("data/raw-data/reflora_all.RData")
+reflora$downloadedFrom <- "Reflora"
+reflora <- consolidateCase(reflora, goodNames)
+goodNames <- union(goodNames, names(reflora))
+reflora <- remove_fields(reflora)
+load("data/derived-data/jabot_saopaulo.RData")
+jabot$downloadedFrom <- "JABOT"
+jabot <- consolidateCase(jabot, goodNames)
+goodNames <- union(goodNames, names(jabot))
+jabot <- remove_fields(jabot)
+load("data/raw-data/spl_saopaulo.RData")
+splsaopaulo$downloadedFrom <- "Splink"
+splsaopaulo <- consolidateCase(splsaopaulo, goodNames)
+splsaopaulo <- remove_fields(splsaopaulo)
 
-sp <- subset(occsR, (grepl("brazil", country.new) | country.new=="") & grepl("s.* paulo", stateProvince.new))
+# Join all this together
+saopaulo1 <- formatDwc(gbif_data = gbif, user_data = jabot)
+saopaulo2 <- formatDwc(splink_data = splsaopaulo, user_data = reflora)
+saopaulo <- dplyr::bind_rows(saopaulo1,saopaulo2)
 
-load("data/derived-data/occs_gbif_saopaulo.RData")
-reflora_gbif <- dplyr::bind_rows(occs, sp)
-load(file="data/derived-data/jabot_saopaulo_dwc.RData")
-saopaulo <- dplyr::bind_rows(reflora_gbif, jabot)
-load(file="data/derived-data/occs_splink_sp.RData")
-
-# join with jabot, reflora and gbif
-spl <- consolidateCase(spl, names(saopaulo))
-saopaulo <- dplyr::bind_rows(spl, saopaulo)
-
-
-rm(occs, occsR, reflora_gbif, jabot, sp, spl)
+rm(gbif, reflora, jabot, splsaopaulo, goodNames, saopaulo1, saopaulo2)
 gc()
 
-saopaulo$scientificNameAuthorship[is.na(saopaulo$scientificNameAuthorship)] <-
-saopaulo$scientificNameAuthorship.x[is.na(saopaulo$scientificNameAuthorship)]
-saopaulo$scientificNameAuthorship[is.na(saopaulo$scientificNameAuthorship)] <-
-saopaulo$scientificNameAuthorship.y[is.na(saopaulo$scientificNameAuthorship)]
-saopaulo$scientificNameAuthorship.x <- NULL
-
-
 saopaulo[saopaulo==""] <- NA
+
+# Lets format this
+saopaulo$recordedBy <- gsub("Eiten Eiten", "Eiten", saopaulo$recordedBy)
+saopaulo$identifiedBy <- gsub("Ulloa Ulloa", "Ulloa", saopaulo$identifiedBy)
+saopaulo <- formatOcc(saopaulo, noNumb = NA, noYear = NA, noName = NA)
+
+# Subset country
+saopaulo <- subset(saopaulo, is.na(country) | grepl("br", tolower(country), fixed=T))
+
+x <- fixLoc(saopaulo)
+
+###### PAUSE
+save(saopaulo, file="temp.RData")
+load("temp.RData")
+formatLoc
 
 noState <- which(saopaulo$resolution.gazetteer == "country")
 x <- saopaulo[noState,]
@@ -124,6 +141,5 @@ saopaulo <- subset(saopaulo, NAME_1 == "São Paulo" | is.na(NAME_1))
 # table(saopaulo$NAME_2, useNA="always")
 # dim(saopaulo)
 
-saopaulo <- remove_fields(saopaulo)
 
 save(saopaulo,file="data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")

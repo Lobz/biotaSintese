@@ -8,9 +8,11 @@ consolidateCase <- function(x, ns) {
     s <- names(x)
     correct <- ns[match(tolower(s), tolower(ns))]
     correct[is.na(correct)] <- s[is.na(correct)]
+    print(paste("replaced", sum(correct!=s), "names"))
     names(x) <- s <- correct
     if(anyDuplicated(tolower(s))) {
         # TODO
+        warn("there are duplicated names")
     }
     x
 }
