@@ -1,7 +1,7 @@
-    library(plantR) # used for reading and cleaning occurrence data
-    library(stringr)
-    library(florabr)
-    devtools::load_all()
+devtools::load_all()
+library(plantR) # used for reading and cleaning occurrence data
+library(stringr)
+library(florabr)
 
 # Pre-treated data from GBIF, REflora and JABOT
 load("data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
