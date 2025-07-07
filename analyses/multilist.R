@@ -154,7 +154,7 @@ try({
         })
 
     # What's still unmatched? Try again with less rigor?
-    total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, sug.dist=0.8 )
+    # total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, sug.dist=0.8 )
 
 
     # Finished; validate taxonomist
@@ -177,7 +177,7 @@ try({
     rank[grepl(" subsp[. ]",x)] <- "subspecies"
     rank[grepl(" var[. ]",x)] <- "subspecies"
     rank[x == total$family.new[fix_these]] <- "family"
-    rank[is.na(rank)] <- tolower(total$taxonRank)
+    rank[is.na(rank)] <- tolower(total$taxonRank)[fix_these][is.na(rank)]
     rank[is.na(rank)] <- "genus"
     total$taxon.rank[fix_these] <- rank
 
@@ -193,8 +193,10 @@ try({
     species <- subset(total, taxon.rank %in% c("species","subspecies","variety","form")) # todo: check if this is correct
     sp <- unique(species$species.new)
     gen <- unique(species$genus.new)
-    genus <- subset(total, !genus.new %in% gen) #TODO: add similar for family-level ids
-    final <- rbind(species, genus)
+    genus <- subset(total, !genus.new %in% gen)
+    fam <- unique(c(species$family.new, genus$family.new))
+    family <- subset(total, !family.new %in% fam)
+    final <- dplyr::bind_rows(species, genus, family)
 
     # Get best records for each taxon
     top <- top_records(final, n = 1)
