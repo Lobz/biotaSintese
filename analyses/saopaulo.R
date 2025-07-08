@@ -22,9 +22,36 @@ splsaopaulo <- consolidateCase(splsaopaulo, goodNames)
 splsaopaulo <- remove_fields(splsaopaulo)
 
 # Join all this together
-saopaulo1 <- formatDwc(gbif_data = gbif, user_data = jabot)
+saopaulo1 <- formatDwc(gbif_data = gbif)#, user_data = jabot) # WHAT THE FUCK IS GOING ON
+
+detect_error <- function(x) {
+  y <- formatDwc(gbif_data = x)
+  if (nrow(x) < nrow(y)) {
+    stop("Generated extra rows")
+  }
+  if (nrow(x) > nrow(y)) {
+    stop("Lost rows")
+  }
+  # if ("scientificNameAuthorship.y" %in% names(y)) {
+  #   stop("Extra authorship column")
+  # }
+  y
+}
+
+x <- isolateProblemCases(gbif, FUN = detect_error)
+x <- isolateProblemCases(x, FUN = detect_error); nrow(x)
+
+
 saopaulo2 <- formatDwc(splink_data = splsaopaulo, user_data = reflora)
 saopaulo <- dplyr::bind_rows(saopaulo1,saopaulo2)
+
+saopaulo$scientificNameAuthorship[is.na(saopaulo$scientificNameAuthorship)] <-
+saopaulo$scientificNameAuthorship.y[is.na(saopaulo$scientificNameAuthorship)]
+
+saopaulo$scientificNameAuthorship[is.na(saopaulo$scientificNameAuthorship)] <-
+saopaulo$scientificNameAuthorship.x[is.na(saopaulo$scientificNameAuthorship)]
+
+saopaulo$scientificNameAuthorship.y <- NULL
 
 rm(gbif, reflora, jabot, splsaopaulo, goodNames, saopaulo1, saopaulo2)
 gc()
@@ -32,8 +59,6 @@ gc()
 saopaulo[saopaulo==""] <- NA
 
 # Lets format this
-saopaulo$recordedBy <- gsub("Eiten Eiten", "Eiten", saopaulo$recordedBy)
-saopaulo$identifiedBy <- gsub("Ulloa Ulloa", "Ulloa", saopaulo$identifiedBy)
 saopaulo <- formatOcc(saopaulo, noNumb = NA, noYear = NA, noName = NA)
 
 # Subset country

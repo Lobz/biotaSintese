@@ -48,19 +48,17 @@ parseReflora <- function(data) {
     decimalLatitude <- sapply(latitude, measurements::conv_unit, from = 'deg_min_sec', to = 'dec_deg')
     decimalLongitude <- sapply(longitude, measurements::conv_unit, from = 'deg_min_sec', to = 'dec_deg')
 
+    data$taxonRank = factor(data$taxonRank,
+        levels = c('Forma','Variedade','Subespécie','Espécie','Gênero','Família','Ordem', 'Classe', 'Filo', 'Reino'),
+    labels = taxonRanks,
+    ordered=TRUE)
+
     data <- data %>% dplyr::mutate(
         # source = 'reflora',
         # comments = '',
 
         scientificName = substr(verbatimScientificName, nchar(family)+2, nchar(verbatimScientificName)),
 
-        taxonRank = ifelse(taxonRank=='Família','FAMILY',
-            ifelse(taxonRank=='Gênero','GENUS',
-            ifelse(taxonRank=='Espécie','SPECIES',
-            ifelse(taxonRank=='Variedade', 'VARIETY',
-            ifelse(taxonRank=='Subespécie', 'SUBSPECIES',
-            ifelse(taxonRank=='Forma', 'FORM',
-            "")))))),
 
         year = substr(dateCollected, 7, 12),
         month = substr(dateCollected, 4, 5),
