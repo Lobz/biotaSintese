@@ -134,18 +134,20 @@ try({
 
     # Get best records for each taxon
     top <- top_records(final, n = 1)
+    write.csv(top, paste0("results/checklist_",nome_file,".csv"), na="", row.names=FALSE)
+
+    # Remove unmatched?
+    top <- subset(top, !is.na(id))
 
     print(paste("Found",nrow(top),"taxons."))
     ucs[i,]$NumTaxons <- nrow(top)
     ucs[i,]$NumSpecies <- length(unique(top$species.new))
     ucs[i,]$NumGenus <- length(unique(top$genus.new))
     ucs[i,]$NumFamilies <- length(unique(top$family.new))
-    ucs[i,]$NumOuro <- sum(top$tax.check == "Ouro")
-    ucs[i,]$NumPrata <- sum(top$tax.check == "Prata")
-    ucs[i,]$NumBronze <- sum(top$tax.check == "Bronze")
-    ucs[i,]$NumLatao <- sum(top$tax.check == "Latao")
-
-    write.csv(top, paste0("results/checklist_",nome_file,".csv"), na="", row.names=FALSE)
+    ucs[i,]$NumOuro <- sum(top$tax.check == "high")
+    ucs[i,]$NumPrata <- sum(top$tax.check == "medium")
+    ucs[i,]$NumBronze <- sum(top$tax.check == "low")
+    ucs[i,]$NumLatao <- sum(top$tax.check == "unkown")
 
     # Get info from  F&FBR
     bf <- load_florabr(data_dir = "data/raw-data")
