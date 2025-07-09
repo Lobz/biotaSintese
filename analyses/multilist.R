@@ -12,6 +12,7 @@ load("data/raw-data/catalogoCompleto.RData")
 # Data from previous runs
 done <- read.csv("results/summary_multilist.csv")
 done <- na.exclude(done)
+done <- subset(done, FALSE)
 
 # Data about UCs from CNUC
 ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
@@ -22,7 +23,7 @@ ucs <- subset(ucs, !Nome.da.UC %in% done$Nome.da.UC)
 
 # Select a subset of UCs (for testing)
 # ucs <- subset(ucs, !grepl("-",Municípios.Abrangidos))
-# ucs <- ucs[sample(1:nrow(ucs), 10), ]
+ucs <- ucs[sample(1:nrow(ucs), 10), ]
 sample_size = nrow(ucs)
 
 # Make a summary table
