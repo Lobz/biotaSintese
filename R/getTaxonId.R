@@ -18,11 +18,11 @@ getTaxonId <- function(total) {
     noName <- is.na(total$scientificName)
     table(noName)
 
-    # Isolate authorship
-    total <- isolateAuthorship(total)
-
     # Match scientificName to oficial F&FBR backbone
     total <- formatTax(total)
+
+    # Isolate authorship
+    total <- isolateAuthorship(total, overwrite.authorship = FALSE)
 
     # For records that have authorship inside scientific name, we want to remove that
     total <- tryAgain(total,
@@ -59,8 +59,11 @@ getTaxonId <- function(total) {
     # we're gonna try again without author (see issue #170 in plantR)
     total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, use.author = F)
 
+    # Isolate authorship
+    total <- tryAgain(total, function(x) x$tax.notes == "not found", function(x) {formatTax(isolateAuthorship(x))})
+
     # What's still unmatched? Genus rank
-    total <- tryAgain(total, condition = function(x) x$tax.notes == "not found"& x$taxonRank=="GENUS", FUN = formatTax, tax.name = "genus")
+    total <- tryAgain(total, condition = function(x) x$tax.notes == "not found"& x$taxonRank=="genus", FUN = formatTax, tax.name = "genus")
 
     # What's still unmatched? Vars and subspecies
     total <- tryAgain(total,

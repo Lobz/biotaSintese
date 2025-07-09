@@ -78,6 +78,9 @@ try({
         next
     }
 
+    save(total, file=paste0("data/derived-data/occs_",nome_file,".RData"))
+    # load(file=paste0("data/derived-data/occs_",nome_file,".RData"))
+
     print(paste("Found",nrow(total),"records."))
     ucs[i,]$NumRecords <- nrow(total)
 
@@ -114,9 +117,6 @@ try({
     total <- get_species_and_genus(total)
 
     total <- total[order(total$taxon.rank, total$tax.check, total$scientificName.new, as.numeric(total$year.new), as.numeric(total$yearIdentified.new), na.last=F, decreasing = T),]
-
-    save(total, file=paste0("data/derived-data/occs_",nome_file,".RData"))
-    # load(file=paste0("data/derived-data/occs_",nome_file,".RData"))
 
     # Create my own checklist from the data treated with plantR
     species <- subset(total, taxon.rank %in% c("species","subspecies","variety","form")) # todo: check if this is correct
