@@ -9,6 +9,12 @@ original <- my_files[!endsWith(my_files, "modeloCatalogo.csv")]
 dataCat <- lapply(paste0("results/",modCat), read.csv, na.strings = c("NA","","s.n.","s.c.","s.a."), colClasses = "character")
 dtOrig <- lapply(paste0("results/",original), read.csv, na.strings = c("NA",""), colClasses = "character")
 
+dataCat <- lapply(dataCat, function(x) {x <- x[order(x[,"Táxon_completo"]),]})
+lapply(dataCat, function(x) {
+    nome_file <- gsub(" ","",tolower(rmLatin(x$UC[1])))
+    write.csv(x, paste0("results/checklist_",nome_file,"_modeloCatalogo.csv"), na="", row.names=FALSE)
+})
+
 length(dtOrig)
 
 total <- dplyr::bind_rows(dtOrig)

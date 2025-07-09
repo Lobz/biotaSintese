@@ -25,5 +25,5 @@ format_list <- function(x, UC) {
         ConfiançaID = factor(x$tax.check, levels=c("unknown", "low", "medium", "high"), labels=c("Latão", "Bronze", "Prata", "Ouro")),
         Localidade = x$locality
     )
-    finalList[order(finalList$ConfiançaID, decreasing = T),]
+    finalList[order(finalList$Táxon_completo),]
 }

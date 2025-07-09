@@ -31,6 +31,10 @@ ucs$NumTaxons <- NA
 ucs$NumSpecies <- NA
 ucs$NumGenus <- NA
 ucs$NumFamilies <- NA
+ucs$NumOuro <- NA
+ucs$NumPrata <- NA
+ucs$NumBronze <- NA
+ucs$NumLatao <- NA
 
 for(i in 1:sample_size){
 try({
@@ -135,6 +139,10 @@ try({
     ucs[i,]$NumSpecies <- length(unique(top$species.new))
     ucs[i,]$NumGenus <- length(unique(top$genus.new))
     ucs[i,]$NumFamilies <- length(unique(top$family.new))
+    ucs[i,]$NumOuro <- sum(top$tax.check == "Ouro")
+    ucs[i,]$NumPrata <- sum(top$tax.check == "Prata")
+    ucs[i,]$NumBronze <- sum(top$tax.check == "Bronze")
+    ucs[i,]$NumLatao <- sum(top$tax.check == "Latao")
 
     write.csv(top, paste0("results/checklist_",nome_file,".csv"), na="", row.names=FALSE)
 
