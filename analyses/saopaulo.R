@@ -22,49 +22,25 @@ splsaopaulo <- consolidateCase(splsaopaulo, goodNames)
 splsaopaulo <- remove_fields(splsaopaulo)
 
 # Join all this together
-saopaulo1 <- formatDwc(gbif_data = gbif)#, user_data = jabot) # WHAT THE FUCK IS GOING ON
-
-detect_error <- function(x) {
-  y <- formatDwc(gbif_data = x)
-  if (nrow(x) < nrow(y)) {
-    stop("Generated extra rows")
-  }
-  if (nrow(x) > nrow(y)) {
-    stop("Lost rows")
-  }
-  # if ("scientificNameAuthorship.y" %in% names(y)) {
-  #   stop("Extra authorship column")
-  # }
-  y
-}
-
-x <- isolateProblemCases(gbif, FUN = detect_error)
-x <- isolateProblemCases(x, FUN = detect_error); nrow(x)
-
-
+saopaulo1 <- formatDwc(gbif_data = gbif, user_data = jabot)
 saopaulo2 <- formatDwc(splink_data = splsaopaulo, user_data = reflora)
-saopaulo <- dplyr::bind_rows(saopaulo1,saopaulo2)
-
-saopaulo$scientificNameAuthorship[is.na(saopaulo$scientificNameAuthorship)] <-
-saopaulo$scientificNameAuthorship.y[is.na(saopaulo$scientificNameAuthorship)]
-
-saopaulo$scientificNameAuthorship[is.na(saopaulo$scientificNameAuthorship)] <-
-saopaulo$scientificNameAuthorship.x[is.na(saopaulo$scientificNameAuthorship)]
-
-saopaulo$scientificNameAuthorship.y <- NULL
+saopaulo <- dplyr::bind_rows(saopaulo1, saopaulo2)
 
 rm(gbif, reflora, jabot, splsaopaulo, goodNames, saopaulo1, saopaulo2)
 gc()
 
+# Subset country
+saopaulo <- subset(saopaulo, is.na(country) | grepl("br", tolower(country), fixed=T))
+
+# Standardize missing information
 saopaulo[saopaulo==""] <- NA
 
 # Lets format this
 saopaulo <- formatOcc(saopaulo, noNumb = NA, noYear = NA, noName = NA)
 
-# Subset country
-saopaulo <- subset(saopaulo, is.na(country) | grepl("br", tolower(country), fixed=T))
-
-x <- fixLoc(saopaulo)
+# ###### PAUSE
+# save(saopaulo, file="data/derived-data/temp.RData")
+# load("data/derived-data/temp.RData")
 
 saopaulo <- formatLoc(saopaulo)
 
@@ -190,10 +166,6 @@ saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country" &
 # })
 # table(saopaulo$country.new, useNA="always")
 # sort(table(saopaulo$stateProvince.new, useNA="always"))
-
-###### PAUSE
-save(saopaulo, file="data/derived-data/temp.RData")
-load("data/derived-data/temp.RData")
 
 locs <- getAdmin(saopaulo$loc.correct)
 names(locs)[1]<-"loc.correct.mun"

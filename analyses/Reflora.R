@@ -24,4 +24,18 @@ reflora <- parseReflora(reflora_raw)
 reflora$downloadedFrom <- "REFLORA"
 reflora <- as.data.frame(reflora)
 
+# fix year data
+reflora$year <- sub("^.*/","", reflora$year)
+year <- reflora$year
+correct <- nchar(year)==4
+incomplete <- nchar(year)==2
+date <- nchar(year)==6
+
+year[date] <- getYear(as.Date(year[date], "%d%m%y"))
+year[incomplete] <- ifelse(as.integer(year[incomplete]) > 25, paste0("19", year[incomplete]), year[incomplete])
+reflora$year <- as.numeric(year)
+
+reflora$month <- as.numeric(reflora$month)
+
+
 save(reflora,file="data/raw-data/reflora_all.RData")
