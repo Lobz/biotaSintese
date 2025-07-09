@@ -4,7 +4,8 @@
 #'
 #' @param x A data frame containing scientificName information
 #' @param save.original.as Name for the column where original scientific name will be saved
-#' @param save.original.authorship.as Name for the column where original scientificNameAuthorship will be saved
+#' @param overwrite.authorship Logical. If true, will try to extract from all taxon names. If false, records that already have a value in the scientificNameAuthorship column will be ignored. Defaults to FALSE.
+#' @param save.original.authorship.as Name for the column where original scientificNameAuthorship will be saved, if overwrite.authorship is TRUE
 #' @param tax.name Name for the column with scientificName information in x
 #' @param tax.author Name for the column with scientificNameAuthorship information in x
 #'
@@ -15,16 +16,21 @@
 #' @details This function uses plantR::fixAuthors() to extract authorship information
 isolateAuthorship <- function(x,
     save.original.as = "verbatimScientificName",
+    overwrite.authorship = FALSE,
     tax.name = "scientificName",
     tax.author = "scientificNameAuthorship",
     save.original.authorship.as = "verbatimScientificNameAuthorship") {
 
     # Create a column to save original name
     x[,save.original.as] <- x[,tax.name]
-    x[,save.original.authorship.as] <- x[,tax.author]
 
     # Isolate authorship from taxon names
-    species <- as.character(unique(x[,tax.name]))
+    if(overwrite.authorship) {
+        x[,save.original.authorship.as] <- x[,tax.author]
+        species <- as.character(unique(x[,tax.name]))
+    } else {
+        species <- as.character(unique(x[is.na(x[,tax.author]),tax.name]))
+    }
     species_split <- fixAuthors(species)
 
     # Select only those that were corrected
