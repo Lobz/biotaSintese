@@ -32,6 +32,7 @@ isolateAuthorship <- function(x,
         species <- as.character(unique(x[,tax.name]))
     } else {
         species <- as.character(unique(x[is.na(x[,tax.author]),tax.name]))
+        if(length(species)==0) return(x)
     }
     species_split <- fixAuthors(species, ...)
 
