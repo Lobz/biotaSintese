@@ -8,6 +8,7 @@
 #' @param save.original.authorship.as Name for the column where original scientificNameAuthorship will be saved, if overwrite.authorship is TRUE
 #' @param tax.name Name for the column with scientificName information in x
 #' @param tax.author Name for the column with scientificNameAuthorship information in x
+#' @param ... Aditional parameters to be passed to fixAuthors()
 #'
 #' @return The x data.frame with corrected information in tax.name and tax.author columns, plus new columns save.original.as and save.original.authorship.as. If these columns are already present in x, they will be overwritten.
 #'
@@ -17,9 +18,10 @@
 isolateAuthorship <- function(x,
     save.original.as = "verbatimScientificName",
     overwrite.authorship = FALSE,
+    save.original.authorship.as = "verbatimScientificNameAuthorship",
     tax.name = "scientificName",
     tax.author = "scientificNameAuthorship",
-    save.original.authorship.as = "verbatimScientificNameAuthorship") {
+    ...) {
 
     # Create a column to save original name
     x[,save.original.as] <- x[,tax.name]
@@ -31,7 +33,7 @@ isolateAuthorship <- function(x,
     } else {
         species <- as.character(unique(x[is.na(x[,tax.author]),tax.name]))
     }
-    species_split <- fixAuthors(species)
+    species_split <- fixAuthors(species, ...)
 
     # Select only those that were corrected
     species_split <- na.omit(species_split)
