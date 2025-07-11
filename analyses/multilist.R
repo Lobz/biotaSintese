@@ -78,7 +78,7 @@ try({
         print("No records found for CU:")
         print(Nome_UC)
 
-        ucs[i,3:7] <- 0
+        ucs[i,3:11] <- 0
 
         next
     }
