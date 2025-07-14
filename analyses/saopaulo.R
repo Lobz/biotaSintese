@@ -182,5 +182,23 @@ saopaulo <- subset(saopaulo, NAME_1 == "São Paulo" | is.na(NAME_1))
 # table(saopaulo$NAME_2, useNA="always")
 # dim(saopaulo)
 
+# Treat gps data
+saopaulo <- prepCoord(saopaulo)
+# Try again using verbatim coordinates
+saopaulo <- tryAgain(saopaulo,
+    condition = function(x) {
+      x$coord.check == FALSE
+    },
+    FUN = function(x) {
+        x <- remove_fields(x, c("decimalLatitude.new", "decimalLongitude.new", "coord.check"))
+        x <- prepCoord(x, lat = "verbatimLatitude", lon = "verbatimLongitude")
+        names(x)[ncol(x)-2:1] <- c("decimalLatitude.new", "decimalLongitude.new")
+        x
+    }
+)
+saopaulo <- getCoord(saopaulo)
+
+table(is.na(saopaulo$locality), saopaulo$origin.coord)
+# str(saopaulo)
 
 save(saopaulo,file="data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")

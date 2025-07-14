@@ -540,7 +540,5 @@ remove_fields <- function(x, to_remove = c(
     'level3Name'
   )) {
 
-  to_remove <- intersect(names(x), to_remove)
-  x[,to_remove] <- NULL
-  x
+  x[, !names(x) %in% to_remove]
 }

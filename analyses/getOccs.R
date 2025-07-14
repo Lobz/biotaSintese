@@ -6,6 +6,9 @@ library(florabr)
 # Pre-treated data from GBIF, REflora and JABOT
 load("data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
 
+# Data with valid coordinates: either original coordinates or locality
+valid_coords <- subset(saopaulo, origin.coord == "coord_original" | resolution.gazetteer == "locality")
+
 # Data about UCs from CNUC
 ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
 ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC", "Municípios.Abrangidos"))
@@ -45,9 +48,8 @@ try({
     counties <- strsplit(uc_data$Municípios.Abrangidos, " - ")[[1]]
     counties <- counties[endsWith(counties,"(SP)")]
     counties <- substr(counties, 0, nchar(counties)-5)
-    county <- paste(counties, collapse = " ")
     # This is to help look for municipality in plantR's municipality.new field
-    county_plantr <- tolower(rmLatin(county))
+    county_plantr <- tolower(rmLatin(counties))
 
     # Filter occs in the selected CU
     # Records in the municipality and in locality by type of CU
@@ -55,6 +57,8 @@ try({
     # parque <- subset(occs_mun, grepl("parque", locality.new, ignore.case = TRUE, perl = TRUE))
     # parque <- subset(parque,!grepl("parque estadual da vassununga", locality.new, perl = TRUE)) # todo: generalize this
     occs_uc_name <- subset(saopaulo, grepl(uc_string, locality, ignore.case = TRUE, perl = TRUE))
+
+    occs_gps <- gpsFilter(points, shape)
     # if(grepl("PARQUE",Nome_UC)) {
         # total <- merge(occs_uc_name, parque, all=T)
     # } else {

@@ -1,7 +1,7 @@
 library(sf) # used for spatial operations
 library(plantR) # used foi reading and cleaning occurrence data
 
-UC_de_interesse <- "ESTAÇÃO ECOLÓGICA DE AVARÉ"
+UC_de_interesse <- "PARQUE ESTADUAL DE CAMPOS"
 # UC_de_interesse <- "PORTO FERREIRA"
 
 ucs <- read.csv("~/BIOTA/unidades-de-conservacao/cnuc_2024_10.csv", sep=";", dec=",")
