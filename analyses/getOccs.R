@@ -2,12 +2,18 @@ devtools::load_all()
 library(plantR) # used for reading and cleaning occurrence data
 library(stringr)
 library(florabr)
+library(sf)
 
 # Pre-treated data from GBIF, REflora and JABOT
 load("data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
+saopaulo$recordID <- 1:nrow(saopaulo) # I need a unique ID for this
 
 # Data with valid coordinates: either original coordinates or locality
 valid_coords <- subset(saopaulo, origin.coord == "coord_original" | resolution.gazetteer == "locality")
+valid_points <- st_as_sf(valid_coords, coords = c("decimalLongitude.new", "decimalLatitude.new"))
+# Unify and convert datum to match SIRGAS 2000
+valid_points <- fixDatum(valid_points)
+plot(valid_points[,"municipality"])
 
 # Data about UCs from CNUC
 ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
@@ -17,6 +23,14 @@ ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC", "Municíp
 # ucs <- subset(ucs, !grepl("-",Municípios.Abrangidos))
 # ucs <- ucs[sample(1:nrow(ucs), 10), ]
 sample_size = nrow(ucs)
+
+# Shape data
+shapes <- st_read("data/raw-data/shp_cnuc_2025_03/cnuc_2025_03.shp")
+shapes <- subset(shapes, nome_uc %in% ucs$Nome.da.UC)
+
+# Intersect points with shapes
+lst <- st_intersects(shapes, valid_points)
+
 
 # Make a summary table
 ucs$NumRecords <- NA
@@ -56,13 +70,16 @@ try({
     # occs_mun <- subset(occs, municipality.new == county_plantr)
     # parque <- subset(occs_mun, grepl("parque", locality.new, ignore.case = TRUE, perl = TRUE))
     # parque <- subset(parque,!grepl("parque estadual da vassununga", locality.new, perl = TRUE)) # todo: generalize this
-    occs_uc_name <- subset(saopaulo, grepl(uc_string, locality, ignore.case = TRUE, perl = TRUE))
+    occs_uc_name <- grepl(uc_string, saopaulo$locality, ignore.case = TRUE, perl = TRUE)
 
-    occs_gps <- gpsFilter(points, shape)
+    # Which records are in the gps shp
+    rcs_intersect <- valid_points$recordID[lst[[9]]]
+    occs_gps <- saopaulo$recordID %in% rcs_intersect
+
     # if(grepl("PARQUE",Nome_UC)) {
         # total <- merge(occs_uc_name, parque, all=T)
     # } else {
-        total <- occs_uc_name
+        total <- saopaulo[occs_uc_name | occs_gps,]
     # }
 
     # TODO get records based on gps??
