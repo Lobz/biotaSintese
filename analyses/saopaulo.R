@@ -198,6 +198,10 @@ saopaulo <- tryAgain(saopaulo,
 )
 saopaulo <- getCoord(saopaulo)
 
+# Pre-treat taxons
+saopaulo <- getTaxonId(saopaulo)
+table(saopaulo$tax.notes)
+
 table(is.na(saopaulo$locality), saopaulo$origin.coord)
 # str(saopaulo)
 

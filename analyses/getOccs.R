@@ -13,11 +13,11 @@ valid_coords <- subset(saopaulo, origin.coord == "coord_original" | resolution.g
 valid_points <- st_as_sf(valid_coords, coords = c("decimalLongitude.new", "decimalLatitude.new"))
 # Unify and convert datum to match SIRGAS 2000
 valid_points <- fixDatum(valid_points)
-plot(valid_points[,"municipality"])
 
 # Data about UCs from CNUC
 ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
 ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC", "Municípios.Abrangidos"))
+ucs <- ucs[order(ucs$Nome.da.UC),]
 
 # Select a subset of UCs (for testing)
 # ucs <- subset(ucs, !grepl("-",Municípios.Abrangidos))
@@ -30,7 +30,7 @@ shapes <- subset(shapes, nome_uc %in% ucs$Nome.da.UC)
 
 # Intersect points with shapes
 lst <- st_intersects(shapes, valid_points)
-
+names(lst) <- shapes$nome_uc
 
 # Make a summary table
 ucs$NumRecords <- NA
@@ -73,8 +73,21 @@ try({
     occs_uc_name <- grepl(uc_string, saopaulo$locality, ignore.case = TRUE, perl = TRUE)
 
     # Which records are in the gps shp
-    rcs_intersect <- valid_points$recordID[lst[[9]]]
+    rcs_intersect <- valid_points$recordID[lst[[Nome_UC]]]
+    rcs_intersect2 <- valid_points$recordID[st_intersects(shapes[shapes$nome_uc == Nome_UC,], valid_points)]
     occs_gps <- saopaulo$recordID %in% rcs_intersect
+    table(occs_gps)
+
+    # Check if those records are valid
+    incounty <- occs_gps & tolower(saopaulo$NAME_2) %in% tolower(counties)
+    nacounty <- occs_gps & is.na(saopaulo$NAME_2)
+    naloc <- is.na(saopaulo$locality)
+    table(incounty)
+    table(nacounty)
+    sort(table(saopaulo$locality[saopaulo$basisOfRecord=="HUMAN_OBSERVATION" & nacounty], useNA="always"))
+    allna <- nacounty & naloc
+    sort(table(saopaulo$basisOfRecord[allna], useNA="always"))
+    table(saopaulo$[occs_gps][allna], useNA="always")
 
     # if(grepl("PARQUE",Nome_UC)) {
         # total <- merge(occs_uc_name, parque, all=T)
@@ -102,7 +115,6 @@ try({
 }
 
 # Save summary
-ucs <- ucs[order(ucs$Nome.da.UC),]
 write.csv(ucs, "results/summary_multilist.csv", row.names=FALSE)
 summary(ucs==0)
 summary(ucs<20)

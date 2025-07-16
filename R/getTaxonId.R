@@ -21,8 +21,20 @@ getTaxonId <- function(total) {
     # Match scientificName to oficial F&FBR backbone
     total <- formatTax(total)
 
+    # we're gonna try again without author (see issue #170 in plantR)
+    total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, use.author = F)
+
+    # Try again with verbatim
+    total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, tax.name = "verbatimScientificName")
+
+    # And again without author
+    total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, tax.name = "verbatimScientificName", use.author = F)
+
     # Isolate authorship
     total <- isolateAuthorship(total, overwrite.authorship = FALSE)
+
+    # we're gonna try again without author (see issue #170 in plantR)
+    total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, use.author = F)
 
     # For records that have authorship inside scientific name, we want to remove that
     total <- tryAgain(total,
