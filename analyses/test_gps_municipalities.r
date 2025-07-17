@@ -15,8 +15,6 @@ valid_coords <- subset(saopaulo, origin.coord == "coord_original" | resolution.g
 valid_points <- st_as_sf(valid_coords, coords = c("decimalLongitude.new", "decimalLatitude.new"))
 # Unify and convert datum to match SIRGAS 2000
 valid_points <- fixDatum(valid_points)
-sort(valid_coords$recordID)[1:70]
-sort(valid_points$recordID)[1:70]
 
 # Get shapes for municipalities
 shapes <- read_municipality("SP")
@@ -36,28 +34,27 @@ plotMun <- function(name, plot = TRUE, save = TRUE) {
     # othermuns <- unique(filtered_gps$NAME_2)
     # plot(filtered_gps, add=T, col = "blue")
     filtered_name <- saopaulo[which(tolower(saopaulo$NAME_2)==tolower(name)),]
-    name_filter1 <- (valid_points$recordID %in% filtered_name$recordID)
-    name_filter2 <- (tolower(valid_points$NAME_2)==tolower(name))
+    name_filter <- which(tolower(valid_points$NAME_2)==tolower(name))
 
     # Summary from GPS
     total <- nrow(filtered_gps)
     correct <- length(intersect(name_filter, gps_filter))
     na <- sum(is.na(filtered_gps$NAME_2))
     wrong <- total - correct - na
-    summ_gps <- c(total=total,correct=correct,wrong=wrong,not_av=na)
+    summ_gps <- c(total_gps=total,correct=correct,wrong_name=wrong,name_not_av=na)
 
     # Summary from Name
     total <- nrow(filtered_name)
     wrong <- length(name_filter) - correct
     na <- total - correct - wrong
-    summ_name <- c(total=total,correct=correct,wrong=wrong,not_av=na)
+    summ_name <- c(total_name=total,correct=correct,wrong_gps=wrong,gps_not_av=na)
 
     # Plots
     if(plot) {
         par(mfrow=c(2,2))
         plot(sp$geom, main=name)
         plot(st_geometry(shapes[name,]), add=T)
-        plot(filtered_name, col=rgb(0,0,1,0.1), pch = 4, add=T)
+        plot(valid_points[name_filter,], col=rgb(0,0,1,0.1), pch = 4, add=T)
         barplot(summ_name[2:4], main = "Coords of points filtered by municipality")
         barplot(summ_gps[2:4], main="Municipality of points filtered by GPS")
         # Third summary I guess
@@ -67,7 +64,7 @@ plotMun <- function(name, plot = TRUE, save = TRUE) {
         }
     }
 
-    dplyr::bind_rows(summ_gps, summ_name)
+    c(summ_gps, summ_name[c(1,3:4)])
 }
 
 plotMun("Ubatuba")
@@ -78,3 +75,15 @@ plotMun("Santos")
 plotMun("São Carlos")
 plotMun("Campos Do Jordão")
 plotMun("São Paulo")
+
+tabs <- lapply(rownames(shapes), function(x) try(plotMun(x, plot=F)))
+tabs <- do.call(rbind, tabs)
+rownames(tabs) <- rownames(shapes)
+write.csv(tabs, "data/derived-data/test_gps_municipalitites.csv")
+
+# Mean 67% and median 79%????
+summary(t$correct/t$total_gps)
+# Mean 19% and median 8% actual wrong names
+summary(t$wrong_name/t$total_gps)
+# In total, 9.8% of gps locations are on the wrong municipality
+sum(t$wrong_name)/sum(t$total_gps)
