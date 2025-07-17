@@ -28,32 +28,51 @@ points_muns <- st_intersects(shapes, valid_points)
 names(points_muns) <- shapes$name_muni
 sapply(points_muns, length)
 
-plotMun <- function(name) {
-    dev.off()
+plotMun <- function(name, plot = TRUE, save = TRUE) {
     gps_filter <- points_muns[[name]]
     filtered_gps <- valid_points[gps_filter,]
     # othermuns <- unique(filtered_gps$NAME_2)
-    plot(sp$geom, main=name)
-    plot(st_geometry(shapes[name,]), add=T)
     # plot(filtered_gps, add=T, col = "blue")
-    name_filter <- which(valid_points$NAME_2==name)
-    filtered_name <- valid_points[name_filter,]
-    plot(filtered_name, col=rgb(0,0,1,0.1), pch = 4, add=T)
+    filtered_name <- saopaulo[which(tolower(saopaulo$NAME_2)==tolower(name)),]
+    name_filter1 <- which(valid_points$recordID %in% filtered_name$recordID)
+    name_filter2 <- which(tolower(valid_points$NAME_2)==tolower(name))
 
     # Summary from GPS
     total <- nrow(filtered_gps)
-    correct <- sum(filtered_gpsname$NAME_2 == name, na.rm = T)
-    wrong <- sum(filtered_gpsname$NAME_2 != name, na.rm = T)
-    na <- sum(is.na(filtered_gpsname$NAME_2))
-    summ_gps <- (round(100*c(correct, wrong, na)/total))
+    correct <- length(intersect(name_filter, gps_filter))
+    na <- sum(is.na(filtered_gps$NAME_2))
+    wrong <- total - correct - na
+    summ_gps <- c(total=total,correct=correct,wrong=wrong,not_av=na)
+
     # Summary from Name
     total <- nrow(filtered_name)
-    correct <- sum(, na.rm = T)
-    wrong <- sum(filtered_gpsname$NAME_2 != name, na.rm = T)
-    na <- sum(is.na(filtered_gpsname$NAME_2))
-    (round(100*c(correct, wrong, na)/total))
+    wrong <- length(name_filter) - correct
+    na <- total - correct - wrong
+    summ_name <- c(total=total,correct=correct,wrong=wrong,not_av=na)
+
+    # Plots
+    if(plot) {
+        par(mfrow=c(2,2))
+        plot(sp$geom, main=name)
+        plot(st_geometry(shapes[name,]), add=T)
+        plot(filtered_name, col=rgb(0,0,1,0.1), pch = 4, add=T)
+        barplot(summ_name[2:4], main = "Coords of points filtered by municipality")
+        barplot(summ_gps[2:4], main="Municipality of points filtered by GPS")
+        # Third summary I guess
+        barplot(sort(table(filtered_gps$NAME_2), decreasing = TRUE)[2:4], main="Top three wrong municipalities")
+        if(save) {
+            savePlot(paste0("plots/", tolower(plantR::rmLatin(name)), ".png"))
+        }
+    }
+
+    dplyr::bind_rows(summ_gps, summ_name)
 }
 
 plotMun("Ubatuba")
 plotMun("Campinas")
 plotMun("Valinhos")
+plotMun("Santo André")
+plotMun("Santos")
+plotMun("São Carlos")
+plotMun("Campos Do Jordão")
+plotMun("São Paulo")
