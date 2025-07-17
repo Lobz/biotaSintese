@@ -15,6 +15,8 @@ valid_coords <- subset(saopaulo, origin.coord == "coord_original" | resolution.g
 valid_points <- st_as_sf(valid_coords, coords = c("decimalLongitude.new", "decimalLatitude.new"))
 # Unify and convert datum to match SIRGAS 2000
 valid_points <- fixDatum(valid_points)
+sort(valid_coords$recordID)[1:70]
+sort(valid_points$recordID)[1:70]
 
 # Get shapes for municipalities
 shapes <- read_municipality("SP")
@@ -34,8 +36,8 @@ plotMun <- function(name, plot = TRUE, save = TRUE) {
     # othermuns <- unique(filtered_gps$NAME_2)
     # plot(filtered_gps, add=T, col = "blue")
     filtered_name <- saopaulo[which(tolower(saopaulo$NAME_2)==tolower(name)),]
-    name_filter1 <- which(valid_points$recordID %in% filtered_name$recordID)
-    name_filter2 <- which(tolower(valid_points$NAME_2)==tolower(name))
+    name_filter1 <- (valid_points$recordID %in% filtered_name$recordID)
+    name_filter2 <- (tolower(valid_points$NAME_2)==tolower(name))
 
     # Summary from GPS
     total <- nrow(filtered_gps)

@@ -23,12 +23,11 @@ fixDatum <- function(x, convert.to = "EPSG:4674", na = "EPSG:4674") {
     datum[grepl("NOT|UNKNOWN|DESCONHECIDO", datum)] <- na
     datum[is.na(datum)] <- na
 
-    x$recordID <- 1:nrow(x)
-    ids <- x$recordID
     x$datum.new <- datum
     split_x <- by(x, datum, function(d) {
         st_crs(d) <- d$datum.new[1]
         d <- st_transform(d, convert.to)
+        d
     })
     y <- do.call(rbind, split_x)
 
