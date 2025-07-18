@@ -3,22 +3,32 @@ library(plantR) # used for reading and cleaning occurrence data
 library(stringr)
 library(florabr)
 
+# Flag for reruning all analysis
+rerun <- FALSE
+
 # Data from Catalogo
 load("data/raw-data/catalogoCompleto.RData")
 
 # Data from previous runs
 done <- read.csv("results/summary_multilist.csv")
 
-# Select for treating: one or more records
-has_records <- done$NumRecords > 0
-untreated <- is.na(done$NumTaxons)
-
 # Data about UCs from CNUC
 ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
 ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC", "Municípios.Abrangidos"))
 
-# Remove done
-ucs <- subset(ucs, Nome.da.UC %in% done$Nome.da.UC[has_records & untreated])
+# Select for treating: one or more records
+has_records <- done$NumRecords > 0
+
+# Select units for which this treatement was not done
+untreated <- is.na(done$NumTaxons)
+if (rerun) {
+    to_treat <- has_records
+} else {
+    to_treat <- has_records & untreated
+}
+
+# Apply selection
+ucs <- subset(ucs, Nome.da.UC %in% done$Nome.da.UC[to_treat])
 
 # Select a subset of UCs (for testing)
 # ucs <- subset(ucs, !grepl("-",Municípios.Abrangidos))
@@ -43,9 +53,9 @@ for(i in 1:sample_size){
 try({
 
     uc_data <- ucs[i,]
-    print("Getting data for UC:")
-    print(uc_data)
     Nome_UC <- uc_data$Nome.da.UC
+    print("Getting data for UC:")
+    print(Nome_UC)
     nome_file <- gsub(" ","",tolower(rmLatin(Nome_UC)))
     # fix a couple common misspellings
     Nome_UC <- sub("AREA", "ÁREA", Nome_UC, fixed = T)

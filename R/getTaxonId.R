@@ -68,9 +68,6 @@ getTaxonId <- function(total) {
         })
 
 
-    # we're gonna try again without author (see issue #170 in plantR)
-    total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, use.author = F)
-
     # Isolate authorship
     total <- tryAgain(total, function(x) x$tax.notes == "not found", function(x) {formatTax(isolateAuthorship(x))})
 

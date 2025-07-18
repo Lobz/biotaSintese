@@ -60,7 +60,7 @@ plotMun <- function(name, plot = TRUE, save = TRUE) {
         # Third summary I guess
         barplot(sort(table(filtered_gps$NAME_2), decreasing = TRUE)[2:4], main="Top three wrong municipalities")
         if(save) {
-            savePlot(paste0("plots/", tolower(plantR::rmLatin(name)), ".png"))
+            savePlot(paste0("plots/municipios/", tolower(plantR::rmLatin(name)), ".png"))
         }
     }
 
@@ -81,6 +81,7 @@ tabs <- do.call(rbind, tabs)
 rownames(tabs) <- rownames(shapes)
 write.csv(tabs, "data/derived-data/test_gps_municipalitites.csv")
 
+t <- as.data.frame(tabs)
 # Mean 67% and median 79%????
 summary(t$correct/t$total_gps)
 # Mean 19% and median 8% actual wrong names
