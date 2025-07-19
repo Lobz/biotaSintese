@@ -18,6 +18,7 @@ valid_points <- fixDatum(valid_points)
 # Data about UCs from CNUC
 ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
 ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC", "Municípios.Abrangidos"))
+ucs$Nome.da.UC <- standardize_uc_name(ucs$Nome.da.UC)
 ucs <- ucs[order(ucs$Nome.da.UC),]
 
 # Select a subset of UCs (for testing)
@@ -28,8 +29,7 @@ sample_size = nrow(ucs)
 # Shape data
 shapes <- st_read("data/raw-data/shp_cnuc_2025_03/cnuc_2025_03.shp")
 shapes <- subset(shapes, uf == "SÃO PAULO")
-n1 <- shapes$nome_uc
-n2 <- ucs$Nome.da.UC
+shapes$nome_uc <- standardize_uc_name(shapes$nome_uc)
 shapes <- subset(shapes, nome_uc %in% ucs$Nome.da.UC)
 shapes <- shapes[order(shapes$nome_uc), ]
 
@@ -78,7 +78,6 @@ try({
     # parque <- subset(parque,!grepl("parque estadual da vassununga", locality.new, perl = TRUE)) # todo: generalize this
 
     # Which records are in the gps shp
-    uc_shape <- shapes[shapes$nome_uc == Nome_UC,]
     rcs_intersect <- valid_points$recordID[points_ucs[[Nome_UC]]]
     occs_gps <- saopaulo$recordID %in% rcs_intersect
     table(occs_gps)

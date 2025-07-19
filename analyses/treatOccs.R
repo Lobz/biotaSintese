@@ -15,6 +15,7 @@ done <- read.csv("results/summary_multilist.csv")
 # Data about UCs from CNUC
 ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
 ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC", "Municípios.Abrangidos"))
+ucs$Nome.da.UC <- standardize_uc_name(ucs$Nome.da.UC)
 
 # Select for treating: one or more records
 has_records <- done$NumRecords > 0
