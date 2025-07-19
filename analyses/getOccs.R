@@ -2,6 +2,7 @@ devtools::load_all()
 library(plantR) # used for reading and cleaning occurrence data
 library(stringr)
 library(florabr)
+library(parallel)
 library(sf)
 
 # Pre-treated data from GBIF, REflora and JABOT
@@ -26,11 +27,16 @@ sample_size = nrow(ucs)
 
 # Shape data
 shapes <- st_read("data/raw-data/shp_cnuc_2025_03/cnuc_2025_03.shp")
+shapes <- subset(shapes, uf == "SÃO PAULO")
+n1 <- shapes$nome_uc
+n2 <- ucs$Nome.da.UC
 shapes <- subset(shapes, nome_uc %in% ucs$Nome.da.UC)
+shapes <- shapes[order(shapes$nome_uc), ]
 
 # Intersect points with shapes
-lst <- st_intersects(shapes, valid_points)
-names(lst) <- shapes$nome_uc
+points_ucs <- st_intersects(shapes, valid_points)
+names(points_ucs) <- shapes$nome_uc
+sapply(points_ucs, length)
 
 # Make a summary table
 ucs$NumRecords <- NA
@@ -70,11 +76,10 @@ try({
     # occs_mun <- subset(occs, municipality.new == county_plantr)
     # parque <- subset(occs_mun, grepl("parque", locality.new, ignore.case = TRUE, perl = TRUE))
     # parque <- subset(parque,!grepl("parque estadual da vassununga", locality.new, perl = TRUE)) # todo: generalize this
-    occs_uc_name <- grepl(uc_string, saopaulo$locality, ignore.case = TRUE, perl = TRUE)
 
     # Which records are in the gps shp
-    rcs_intersect <- valid_points$recordID[lst[[Nome_UC]]]
-    rcs_intersect2 <- valid_points$recordID[st_intersects(shapes[shapes$nome_uc == Nome_UC,], valid_points)]
+    uc_shape <- shapes[shapes$nome_uc == Nome_UC,]
+    rcs_intersect <- valid_points$recordID[points_ucs[[Nome_UC]]]
     occs_gps <- saopaulo$recordID %in% rcs_intersect
     table(occs_gps)
 
@@ -84,11 +89,17 @@ try({
     naloc <- is.na(saopaulo$locality)
     table(incounty)
     table(nacounty)
+    sort(table(saopaulo$municipality[occs_gps]))
+    my_points <-
+    plot(st_geometry(uc_shape))
+    plot(valid_points[points_ucs[[Nome_UC]],], col="gray", add=T)
+
     sort(table(saopaulo$locality[saopaulo$basisOfRecord=="HUMAN_OBSERVATION" & nacounty], useNA="always"))
     allna <- nacounty & naloc
     sort(table(saopaulo$basisOfRecord[allna], useNA="always"))
     table(saopaulo$[occs_gps][allna], useNA="always")
 
+    occs_uc_name <- grepl(uc_string, saopaulo$locality, ignore.case = TRUE, perl = TRUE)
     # if(grepl("PARQUE",Nome_UC)) {
         # total <- merge(occs_uc_name, parque, all=T)
     # } else {

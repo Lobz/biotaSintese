@@ -1,7 +1,7 @@
 library(sf) # used for spatial operations
 library(plantR) # used foi reading and cleaning occurrence data
 
-UC_de_interesse <- "PARQUE ESTADUAL DE CAMPOS"
+UC_de_interesse <- "JORDÃO"
 # UC_de_interesse <- "PORTO FERREIRA"
 
 ucs <- read.csv("~/BIOTA/unidades-de-conservacao/cnuc_2024_10.csv", sep=";", dec=",")
@@ -33,7 +33,7 @@ my_UC <- subset(shapes, grepl(UC_de_interesse, nome_uc, ignore.case=T))
 plot(my_UC[c(3,1,2),"nome_uc"])
 
 # read data from file
-load(paste0("data/derived-data/occs_",nome_file,".RData"))
+load(paste0("data/derived-data/occs_",nome_file[4],".RData"))
 
 str(total)
 dim(total)
@@ -42,7 +42,7 @@ summary(is.na(total$locality))
 
 # Create sf points for all records
 my_points <- st_as_sf(total, coords = c("decimalLongitude.new", "decimalLatitude.new"))
-plot(my_points[,"municipality"])
+plot(my_points[,"NAME_2"])
 plot(shapes_sp[2], col="grey", add= TRUE) ## WHY NOT WORK????
 
 
