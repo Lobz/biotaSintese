@@ -21,14 +21,16 @@ generate_uc_string <- function(x) {
 }
 
 uc_abbrevs <- data.frame(
-    short= c("APA", "RPPN", "ARIE", "RDS", "MNE", "FLONA", "PARNA"),
+    short= c("APA", "RPPN", "ARIE", "RDS", "MNE", "FLONA", "PARNA", "PNM", "EE"),
     long = c("ÁREA DE PROTEÇÃO AMBIENTAL",
             "RESERVA PARTICULAR DO PATRIMÔNIO NATURAL",
             "ÁREA DE RELEVANTE INTERESSE ECOLÓGICO",
             "RESERVA DE DESENVOLVIMENTO SUSTENTÁVEL",
             "MONUMENTO NATURAL ESTADUAL",
             "FLORESTA NACIONAL",
-            "PARQUE NACIONAL"))
+            "PARQUE NACIONAL",
+            "PARQUE NATURAL MUNICIPAL",
+            "ESTAÇÃO ECOLÓGICA"))
 
 #' Standardize UC Name
 #'
@@ -46,4 +48,12 @@ standardize_uc_name <- function(x) {
         x <- sub(paste0("^",uc_abbrevs$short[i]), uc_abbrevs$long[i], x)
     }
     x
+}
+
+generate_filename <- function(x) {
+    for(i in 1:nrow(uc_abbrevs)){
+        x <- sub(paste0("^",uc_abbrevs$short[i]), uc_abbrevs$long[i], x)
+    }
+    x
+
 }
