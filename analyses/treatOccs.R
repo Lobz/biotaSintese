@@ -114,7 +114,7 @@ try({
 
     # Get best records for each taxon
     top <- top_records(final, n = 1)
-    write.csv(top, paste0("results/checklist_",nome_file,".csv"), na="", row.names=FALSE)
+    write.csv(top, paste0("results/allfields/",nome_file,".csv"), na="", row.names=FALSE)
 
     # Remove unmatched?
     top <- subset(top, !is.na(id))
@@ -156,7 +156,7 @@ try({
     listed <- finalList$Táxon_completo %in% UC_catalogo$Táxon
     finalList[,"Já listada"] <- ifelse(listed, "Sim", "Não")
 
-    write.csv(finalList, paste0("results/checklist_",nome_file,"_modeloCatalogo.csv"), na="", row.names=FALSE)
+    write.csv(finalList, paste0("results/checklist/",nome_file,"_modeloCatalogo.csv"), na="", row.names=FALSE)
 })
 }
 
