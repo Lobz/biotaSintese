@@ -3,13 +3,14 @@
 #' @importFrom plantR rmLatin
 generate_uc_string <- function(x) {
     s <- tolower(x)
+    str_de <- "(,? ?( d[oae]s?)? ?| - )"
     # intercheangable names
     m <- tolower(paste0(uc_abbrevs$short,"|",uc_abbrevs$long))
     for(n in m)
-        s <- sub(n,paste0("(",n,")"),s,perl=T)
+        s <- sub(n,paste0("(",n,")",str_de),s,perl=T)
 
     # de/dos/da pode estar incorreto ou faltante
-    s <- gsub(" (d[oae]s?|-) ","(,? ?( d[oae]s?)? ?| - )",s)
+    s <- gsub(" (d[oae]s?|-) ",str_de,s)
     # caracteres especiais podem estar incorretos ou faltantes
     s <- gsub("[éêẽè`]","[éêẽèe _?]?",s)
     s <- gsub("[áâãà`]","[áâãàa _?]?",s)
@@ -20,12 +21,14 @@ generate_uc_string <- function(x) {
 }
 
 uc_abbrevs <- data.frame(
-    short= c("APA", "RPPN", "ARIE", "RDS", "MNE"),
+    short= c("APA", "RPPN", "ARIE", "RDS", "MNE", "FLONA", "PARNA"),
     long = c("ÁREA DE PROTEÇÃO AMBIENTAL",
             "RESERVA PARTICULAR DO PATRIMÔNIO NATURAL",
             "ÁREA DE RELEVANTE INTERESSE ECOLÓGICO",
             "RESERVA DE DESENVOLVIMENTO SUSTENTÁVEL",
-            "MONUMENTO NATURAL ESTADUAL"))
+            "MONUMENTO NATURAL ESTADUAL",
+            "FLORESTA NACIONAL",
+            "PARQUE NACIONAL"))
 
 #' Standardize UC Name
 #'

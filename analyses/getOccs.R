@@ -57,57 +57,19 @@ try({
     print(uc_data)
     Nome_UC <- uc_data$Nome.da.UC
     nome_file <- gsub(" ","",tolower(rmLatin(Nome_UC)))
-    # fix a couple common misspellings
-    Nome_UC <- sub("AREA", "ÁREA", Nome_UC, fixed = T)
-    Nome_UC <- sub("PATRIMONIO", "PATRIMÔNIO", Nome_UC, fixed = T)
-    # Generate string for regex grepl in locality data
-    uc_string <- generate_uc_string(Nome_UC)
-    # Get municípios
-    # split municipios
-    # Remove ones in other states (?), download each separately
-    counties <- strsplit(uc_data$Municípios.Abrangidos, " - ")[[1]]
-    counties <- counties[endsWith(counties,"(SP)")]
-    counties <- substr(counties, 0, nchar(counties)-5)
-    # This is to help look for municipality in plantR's municipality.new field
-    county_plantr <- tolower(rmLatin(counties))
-
-    # Filter occs in the selected CU
-    # Records in the municipality and in locality by type of CU
-    # occs_mun <- subset(occs, municipality.new == county_plantr)
-    # parque <- subset(occs_mun, grepl("parque", locality.new, ignore.case = TRUE, perl = TRUE))
-    # parque <- subset(parque,!grepl("parque estadual da vassununga", locality.new, perl = TRUE)) # todo: generalize this
 
     # Which records are in the gps shp
     rcs_intersect <- valid_points$recordID[points_ucs[[Nome_UC]]]
     occs_gps <- saopaulo$recordID %in% rcs_intersect
     table(occs_gps)
 
-    # Check if those records are valid
-    incounty <- occs_gps & tolower(saopaulo$NAME_2) %in% tolower(counties)
-    nacounty <- occs_gps & is.na(saopaulo$NAME_2)
-    naloc <- is.na(saopaulo$locality)
-    table(incounty)
-    table(nacounty)
-    sort(table(saopaulo$municipality[occs_gps]))
-    my_points <-
-    plot(st_geometry(uc_shape))
-    plot(valid_points[points_ucs[[Nome_UC]],], col="gray", add=T)
-
-    sort(table(saopaulo$locality[saopaulo$basisOfRecord=="HUMAN_OBSERVATION" & nacounty], useNA="always"))
-    allna <- nacounty & naloc
-    sort(table(saopaulo$basisOfRecord[allna], useNA="always"))
-    table(saopaulo$[occs_gps][allna], useNA="always")
-
+    # Generate string for regex grepl in locality data
+    uc_string <- generate_uc_string(Nome_UC)
     occs_uc_name <- grepl(uc_string, saopaulo$locality, ignore.case = TRUE, perl = TRUE)
-    # if(grepl("PARQUE",Nome_UC)) {
-        # total <- merge(occs_uc_name, parque, all=T)
-    # } else {
-        total <- saopaulo[occs_uc_name | occs_gps,]
-    # }
 
-    # TODO get records based on gps??
-
-    if(nrow(total) == 0) {
+    # Join all filters
+    occs_total <- occs_uc_name | occs_gps
+    if(!any(occs_total)) {
         print("No records found for CU:")
         print(Nome_UC)
 
@@ -115,6 +77,10 @@ try({
 
         next
     }
+
+    saopaulo$confidenceLocality <- ifelse(occs_uc_name, "High", "Low")
+    total <- saopaulo[occs_total,]
+    saopaulo$confidenceLocality <- NA
 
     save(total, file=paste0("data/derived-data/occs_",nome_file,".RData"))
     # load(file=paste0("data/derived-data/occs_",nome_file,".RData"))

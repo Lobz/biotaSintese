@@ -4,7 +4,7 @@ library(stringr)
 library(florabr)
 
 # Flag for reruning all analysis
-rerun <- FALSE
+rerun <- TRUE
 
 # Data from Catalogo
 load("data/raw-data/catalogoCompleto.RData")
