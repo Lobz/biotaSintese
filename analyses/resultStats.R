@@ -1,19 +1,21 @@
 # Let's see what's going on with those stats
 
-my_files <- list.files("results")
 
-my_files <- my_files[startsWith(my_files, "checklist")]
-modCat <- my_files[endsWith(my_files, "modeloCatalogo.csv")]
-original <- my_files[!endsWith(my_files, "modeloCatalogo.csv")]
+modCat <- list.files("results/checklist", full.names = T)
+original <- list.files("results/allfields", full.names = T)
 
-dataCat <- lapply(paste0("results/",modCat), read.csv, na.strings = c("NA","","s.n.","s.c.","s.a."), colClasses = "character")
-dtOrig <- lapply(paste0("results/",original), read.csv, na.strings = c("NA",""), colClasses = "character")
+dataCat <- lapply(modCat, read.csv, na.strings = c("NA","","s.n.","s.c.","s.a."), colClasses = "character")
+dtOrig <- lapply(original, read.csv, na.strings = c("NA",""), colClasses = "character")
 
-dataCat <- lapply(dataCat, function(x) {x <- x[order(x[,"Táxon_completo"]),]})
-lapply(dataCat, function(x) {
-    nome_file <- gsub(" ","",tolower(rmLatin(x$UC[1])))
-    write.csv(x, paste0("results/checklist_",nome_file,"_modeloCatalogo.csv"), na="", row.names=FALSE)
-})
+i <- 6
+i <- i+1
+dt <- dtOrig[[i]]
+modCat[i]
+table(dt$municipality)
+sort(table(dt$locality))
+locs <- unlist(stringr::str_split(dt$locality,",|[.]|;|-"))
+locs <- stringr::str_squish(locs)
+sort(table(locs))
 
 length(dtOrig)
 
