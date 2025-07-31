@@ -91,10 +91,11 @@ tabls <- sapply(tabs, function(x) if(class(x) == "integer") FALSE else TRUE)
 tabs <- do.call(rbind, tabs)
 rownames(tabs) <- rownames(shapes)
 write.csv(tabs, "data/derived-data/test_gps_municipalitites.csv")
-tabs <- read.csv("data/derived-data/test_gps_municipalitites.csv")
+tabs <- read.csv("results/test_gps_municipalitites.csv")
 
 t <- as.data.frame(tabs)
 t$total <- t$total_gps + t$total_name - t$correct
+t <- subset(t, total_name > 0)
 summary(t)
 ts <- subset(t, total_name > 20)
 # Mean 67% and median 79%????
