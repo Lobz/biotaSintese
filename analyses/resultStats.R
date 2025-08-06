@@ -19,6 +19,34 @@ sort(table(locs))
 
 length(dtOrig)
 
+# proportion of gps vs text entries
+prop.gps <- lapply(dtOrig, function(x) {
+    c(High=sum(x$confidenceLocality=="High"),
+    Low=sum(x$confidenceLocality=="Low"))
+
+})
+prop.gps <- as.data.frame(do.call(rbind, prop.gps))
+prop.gps$Total <- prop.gps$High + prop.gps$Low
+prop.gps$New <- prop.gps$Low > 10 & prop.gps$High < 10
+prop.gps$Increase <- prop.gps$Low/prop.gps$High
+prop.gps$Prop <- prop.gps$Low/prop.gps$Total
+
+summary(prop.gps)
+
+table(prop.gps$High==0)
+
+summary(subset(prop.gps, High > 0))
+summary(subset(prop.gps, High == 0))
+
+
+
+# Proportion of each taxon rank
+prop.gps <- lapply(dtOrig, function(x) {
+    data.frame(High=sum(x$confidenceLocality=="High"),
+    Low=sum(x$confidenceLocality=="Low"))
+})
+
+
 total <- dplyr::bind_rows(dtOrig)
 
 summary(sapply(total, is.na))
