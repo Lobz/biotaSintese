@@ -17,9 +17,16 @@ valid_points <- fixDatum(valid_points)
 
 # Data about UCs from CNUC
 ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
-ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC", "Municípios.Abrangidos"))
+ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC"))
 ucs$Nome.da.UC <- standardize_uc_name(ucs$Nome.da.UC)
 ucs <- ucs[order(ucs$Nome.da.UC),]
+
+# Generate string for regex grepl in locality data
+uc_strings <- generate_uc_string(ucs$Nome.da.UC)
+
+# Which occs are associated with each UC
+occs_ucs <- lapply(uc_strings, grepl, x = saopaulo$locality, ignore.case = TRUE, perl = TRUE)
+names(occs_ucs) <- ucs$Nome.da.UC
 
 # Select a subset of UCs (for testing)
 # ucs <- subset(ucs, !grepl("-",Municípios.Abrangidos))
@@ -49,6 +56,12 @@ ucs$NumPrata <- NA
 ucs$NumBronze <- NA
 ucs$NumLatao <- NA
 
+# Get intersection table
+intersecUCs <- read.csv("results/intersecUCs.csv")
+# Attribute confidence based on intersections
+intersecUCs$confidence <- ifelse(intersecUCs$prop > 98, "High",
+                             ifelse(intersecUCs$status == "covered_buffer" | intersecUCs$prop > 80, "Medium", "Low"))
+
 for(i in 1:sample_size){
 try({
 
@@ -61,14 +74,28 @@ try({
     # Which records are in the gps shp
     rcs_intersect <- valid_points$recordID[points_ucs[[Nome_UC]]]
     occs_gps <- saopaulo$recordID %in% rcs_intersect
-    table(occs_gps)
 
     # Generate string for regex grepl in locality data
-    uc_string <- generate_uc_string(Nome_UC)
-    occs_uc_name <- grepl(uc_string, saopaulo$locality, ignore.case = TRUE, perl = TRUE)
+    intersected <- subset(intersecUCs, nome_uc == Nome_UC)
+    high <- intersected$outra_uc[intersected$confidence=="High"]
+    medium <- intersected$outra_uc[intersected$confidence=="Medium"]
+
+    occs_high <- Reduce('|', occs_ucs[high])
+    occs_medium <- Reduce('|', occs_ucs[medium])
+
+    if(length(high)==0){
+        occs_high <- FALSE
+    }
+    if(length(medium)==0){
+        occs_medium <- FALSE
+    }
+
+
+    # Exact UC name
+    occs_uc_name <- occs_ucs[[Nome_UC]]
 
     # Join all filters
-    occs_total <- occs_uc_name | occs_gps
+    occs_total <- occs_uc_name | occs_gps | occs_high | occs_medium
     if(!any(occs_total)) {
         print("No records found for CU:")
         print(Nome_UC)
@@ -78,17 +105,23 @@ try({
         next
     }
 
-    saopaulo$confidenceLocality <- ifelse(occs_uc_name, "High", "Low")
+    saopaulo$confidenceLocality <- ifelse(occs_uc_name | occs_high, "High", ifelse(occs_medium, "Medium", "Low"))
     total <- saopaulo[occs_total,]
     saopaulo$confidenceLocality <- NA
 
-    save(total, file=paste0("data/derived-data/occs_",nome_file,".RData"))
+    # total$uc_name <- Nome_UC
+    save(total, file=paste0("results/total/occs_",nome_file,".RData"))
     # load(file=paste0("data/derived-data/occs_",nome_file,".RData"))
 
     print(paste("Found",nrow(total),"records."))
     ucs[i,]$NumRecords <- nrow(total)
 })
 }
+
+# Data from previous runs
+done <- read.csv("results/summary_multilist.csv")
+unchanged <- (done$NumRecords == ucs$NumRecords)
+ucs[!unchanged,]<-done[unchanged,]
 
 # Save summary
 write.csv(ucs, "results/summary_multilist.csv", row.names=FALSE)

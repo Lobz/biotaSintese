@@ -64,7 +64,7 @@ try({
     # Generate string for regex grepl in locality data
     uc_string <- generate_uc_string(Nome_UC)
 
-    load(file=paste0("data/derived-data/occs_",nome_file,".RData"))
+    load(file=paste0("results/total/occs_",nome_file,".RData"))
 
     print(paste("Found",nrow(total),"records."))
     ucs[i,]$NumRecords <- nrow(total)

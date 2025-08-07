@@ -23,6 +23,7 @@ format_list <- function(x, UC) {
         Número_da_Coleta = x$recordNumber,
         Origem_FFBr = x$origin,
         ConfiançaID = factor(x$tax.check, levels=c("unknown", "low", "medium", "high"), labels=c("Latão", "Bronze", "Prata", "Ouro")),
+        ConfiançaLoc = x$confidenceLocality,
         Localidade = x$locality
     )
     finalList[order(finalList$Táxon_completo),]

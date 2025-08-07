@@ -18,10 +18,11 @@ generate_uc_string <- function(x) {
     s <- gsub("[óôõò`]","[óôõòo _?]?",s)
     s <- gsub("[úûüù`]","[úûüùu _?]?",s)
     s <- gsub("[ç`]","[çc _?]?",s)
+    paste0("(",s,")")
 }
 
 uc_abbrevs <- data.frame(
-    short= c("APA", "RPPN", "ARIE", "RDS", "MNE", "FLONA", "PARNA", "PNM", "EE"),
+    short= c("APA", "RPPN", "ARIE", "RDS", "MNE", "FLONA", "PARNA", "PNM", "EEC"),
     long = c("ÁREA DE PROTEÇÃO AMBIENTAL",
             "RESERVA PARTICULAR DO PATRIMÔNIO NATURAL",
             "ÁREA DE RELEVANTE INTERESSE ECOLÓGICO",

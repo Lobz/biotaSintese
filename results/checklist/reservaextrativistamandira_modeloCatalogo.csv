@@ -1,3 +1,3 @@
-"UC","Grupos","Família","Gênero","Espécie","Autor","Táxon_completo","Barcode","BD_Origem","Herbário","Coletor","Número_da_Coleta","Origem_FFBr","ConfiançaID","Localidade","Já listada"
-"RESERVA EXTRATIVISTA MANDIRA","Angiosperms","Convolvulaceae","Ipomoea",,"L.","CONVOLVULACEAE Ipomoea L.","UNIP06870","GBIF","UNIP","Paciencia, M.","3369",,"Latão","APA CIP (Cananéia-Iguape-Peruíbe). Estrada do Mandira.","Não"
-"RESERVA EXTRATIVISTA MANDIRA","Angiosperms","Rhizophoraceae","Rhizophora","mangle","L.","RHIZOPHORACEAE Rhizophora mangle L.","125853705","GBIF","Observations","Matsumoto, E.K.O.",,"Native","Bronze","Cananéia, SP, 11990-000, Brasil","Não"
+"UC","Grupos","Família","Gênero","Espécie","Autor","Táxon_completo","Barcode","BD_Origem","Herbário","Coletor","Número_da_Coleta","Origem_FFBr","ConfiançaID","ConfiançaLoc","Localidade","Já listada"
+"RESERVA EXTRATIVISTA MANDIRA","Angiosperms","Convolvulaceae","Ipomoea",,"L.","CONVOLVULACEAE Ipomoea L.","UNIP06870","GBIF","UNIP","Paciencia, M.","3369",,"Latão","Low","APA CIP (Cananéia-Iguape-Peruíbe). Estrada do Mandira.","Não"
+"RESERVA EXTRATIVISTA MANDIRA","Angiosperms","Rhizophoraceae","Rhizophora","mangle","L.","RHIZOPHORACEAE Rhizophora mangle L.","125853705","GBIF","Observations","Matsumoto, E.K.O.",,"Native","Bronze","Low","Cananéia, SP, 11990-000, Brasil","Não"

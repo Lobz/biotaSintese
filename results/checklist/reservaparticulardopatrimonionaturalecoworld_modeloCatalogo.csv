@@ -1,2 +1,2 @@
-"UC","Grupos","Família","Gênero","Espécie","Autor","Táxon_completo","Barcode","BD_Origem","Herbário","Coletor","Número_da_Coleta","Origem_FFBr","ConfiançaID","Localidade","Já listada"
-"RESERVA PARTICULAR DO PATRIMÔNIO NATURAL ECOWORLD","Angiosperms","Bromeliaceae","Tillandsia","tenuifolia","L.","BROMELIACEAE Tillandsia tenuifolia L.","122102016","GBIF","Observations","Endo, W.",,"Native","Bronze","Atibaia - SP, Brasil","Não"
+"UC","Grupos","Família","Gênero","Espécie","Autor","Táxon_completo","Barcode","BD_Origem","Herbário","Coletor","Número_da_Coleta","Origem_FFBr","ConfiançaID","ConfiançaLoc","Localidade","Já listada"
+"RESERVA PARTICULAR DO PATRIMÔNIO NATURAL ECOWORLD","Angiosperms","Bromeliaceae","Tillandsia","tenuifolia","L.","BROMELIACEAE Tillandsia tenuifolia L.","122102016","GBIF","Observations","Endo, W.",,"Native","Bronze","Low","Atibaia - SP, Brasil","Não"
