@@ -18,8 +18,21 @@ valid_points <- fixDatum(valid_points)
 # Data about UCs from CNUC
 ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
 ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC"))
+
+# Make a summary table
+ucs$NumRecords <- NA
+ucs$NumTaxons <- NA
+ucs$NumSpecies <- NA
+ucs$NumGenus <- NA
+ucs$NumFamilies <- NA
+ucs$NumOuro <- NA
+ucs$NumPrata <- NA
+ucs$NumBronze <- NA
+ucs$NumLatao <- NA
+
+# Standardize names and reorder
 ucs$Nome.da.UC <- standardize_uc_name(ucs$Nome.da.UC)
-ucs <- ucs[order(ucs$Nome.da.UC),]
+ucs <- ucs[order(ucs$Nome.da.UC), ]
 
 # Generate string for regex grepl in locality data
 uc_strings <- generate_uc_string(ucs$Nome.da.UC)
@@ -27,6 +40,8 @@ uc_strings <- generate_uc_string(ucs$Nome.da.UC)
 # Which occs are associated with each UC
 occs_ucs <- lapply(uc_strings, grepl, x = saopaulo$locality, ignore.case = TRUE, perl = TRUE)
 names(occs_ucs) <- ucs$Nome.da.UC
+save(occs_ucs, file="data/derived-data/occs_ucs.RData")
+# load("data/derived-data/points_ucs.RData")
 
 # Select a subset of UCs (for testing)
 # ucs <- subset(ucs, !grepl("-",Municípios.Abrangidos))
@@ -42,19 +57,10 @@ shapes <- shapes[order(shapes$nome_uc), ]
 
 # Intersect points with shapes
 points_ucs <- st_intersects(shapes, valid_points)
+save(points_ucs, file="data/derived-data/points_ucs.RData")
+# load("data/derived-data/points_ucs.RData")
 names(points_ucs) <- shapes$nome_uc
 sapply(points_ucs, length)
-
-# Make a summary table
-ucs$NumRecords <- NA
-ucs$NumTaxons <- NA
-ucs$NumSpecies <- NA
-ucs$NumGenus <- NA
-ucs$NumFamilies <- NA
-ucs$NumOuro <- NA
-ucs$NumPrata <- NA
-ucs$NumBronze <- NA
-ucs$NumLatao <- NA
 
 # Get intersection table
 intersecUCs <- read.csv("results/intersecUCs.csv")
@@ -100,14 +106,23 @@ try({
         print("No records found for CU:")
         print(Nome_UC)
 
-        ucs[i,3:11] <- 0
+        ucs[i,2:10] <- 0
 
         next
     }
 
-    saopaulo$confidenceLocality <- ifelse(occs_uc_name | occs_high, "High", ifelse(occs_medium, "Medium", "Low"))
+    # What quality is the locality
+    saopaulo$confidenceLocality <- "Low" # GPS data
+    saopaulo$confidenceLocality[occs_medium] <- "Medium"
+    saopaulo$confidenceLocality[occs_uc_name | occs_high] <- "High"
+
+    # What criteria was used to select each record
+    saopaulo$selectionCategory <- saopaulo$origin.coord
+    saopaulo$selectionCategory[occs_medium] <-  "locality_medium"
+    saopaulo$selectionCategory[occs_high] <- "locality_high"
+    saopaulo$selectionCategory[occs_uc_name] <- "locality_exact"
+
     total <- saopaulo[occs_total,]
-    saopaulo$confidenceLocality <- NA
 
     # total$uc_name <- Nome_UC
     save(total, file=paste0("results/total/occs_",nome_file,".RData"))

@@ -31,7 +31,8 @@ plot(st_geometry(shapes[i,]))
 plot(st_geometry(shapes[shapes_intersect[[i]],]), add=T, col=shapes_covers_buffer[[i]])
 plot(st_geometry(shapes[i,]), col =2)
 plot(st_geometry(shapes_buff[i,]), add=T)
-plot(st_geometry(shapes[229,]), add=T)
+
+plot(st_geometry(shapes[c(113,16),]))
 
 # Get areas
 shapes$area <- units::set_units(st_area(shapes),ha)

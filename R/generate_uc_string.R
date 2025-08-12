@@ -22,13 +22,14 @@ generate_uc_string <- function(x) {
 }
 
 uc_abbrevs <- data.frame(
-    short= c("APA", "RPPN", "ARIE", "RDS", "MNE", "FLONA", "PARNA", "PNM", "EEC"),
+    short= c("APA", "RPPN", "ARIE", "RDS", "MNE", "FLONA", "PE", "PARNA", "PNM", "EEC"),
     long = c("ÁREA DE PROTEÇÃO AMBIENTAL",
             "RESERVA PARTICULAR DO PATRIMÔNIO NATURAL",
             "ÁREA DE RELEVANTE INTERESSE ECOLÓGICO",
             "RESERVA DE DESENVOLVIMENTO SUSTENTÁVEL",
             "MONUMENTO NATURAL ESTADUAL",
             "FLORESTA NACIONAL",
+            "PARQUE ESTADUAL",
             "PARQUE NACIONAL",
             "PARQUE NATURAL MUNICIPAL",
             "ESTAÇÃO ECOLÓGICA"))

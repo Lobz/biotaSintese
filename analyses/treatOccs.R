@@ -12,11 +12,6 @@ load("data/raw-data/catalogoCompleto.RData")
 # Data from previous runs
 done <- read.csv("results/summary_multilist.csv")
 
-# Data about UCs from CNUC
-ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
-ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC", "Municípios.Abrangidos"))
-ucs$Nome.da.UC <- standardize_uc_name(ucs$Nome.da.UC)
-
 # Select for treating: one or more records
 has_records <- done$NumRecords > 0
 
@@ -29,26 +24,14 @@ if (rerun) {
 }
 
 # Apply selection
-ucs <- subset(ucs, Nome.da.UC %in% done$Nome.da.UC[to_treat])
+ucs <- done[to_treat, ]
 
 # Select a subset of UCs (for testing)
-# ucs <- subset(ucs, !grepl("-",Municípios.Abrangidos))
 # ucs <- ucs[sample(1:nrow(ucs), 10), ]
 sample_size = nrow(ucs)
 
 # If using sample, I want to remove sample from done
 done <- subset(done, !Nome.da.UC %in% ucs$Nome.da.UC)
-
-# Make a summary table
-ucs$NumRecords <- NA
-ucs$NumTaxons <- NA
-ucs$NumSpecies <- NA
-ucs$NumGenus <- NA
-ucs$NumFamilies <- NA
-ucs$NumOuro <- NA
-ucs$NumPrata <- NA
-ucs$NumBronze <- NA
-ucs$NumLatao <- NA
 
 for(i in 1:sample_size){
 try({
@@ -58,11 +41,6 @@ try({
     print("Getting data for UC:")
     print(Nome_UC)
     nome_file <- gsub(" ","",tolower(rmLatin(Nome_UC)))
-    # fix a couple common misspellings
-    Nome_UC <- sub("AREA", "ÁREA", Nome_UC, fixed = T)
-    Nome_UC <- sub("PATRIMONIO", "PATRIMÔNIO", Nome_UC, fixed = T)
-    # Generate string for regex grepl in locality data
-    uc_string <- generate_uc_string(Nome_UC)
 
     load(file=paste0("results/total/occs_",nome_file,".RData"))
 
@@ -92,7 +70,7 @@ try({
     rank <- rep(NA,length(fix_these))
     rank[grepl(" ",x)] <- "species"
     rank[grepl(" subsp[. ]",x)] <- "subspecies"
-    rank[grepl(" var[. ]",x)] <- "subspecies"
+    rank[grepl(" var[. ]",x)] <- "variety"
     rank[x == total$family.new[fix_these]] <- "family"
     rank[is.na(rank)] <- tolower(total$taxonRank)[fix_these][is.na(rank)]
     rank[is.na(rank)] <- "genus"
@@ -127,7 +105,7 @@ try({
     ucs[i,]$NumOuro <- sum(top$tax.check == "high")
     ucs[i,]$NumPrata <- sum(top$tax.check == "medium")
     ucs[i,]$NumBronze <- sum(top$tax.check == "low")
-    ucs[i,]$NumLatao <- sum(top$tax.check == "unkown")
+    ucs[i,]$NumLatao <- sum(top$tax.check == "unknown")
 
     # Get info from  F&FBR
     bf <- load_florabr(data_dir = "data/raw-data")
@@ -163,6 +141,8 @@ try({
 # Save summary
 total <- dplyr::bind_rows(done, ucs)
 total <- total[order(total$Nome.da.UC),]
+total$NumLatao <- total$NumTaxons - total$NumOuro - total$NumPrata - total$NumBronze
+total$V11 <- NULL
 write.csv(total, "results/summary_multilist.csv", row.names=FALSE)
 summary(total==0)
 summary(total<20)
