@@ -19,19 +19,21 @@ getTaxonId <- function(total) {
     table(noName)
 
     # Match scientificName to oficial F&FBR backbone
-    total <- formatTax(total)
+    total <- formatTax(total, use.authors = F)
 
-    # we're gonna try again without author (see issue #170 in plantR)
-    total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, use.author = F)
+# TODO: figure out table(total$tax.notes, is.na(total$taxonID))
+
+    # we're gonna try again with author (see issue #170 in plantR)
+    total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax)
 
     # Try again with verbatim
-    total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, tax.name = "verbatimScientificName")
-
-    # And again without author
     total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, tax.name = "verbatimScientificName", use.author = F)
 
+    # And again with author
+    total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, tax.name = "verbatimScientificName")
+
     # Isolate authorship
-    total <- isolateAuthorship(total, overwrite.authorship = FALSE)
+    total[total$tax.notes == "not found",] <- isolateAuthorship(total[total$tax.notes == "not found",], overwrite.authorship = FALSE)
 
     # we're gonna try again without author (see issue #170 in plantR)
     total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, use.author = F)
@@ -84,9 +86,39 @@ getTaxonId <- function(total) {
             x$scientificName <- saved
             x
         })
+    total <- tryAgain(total,
+        condition = function(x) x$tax.notes == "not found" & grepl("\\w+ \\w+ \\w", x$scientificName),
+        FUN = function(x) {
+            saved <- x$scientificName
+            x$scientificName <- sub("(\\w+ \\w+ )", "\\1 subsp. ", x$scientificName)
+            x <- formatTax(x)
+            x$scientificName <- saved
+            x
+        })
+    total <- tryAgain(total,
+        condition = function(x) x$tax.notes == "not found" & grepl("\\w+ \\w+ \\w", x$scientificName),
+        FUN = function(x) {
+            saved <- x$scientificName
+            x$scientificName <- sub("(\\w+ \\w+ )", "\\1 f. ", x$scientificName)
+            x <- formatTax(x)
+            x$scientificName <- saved
+            x
+        })
 
     # What's still unmatched? Try again with less rigor?
     # total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, sug.dist=0.8 )
+
+    # Finally, if something is still unmatched, give up and match higher taxon rank
+    total <- tryAgain(total,
+        condition = function(x) {x$tax.notes == "not found" & grepl("\\w+ \\w+ \\w", x$scientificName)},
+        FUN = function(x) {
+            saved <- x$scientificName
+            x$scientificName <- sub("(^\\w+ \\w+).*", "\\1", x$scientificName)
+            x <- formatTax(x)
+            x$scientificName <- saved
+            x
+        })
+
 
     total
 }
