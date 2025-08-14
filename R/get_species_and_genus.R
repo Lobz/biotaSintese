@@ -1,11 +1,24 @@
-
+#' Get species and genus
+#'
+#' plantR doesn't return these by default so I have to do it myself
+#'
+#' @importFrom stringr str_extract
 get_species_and_genus <- function(x) {
-    x$species.new <- NA
-    x$species.new[which(x$taxon.rank=="species")] <- x$scientificName.new[which(x$taxon.rank=="species")]
-    x$species.new[which(x$taxon.rank=="variety")] <- sub(" var.*$","",x$scientificName.new[which(x$taxon.rank=="variety")])
-    x$species.new[which(x$taxon.rank=="subspecies")] <- sub(" subsp.*$","",x$scientificName.new[which(x$taxon.rank=="subspecies")])
+    if(!"species.new" %in% names(x))
+        x$species.new <- NA
+    if(!"genus.new" %in% names(x))
+        x$genus.new <- NA
 
-    x$genus.new <- sub(" .*$","",x$scientificName.new)
-    x$genus.new[x$taxon.rank == "family"] <- NA
+    x$taxon.rank <- factor(x$taxon.rank, levels = taxonRanks, ordered=TRUE)
+
+    sp <- which(x$taxon.rank <= "species")
+    x$species.new[sp] <- str_extract(x$scientificName.new[sp], "^[\\w|-]+ [\\w|-]+")
+    x$genus.new[sp] <- str_extract(x$scientificName.new[sp], "[\\w|-]+")
+    gen <- which(x$taxon.rank == "genus")
+    x$species.new[gen] <- NA
+    x$genus.new[gen] <- str_extract(x$scientificName.new[gen], "[\\w|-]+")
+    fam <- which(x$taxon.rank >= "family")
+    x$species.new[fam] <- NA
+    x$genus.new[fam] <- NA
     x
 }
