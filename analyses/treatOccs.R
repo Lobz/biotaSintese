@@ -57,23 +57,28 @@ try({
     total$tax.check <- factor(total$tax.check, levels = c("unknown", "low", "medium", "high"), ordered = T)
 
     # fix missing taxon rank
+    total$taxon.rank <- as.taxon.rank(total$taxon.rank)
     table((total$taxon.rank), useNA = "always")
     table(is.na(total$taxon.rank))
+    # If there's another entry of the same taxon, get the taxon rank from there
     total <- total[order(total$taxon.rank),]
     fix_these <- which(is.na(total$taxon.rank))
     x<- total$scientificName.new[fix_these]
-    # If there's another entry of the same taxon, get the taxon rank fron there
     total$taxon.rank[fix_these] <- total$taxon.rank[match(x, total$scientificName.new)]
+    # If possible, get it from taxonRank
+    fix_these <- which(is.na(total$taxon.rank))
+    total$taxon.rank[fix_these] <- tolower(total$taxonRank[fix_these])
+    # Otherwise, look at scientific name
     fix_these <- which(is.na(total$taxon.rank))
     x<- total$scientificName.new[fix_these]
     x <- sub(" sp.","",x)
-    rank <- rep(NA,length(fix_these))
+    rank <- rep(NA, length(fix_these))
     rank[grepl(" ",x)] <- "species"
+    rank[grepl(" \\w+ ",x)] <- "subspecies" # anything with more than two words is less than species
     rank[grepl(" subsp[. ]",x)] <- "subspecies"
     rank[grepl(" var[. ]",x)] <- "variety"
     rank[x == total$family.new[fix_these]] <- "family"
-    rank[is.na(rank)] <- tolower(total$taxonRank)[fix_these][is.na(rank)]
-    rank[is.na(rank)] <- "genus"
+    rank[is.na(rank)] <- "genus" # single word and not family? genus.
     total$taxon.rank[fix_these] <- rank
 
     # get species and genus?
@@ -81,21 +86,26 @@ try({
 
     total <- total[order(total$taxon.rank, total$tax.check, total$scientificName.new, as.numeric(total$year.new), as.numeric(total$yearIdentified.new), na.last=F, decreasing = T),]
 
-    # Create my own checklist from the data treated with plantR
-    species <- subset(total, taxon.rank %in% c("species","subspecies","variety","form")) # todo: check if this is correct
-    sp <- unique(species$species.new)
-    gen <- unique(species$genus.new)
-    genus <- subset(total, !genus.new %in% gen)
-    fam <- unique(c(species$family.new, genus$family.new))
-    family <- subset(total, !family.new %in% fam)
-    final <- dplyr::bind_rows(species, genus, family)
+    write.csv(total, paste0("results/total-treated/",nome_file,".csv"),  na="", row.names=FALSE)
+
+    # Avoid taxons that are already represented by more detailed taxons
+    subspecies <- subset(total, taxon.rank < "species")
+    sp <- unique(subspecies$species.new)
+    species <- subset(total, taxon.rank == "species" & !species.new %in% sp)
+    gen <- unique(c(subspecies$genus.new, species$genus.new))
+    genus <- subset(total, taxon.rank == "genus" & !genus.new %in% gen)
+    fam <- unique(c(subspecies$family.new, species$family.new, genus$family.new))
+    family <- subset(total, taxon.rank == "family" & !family.new %in% fam)
+
+    final <- dplyr::bind_rows(subspecies, species, genus, family)
 
     # Get best records for each taxon
     top <- top_records(final, n = 1)
     write.csv(top, paste0("results/allfields/",nome_file,".csv"), na="", row.names=FALSE)
 
     # Remove unmatched?
-    top <- subset(top, !is.na(id))
+    unmatched <- is.na(top$id)
+    top <- subset(top, !unmatched)
 
     print(paste("Found",nrow(top),"taxons."))
     ucs[i,]$NumTaxons <- nrow(top)
@@ -106,23 +116,15 @@ try({
     ucs[i,]$NumPrata <- sum(top$tax.check == "medium")
     ucs[i,]$NumBronze <- sum(top$tax.check == "low")
     ucs[i,]$NumLatao <- sum(top$tax.check == "unknown")
+    ucs[i,]$NumNoMatch <- sum(unmatched)
 
     # Get info from  F&FBR
     bf <- load_florabr(data_dir = "data/raw-data")
     ids <- substr(top$id, 5, nchar(top$id))
     matches <- match(ids, bf$id)
-    unmatched <- which(is.na(ids))
-    # Try with original name (catches some errors)
-    matches[unmatched] <- match(top$scientificName[unmatched], bf$scientificName)
-    # Try with species names (helps with errors with authorship, eliminates subspecies though)
-    unmatched <- which(is.na(matches) & !is.na(top$species.new))
-    matches[unmatched] <- match(top$species.new[unmatched], bf$species)
-    unmatched <- which(is.na(matches))
 
     # Extract origin and group information
     top$origin <-bf$origin[matches]
-    # Group is probably dependent on family innit
-    matches[unmatched] <- match(top$family.new[unmatched], bf$family)
     top$group <-bf$group[matches]
 
     # Generate output file
