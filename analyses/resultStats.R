@@ -3,9 +3,12 @@
 
 modCat <- list.files("results/checklist", full.names = T)
 original <- list.files("results/allfields", full.names = T)
+nome_file <- sub(".*/","",original)
+nome_file <- sub(".csv","",nome_file)
 
 dataCat <- lapply(modCat, read.csv, na.strings = c("NA","","s.n.","s.c.","s.a."), colClasses = "character")
 dtOrig <- lapply(original, read.csv, na.strings = c("NA",""), colClasses = "character")
+names(dtOrig) <- nome_file
 
 i <- 6
 i <- i+1
@@ -20,23 +23,26 @@ sort(table(locs))
 length(dtOrig)
 
 # proportion of gps vs text entries
-prop.gps <- lapply(dtOrig, function(x) {
-    c(High=sum(x$confidenceLocality=="High"),
-    Low=sum(x$confidenceLocality=="Low"))
-
+selCats <- lapply(dtOrig, function(x) {
+    x <- x$selectionCategory
+    x <- factor(x, levels=c("coord_original", "coord_gazet", "locality_exact", "locality_high", "locality_medium"))
+    summary(x)
 })
-prop.gps <- as.data.frame(do.call(rbind, prop.gps))
-prop.gps$Total <- prop.gps$High + prop.gps$Low
-prop.gps$New <- prop.gps$Low > 10 & prop.gps$High < 10
-prop.gps$Increase <- prop.gps$Low/prop.gps$High
-prop.gps$Prop <- prop.gps$Low/prop.gps$Total
+selCats <- dplyr::bind_rows(selCats)
+selCats$total <- rowSums(selCats)
+props <- 100*selCats/selCats$total
 
-summary(prop.gps)
+summary(props)
+summary(selCats)
 
-table(prop.gps$High==0)
+summary(subset(props, selCats$total > 10))
+summary(subset(selCats, total > 10))
 
-summary(subset(prop.gps, High > 0))
-summary(subset(prop.gps, High == 0))
+colSums(selCats)
+100*colSums(selCats)/sum(selCats$total)
+
+original[which(props$locality_high==max(props$locality_high))]
+original[which(props$locality_medium==max(props$locality_medium))]
 
 
 
