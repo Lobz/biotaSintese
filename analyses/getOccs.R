@@ -29,6 +29,7 @@ ucs$NumOuro <- NA
 ucs$NumPrata <- NA
 ucs$NumBronze <- NA
 ucs$NumLatao <- NA
+ucs$NumNoMatch <- NA
 
 # Standardize names and reorder
 ucs$Nome.da.UC <- standardize_uc_name(ucs$Nome.da.UC)
@@ -57,10 +58,10 @@ shapes <- shapes[order(shapes$nome_uc), ]
 
 # Intersect points with shapes
 points_ucs <- st_intersects(shapes, valid_points)
-save(points_ucs, file="data/derived-data/points_ucs.RData")
-# load("data/derived-data/points_ucs.RData")
 names(points_ucs) <- shapes$nome_uc
 sapply(points_ucs, length)
+save(points_ucs, file="data/derived-data/points_ucs.RData")
+# load("data/derived-data/points_ucs.RData")
 
 # Get intersection table
 intersecUCs <- read.csv("results/intersecUCs.csv")
@@ -132,11 +133,6 @@ try({
     ucs[i,]$NumRecords <- nrow(total)
 })
 }
-
-# Data from previous runs
-done <- read.csv("results/summary_multilist.csv")
-unchanged <- (done$NumRecords == ucs$NumRecords)
-ucs[!unchanged,]<-done[unchanged,]
 
 # Save summary
 write.csv(ucs, "results/summary_multilist.csv", row.names=FALSE)
