@@ -1,6 +1,7 @@
 devtools::load_all()
 library(geobr)
 library(plantR)
+library(parallel)
 
 load("data/raw-data/gbif_saopaulo_raw.RData")
 gbif$downloadedFrom <- "GBIF"
@@ -199,6 +200,18 @@ saopaulo <- tryAgain(saopaulo,
 saopaulo <- getCoord(saopaulo)
 
 table(is.na(saopaulo$locality), saopaulo$origin.coord)
+
+saopaulo <- validateLoc(saopaulo)
+
+# First pass in formatTax
+saopaulo <- formatTax(saopaulo, parallel = TRUE, cores = detectCores() - 1)
+
+# validate coord
+names_save <- saopaulo[,c("NAME_0","NAME_1","NAME_2","NAME_3")]
+saopaulo[,c("NAME_0","NAME_1","NAME_2","NAME_3")] <- NULL
+saopaulo <- validateCoord(saopaulo)
+saopaulo[,c("NAME_0","NAME_1","NAME_2","NAME_3")] <- names_save
+
 # str(saopaulo)
 
 save(saopaulo,file="data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
