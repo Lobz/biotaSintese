@@ -209,7 +209,7 @@ saopaulo <- formatTax(saopaulo, parallel = TRUE, cores = detectCores() - 1)
 # validate coord
 names_save <- saopaulo[,c("NAME_0","NAME_1","NAME_2","NAME_3")]
 saopaulo[,c("NAME_0","NAME_1","NAME_2","NAME_3")] <- NULL
-saopaulo <- validateCoord(saopaulo)
+saopaulo <- validateCoord(saopaulo) # NOT WORKING
 saopaulo[,c("NAME_0","NAME_1","NAME_2","NAME_3")] <- names_save
 
 # str(saopaulo)
