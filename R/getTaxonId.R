@@ -79,7 +79,7 @@ getTaxonId <- function(total) {
     total <- tryAgain(total, not_found, function(x) {formatTax(isolateAuthorship(x))})
 
     # What's still unmatched? Genus rank
-    total <- tryAgain(total, condition = not_found(x) & x$taxonRank=="genus", FUN = formatTax, tax.name = "genus")
+    total <- tryAgain(total, condition = function(x) not_found(x) & x$taxonRank=="genus", FUN = formatTax, tax.name = "genus")
 
     # What's still unmatched? Vars and subspecies
     total <- tryAgain(total,
