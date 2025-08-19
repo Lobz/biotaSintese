@@ -23,7 +23,7 @@ getTaxonId <- function(total) {
 
     # Match scientificName to oficial F&FBR backbone
     if("tax.notes" %in% names(total)) {
-        total <- tryAgain(total, not_found, formatTax, use.authors = F, add_cols = T)
+        total <- tryAgain(total, not_found, formatTax, use.authors = F)
     } else {
         total <- formatTax(total, use.authors = F)
     }

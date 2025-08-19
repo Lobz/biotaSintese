@@ -47,8 +47,6 @@ try({
     print(paste("Found",nrow(total),"records."))
     ucs[i,]$NumRecords <- nrow(total)
 
-    total <- validateLoc(total)
-
     # Match taxonomy to taxonomy backbone
     total <- getTaxonId(total)
 
