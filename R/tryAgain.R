@@ -18,13 +18,13 @@ tryAgain <- function(x, condition, FUN, add_cols = FALSE, ...) {
     }
 
     unmatched <- which(unmatched)
-    rematch <- x[unmatched, ]
+    to_rematch <- x[unmatched, ]
 
     # Apply function
-    rematch <- FUN(rematch, ...)
+    results <- FUN(to_rematch, ...)
 
     # Select which rows have succesfully changed with FUN
-    rematched <- !condition(rematch)
+    rematched <- !condition(results)
     if(!any(rematched, na.rm=T)) {
         print("Retrying wielded no results")
         return(x)
@@ -33,23 +33,25 @@ tryAgain <- function(x, condition, FUN, add_cols = FALSE, ...) {
     }
 
     newresults <- unmatched[which(rematched)] # let's replace these
+    results <- results[which(rematched),]
 
     # Check if the result has less cols than the original
-    missing_cols <- setdiff(names(x), names(rematch))
+    missing_cols <- setdiff(names(x), names(results))
     if(length(missing_cols) > 0) {
         missing_data <- x[newresults, missing_cols]
-        rematch[rematched, missing_cols] <- missing_data
+        results[, missing_cols] <- missing_data
     }
 
     # If the result has added cols, we can keep them or not
     if(add_cols) {
-        new_cols <- setdiff(names(rematch), names(x))
+        new_cols <- setdiff(names(results), names(x))
         x[,new_cols] <- NA
-    } else {
-        rematch <- rematch[rematched, names(x)]
     }
 
+    # Reorder fields to match the order of x
+    results <- results[, names(x)]
+
     # Merge back and return
-    x[newresults,] <- rematch
+    x[newresults,] <- results
     x
 }
