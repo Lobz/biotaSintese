@@ -4,7 +4,7 @@ library(stringr)
 library(florabr)
 
 # Flag for reruning all analysis
-rerun <- TRUE
+rerun <- FALSE
 
 # Data from Catalogo
 load("data/raw-data/catalogoCompleto.RData")
@@ -141,8 +141,6 @@ try({
 # Save summary
 total <- dplyr::bind_rows(done, ucs)
 total <- total[order(total$Nome.da.UC),]
-total$NumLatao <- total$NumTaxons - total$NumOuro - total$NumPrata - total$NumBronze
-total$V11 <- NULL
 write.csv(total, "results/summary_multilist.csv", row.names=FALSE)
 summary(total==0)
 summary(total<20)
