@@ -3,11 +3,13 @@
 
 modCat <- list.files("results/checklist", full.names = T)
 original <- list.files("results/allfields", full.names = T)
+tt <- list.files("results/total-treated", full.names = T)
 nome_file <- sub(".*/","",original)
 nome_file <- sub(".csv","",nome_file)
 
 dataCat <- lapply(modCat, read.csv, na.strings = c("NA","","s.n.","s.c.","s.a."), colClasses = "character")
 dtOrig <- lapply(original, read.csv, na.strings = c("NA",""), colClasses = "character")
+dtTreated <- lapply(tt, read.csv, na.strings = c("NA",""), colClasses = "character")
 names(dtOrig) <- nome_file
 
 i <- 6
