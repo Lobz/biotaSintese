@@ -22,6 +22,7 @@ locTable <- function(x) {
         return(NULL)
     }
     s <- x$Nome_UC[1]
+    x <- subset(x, confidenceLocality != "High")
     locs <- unlist(stringr::str_split(x$locality,",|[.]|;| - "))
     locs <- sub("\\.$","",locs)
     locs <- plantR:::squish(locs)
