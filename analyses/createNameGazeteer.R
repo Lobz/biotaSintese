@@ -23,8 +23,10 @@ locTable <- function(x) {
     }
     s <- x$Nome_UC[1]
     locs <- unlist(stringr::str_split(x$locality,",|[.]|;| - "))
-    locs <- stringr::str_squish(locs)
-    Local <- c(x$locality.new, x$locality, x$locality.scrap, x$NAME_3)
+    locs <- sub("\\.$","",locs)
+    locs <- plantR:::squish(locs)
+    Local <- c(c(x$locality.new, x$locality, x$locality.scrap)[is.na(x$NAME_3)],x$NAME_3)
+    Local <- sub("\\.$","",Local)
     Locality <- c(locs[!locs %in% Local], Local)
     Locality <- Locality[nchar(Locality) > 2 & tolower(Locality) != "sao paulo"]
     LT <- as.data.frame(table(Locality), stringsAsFactors=F, names = c("Locality", "Freq"))
@@ -33,7 +35,7 @@ locTable <- function(x) {
     }
     LT <- subset(LT, Freq >= nrow(x)/100 | Freq > 500)
     LT <- LT[order(LT$Freq, LT$Locality, decreasing = T),]
-    LT <- LT[!duplicated(LT$Locality),]
+    LT <- LT[!duplicated(tolower(LT$Locality)),]
     LT$Nome_UC <- s
     LT[,c(3,1,2)]
 
