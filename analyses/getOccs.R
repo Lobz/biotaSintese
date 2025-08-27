@@ -54,12 +54,21 @@ dt <- tryAgain(dt, function(x) x$resolution.gazetteer != "locality", function(x)
     x$municipality <- NA
     x <- formatLoc(x)
 })
+dt <- validateLoc(dt)
 
 in_gazet <- subset(dt, resolution.gazetteer == "locality")
 in_gazet
-locs <- getAdmin(in_gazet) # TO DO: open issue about duplication and inconsistency between formatLoc gazetteer and getAdmin gazetteer
+locs <- getAdmin(in_gazet) # TO DO: open issue locs issing from getAdmin
 problem.cases <- in_gazet[is.na(locs$NAME_3),]
-write.csv(problem.cases, "tests/test-data/test-formatLoc_vs_getAdmin.csv")
+prob.locality <- subset(saopaulo, resolution.gazetteer == "locality" & is.na(NAME_3), select=c(loc.cols, "loc.correct"))
+prob.mun <- subset(saopaulo, resolution.gazetteer == "county" & is.na(NAME_2), select=c(loc.cols, "loc.correct"))
+prob.state <- subset(saopaulo, resolution.gazetteer == "state" & is.na(NAME_1), select=c(loc.cols, "loc.correct"))
+prob.all <- dplyr::bind_rows(problem.cases, prob.locality, prob.mun, prob.state)[,c(loc.cols, "loc.correct")]
+dim(prob.all) # 16242 records!
+prob.all <- prob.all[!duplicated(prob.all$loc.correct),]
+dim(prob.all) # 167 loc corrects!
+
+write.csv(prob.all, "tests/test-data/test-formatLoc_vs_getAdmin.csv")
 ucs$loc.correct <- dt$loc.correct
 ucs$loc.correct[dt$resolution.gazetteer != "locality"] <- NA
 
