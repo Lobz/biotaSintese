@@ -17,7 +17,7 @@ valid_points <- fixDatum(valid_points)
 
 # Data about UCs from CNUC
 ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
-ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC"))
+ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC", "Municípios.Abrangidos"))
 
 # Make a summary table
 ucs$NumRecords <- NA
@@ -37,6 +37,31 @@ ucs <- ucs[order(ucs$Nome.da.UC), ]
 
 # Generate string for regex grepl in locality data
 uc_strings <- generate_uc_string(ucs$Nome.da.UC)
+
+# Lookup what are the names of UCs in plantR
+dt <- data.frame(country="BR", stateProvince="SP", municipality=ucs$Municípios.Abrangidos, locality=ucs$Nome.da.UC)
+dt$municipality <- gsub("\\(.*\\)", "", dt$municipality)
+dt <- formatLoc(dt)
+dt <- tryAgain(dt, function(x) x$resolution.gazetteer != "locality", function(x) {
+    x$municipality <- gsub(" -.*", "", x$municipality)
+    formatLoc(x)
+})
+dt <- tryAgain(dt, function(x) x$resolution.gazetteer != "locality", function(x) {
+    x$municipality <- gsub(".* - ", "", x$municipality)
+    x <- formatLoc(x)
+})
+dt <- tryAgain(dt, function(x) x$resolution.gazetteer != "locality", function(x) {
+    x$municipality <- NA
+    x <- formatLoc(x)
+})
+
+in_gazet <- subset(dt, resolution.gazetteer == "locality")
+in_gazet
+locs <- getAdmin(in_gazet) # TO DO: open issue about duplication and inconsistency between formatLoc gazetteer and getAdmin gazetteer
+problem.cases <- in_gazet[is.na(locs$NAME_3),]
+write.csv(problem.cases, "tests/test-data/test-formatLoc_vs_getAdmin.csv")
+ucs$loc.correct <- dt$loc.correct
+ucs$loc.correct[dt$resolution.gazetteer != "locality"] <- NA
 
 # Which occs are associated with each UC
 occs_ucs <- lapply(uc_strings, grepl, x = saopaulo$locality, ignore.case = TRUE, perl = TRUE)
