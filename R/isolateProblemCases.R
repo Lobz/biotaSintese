@@ -32,3 +32,6 @@ isolateProblemCases <- function(x, FUN, breaks = 10, no_cores = detectCores() -1
     x <- dplyr::bind_rows(l_prob)
     x
 }
+
+loc.cols <- c("country", "stateProvince", "municipality", "locality")
+tax.cols <- c("scientificName", "family")
