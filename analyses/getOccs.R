@@ -39,19 +39,6 @@ ucs <- ucs[order(ucs$Nome.da.UC), ]
 dt <- data.frame(country="BR", stateProvince="SP", municipality=ucs$Municípios.Abrangidos, locality=ucs$Nome.da.UC)
 dt$municipality <- gsub("\\(.*\\)", "", dt$municipality)
 dt <- formatLoc(dt)
-dt <- tryAgain(dt, function(x) x$resolution.gazetteer != "locality", function(x) {
-    x$municipality <- gsub(" -.*", "", x$municipality)
-    formatLoc(x)
-})
-dt <- tryAgain(dt, function(x) x$resolution.gazetteer != "locality", function(x) {
-    x$municipality <- gsub(".* - ", "", x$municipality)
-    x <- formatLoc(x)
-})
-dt <- tryAgain(dt, function(x) x$resolution.gazetteer != "locality", function(x) {
-    x$municipality <- NA
-    x <- formatLoc(x)
-})
-dt <- validateLoc(dt)
 
 in_gazet <- subset(dt, resolution.gazetteer == "locality")
 in_gazet
