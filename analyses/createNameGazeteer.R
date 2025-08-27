@@ -21,8 +21,8 @@ locTable <- function(x) {
     if(nrow(x)==0) {
         return(NULL)
     }
-    s <- x$Nome_UC[1]
     x <- subset(x, confidenceLocality != "High")
+
     locs <- unlist(stringr::str_split(x$locality,",|[.]|;| - "))
     locs <- sub("\\.$","",locs)
     locs <- plantR:::squish(locs)
@@ -37,7 +37,8 @@ locTable <- function(x) {
     LT <- subset(LT, Freq >= nrow(x)/100 | Freq > 500)
     LT <- LT[order(LT$Freq, LT$Locality, decreasing = T),]
     LT <- LT[!duplicated(tolower(LT$Locality)),]
-    LT$Nome_UC <- s
+
+    LT$Nome_UC <- x$Nome_UC[1]
     LT[,c(3,1,2)]
 
 }
