@@ -35,8 +35,6 @@
 "ÁREA DE PROTEÇÃO AMBIENTAL BARREIRO RICO","Água do Viraeiro",46
 "ÁREA DE PROTEÇÃO AMBIENTAL BARREIRO RICO","Anhembi",44
 "ÁREA DE PROTEÇÃO AMBIENTAL BARREIRO RICO","fazenda bacury",26
-"ÁREA DE PROTEÇÃO AMBIENTAL BARREIRO RICO","Faz. Barreiro Rico",22
-"ÁREA DE PROTEÇÃO AMBIENTAL BORORÉ-COLÔNIA","Parelheiros",202
 "ÁREA DE PROTEÇÃO AMBIENTAL BORORÉ-COLÔNIA","centro paulus",89
 "ÁREA DE PROTEÇÃO AMBIENTAL BORORÉ-COLÔNIA","Braço Taquacetuba da Represa Billings",50
 "ÁREA DE PROTEÇÃO AMBIENTAL BORORÉ-COLÔNIA","Paulo Guilguer Reimberg",46
@@ -405,11 +403,9 @@
 "ÁREA DE PROTEÇÃO AMBIENTAL DO CABUÇU TANQUE GRANDE","Divisa de Guarulhos com São Paulo, Lote 4",25
 "ÁREA DE PROTEÇÃO AMBIENTAL DO CABUÇU TANQUE GRANDE","Pico Pelado",22
 "ÁREA DE PROTEÇÃO AMBIENTAL DO CABUÇU TANQUE GRANDE","lote 4",21
-"ÁREA DE PROTEÇÃO AMBIENTAL DO CABUÇU TANQUE GRANDE","floresta ombrofila densa",20
 "ÁREA DE PROTEÇÃO AMBIENTAL DO CABUÇU TANQUE GRANDE","Cabuçu, Acampamento Mackenzie",20
 "ÁREA DE PROTEÇÃO AMBIENTAL DO CABUÇU TANQUE GRANDE","Acampamento Mackenzie",20
 "ÁREA DE PROTEÇÃO AMBIENTAL DO CABUÇU TANQUE GRANDE","Cabuçu, Proguaru",19
-"ÁREA DE PROTEÇÃO AMBIENTAL DO CABUÇU TANQUE GRANDE","Floresta Ombrófila Densa",18
 "ÁREA DE PROTEÇÃO AMBIENTAL DO CABUÇU TANQUE GRANDE","Cabuçu",17
 "ÁREA DE PROTEÇÃO AMBIENTAL DO CABUÇU TANQUE GRANDE","lote 1",15
 "ÁREA DE PROTEÇÃO AMBIENTAL DO CABUÇU TANQUE GRANDE","Jardim Bananal",14
@@ -741,26 +737,6 @@
 "ÁREA DE PROTEÇÃO AMBIENTAL PARQUE E FAZENDA DO CARMO","distrito parque do carmo, municipio defazenda do carmo",13
 "ÁREA DE PROTEÇÃO AMBIENTAL PARQUE E FAZENDA DO CARMO","parque estadual da serra do mar",12
 "ÁREA DE PROTEÇÃO AMBIENTAL PARQUE E FAZENDA DO CARMO","Distrito Parque do Carmo, Pq. Nat. Mun. Fazenda do Carmo",12
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","fazenda sao jose",1761
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","Fazenda São José",1305
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","serra do cuscuzeiro",676
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","reserva de cerrado da unesp",659
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","Fazenda Pedra Vermelha",403
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","floresta estadual edmundo navarro de andrade",358
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","campus unesp bela vista",243
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","Alt",228
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","Reserva de Cerrado da UNESP. Alt. 793-866m",225
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","793-866m",225
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","Pedra Vermelha",218
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","campus da unesp",181
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","parque rauvitscher, fazenda pedra vermelha",179
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","Parque Rauvitscher, Faz. Pedra Vermelha",179
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","fazenda campininha",168
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","reserva de cerrado de corumbatai",164
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","Reserva de Cerrado de Corumbataí",162
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","just north of Rio Moji-Guaçu",138
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","São José",131
-"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","Faz. São José",111
 "ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERÍ-MIRIM AREA II","IAC",1933
 "ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERÍ-MIRIM AREA II","IAC, Estação Experimental, área nativa",772
 "ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERÍ-MIRIM AREA II","parque ecologico pavuna",752
@@ -790,6 +766,26 @@
 "ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERÍ-MIRIM AREA II","Jardim Botânico Araribá RPPN, Sítio Duas Cachoeiras, Jardim Botânico Araribá, RPPN",136
 "ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERÍ-MIRIM AREA II","da sede até o lago e volta contornando toda a borda",133
 "ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERÍ-MIRIM AREA II","Mata do Macuco",131
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","fazenda sao jose",1761
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","Fazenda São José",1305
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","serra do cuscuzeiro",676
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","reserva de cerrado da unesp",659
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","Fazenda Pedra Vermelha",403
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","floresta estadual edmundo navarro de andrade",358
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","campus unesp bela vista",243
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","Alt",228
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","Reserva de Cerrado da UNESP. Alt. 793-866m",225
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","793-866m",225
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","Pedra Vermelha",218
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","campus da unesp",181
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","parque rauvitscher, fazenda pedra vermelha",179
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","Parque Rauvitscher, Faz. Pedra Vermelha",179
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","fazenda campininha",168
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","reserva de cerrado de corumbatai",164
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","Reserva de Cerrado de Corumbataí",162
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","just north of Rio Moji-Guaçu",138
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","São José",131
+"ÁREA DE PROTEÇÃO AMBIENTAL PIRACICABA JUQUERI MIRIM ÁREA I","Faz. São José",111
 "ÁREA DE PROTEÇÃO AMBIENTAL PLANALTO DO TURVO","Bela Vista",33
 "ÁREA DE PROTEÇÃO AMBIENTAL PLANALTO DO TURVO","km 524",9
 "ÁREA DE PROTEÇÃO AMBIENTAL PLANALTO DO TURVO","about 2 km NE of Rio Barreiro",9
@@ -1447,17 +1443,13 @@
 "ESTAÇÃO ECOLÓGICA BANANAL","estrada de terra sertao do ariro",52
 "ESTAÇÃO ECOLÓGICA BANANAL","sentido Rio Claro (RJ)",50
 "ESTAÇÃO ECOLÓGICA BANANAL","Estrada de terra Sertão do Ariró, sentido Rio Claro (RJ),",42
-"ESTAÇÃO ECOLÓGICA BANANAL","EEc Bananal",18
 "ESTAÇÃO ECOLÓGICA BANANAL","Trilha da Pedra Vermelha",14
 "ESTAÇÃO ECOLÓGICA BANANAL","Estrada Sertão do Ariró",14
 "ESTAÇÃO ECOLÓGICA BANANAL","estrada sertao do ariro",14
-"ESTAÇÃO ECOLÓGICA BANANAL","Bananal (Datum SAD69",13
 "ESTAÇÃO ECOLÓGICA BANANAL","Serra da Bocaina",11
-"ESTAÇÃO ECOLÓGICA BANANAL","Zona 23 K",10
 "ESTAÇÃO ECOLÓGICA BANANAL","Trilha da Pedra Vermelha. Beira da mata",9
 "ESTAÇÃO ECOLÓGICA BANANAL","Beira da mata",9
 "ESTAÇÃO ECOLÓGICA BANANAL","Estrada de terra Sertão do Ariró, sentido Rio Claro (RJ)",8
-"ESTAÇÃO ECOLÓGICA BANANAL","Bananal",8
 "ESTAÇÃO ECOLÓGICA BANANAL","Águas da Bocaina",7
 "ESTAÇÃO ECOLÓGICA BANANAL","aguas da bocaina",7
 "ESTAÇÃO ECOLÓGICA BANANAL","Trilha da Pedra Vermelha. Beira de trilha",5
@@ -1466,7 +1458,6 @@
 "ESTAÇÃO ECOLÓGICA CHAÚAS","João Caçador",163
 "ESTAÇÃO ECOLÓGICA CHAÚAS","estacao ecologica de chauas, no km 78 da rodovia pariquera-iguape",96
 "ESTAÇÃO ECOLÓGICA CHAÚAS","estacao ecologica de chauas",88
-"ESTAÇÃO ECOLÓGICA CHAÚAS","Floresta Ombrófila Densa",72
 "ESTAÇÃO ECOLÓGICA CHAÚAS","no km 78 da Rodovia Pariquera-Iguape",55
 "ESTAÇÃO ECOLÓGICA CHAÚAS","Iguape",33
 "ESTAÇÃO ECOLÓGICA CHAÚAS","Estação Ecológica de Chauás",33
@@ -1522,14 +1513,8 @@
 "ESTAÇÃO ECOLÓGICA DE ANGATUBA","5km N of Pardinho, 15km S of Botucatu, Sítio Palmeiras",3
 "ESTAÇÃO ECOLÓGICA DE ANGATUBA","5km N of Pardinho",3
 "ESTAÇÃO ECOLÓGICA DE ANGATUBA","15km S of Botucatu",3
-"ESTAÇÃO ECOLÓGICA DE ANGATUBA","Estação ecológica de Angatuba",1
-"ESTAÇÃO ECOLÓGICA DE ANGATUBA","estacao ecologica angatuba",1
-"ESTAÇÃO ECOLÓGICA DE ANGATUBA","424889 -48",1
-"ESTAÇÃO ECOLÓGICA DE ANGATUBA","35056",1
-"ESTAÇÃO ECOLÓGICA DE ANGATUBA","-23",1
 "ESTAÇÃO ECOLÓGICA DE ASSIS","estacao ecologica",92
 "ESTAÇÃO ECOLÓGICA DE ASSIS","Estação Ecológica",28
-"ESTAÇÃO ECOLÓGICA DE ASSIS","Assis",7
 "ESTAÇÃO ECOLÓGICA DE ASSIS","Reserva de Cerrado do Horto Florestal",4
 "ESTAÇÃO ECOLÓGICA DE ASSIS","parcela permanente do biota",4
 "ESTAÇÃO ECOLÓGICA DE AVARÉ","Estação Ecológica Mogi-Guaçu",115
@@ -1541,8 +1526,6 @@
 "ESTAÇÃO ECOLÓGICA DE AVARÉ","Mata localizada atrás da Unesp, Rubião Jr",4
 "ESTAÇÃO ECOLÓGICA DE AVARÉ","Mata localizada atrás da Unesp",4
 "ESTAÇÃO ECOLÓGICA DE AVARÉ","mata localizada atras da unesp",4
-"ESTAÇÃO ECOLÓGICA DE BAURU","mata secundária",9
-"ESTAÇÃO ECOLÓGICA DE BAURU","mata secundaria",9
 "ESTAÇÃO ECOLÓGICA DE BAURU","distrito de Tibiriça, área do Instituto Florestal, mata secundária",9
 "ESTAÇÃO ECOLÓGICA DE BAURU","distrito de Tibiriça",9
 "ESTAÇÃO ECOLÓGICA DE BAURU","área do Instituto Florestal",9
@@ -1634,43 +1617,16 @@
 "ESTAÇÃO ECOLÓGICA DE MOGI-GUAÇU","Padua Sales, Fazenda Campininha",71
 "ESTAÇÃO ECOLÓGICA DE MOGI-GUAÇU","Reserva Biológica da Fazenda Campininha",70
 "ESTAÇÃO ECOLÓGICA DE MOGI-GUAÇU","Pádua Sales, Fazenda Campininha",67
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","estacao ecologica",226
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","Estação Ecológica",217
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","trilha 2",21
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","trilha 4",16
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","trilha 1",12
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","trilha 3",9
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","Palmital",7
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","Grevilea",7
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","Coord",7
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","saída da trilha do Ribeirão Santa Helena",5
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","borda da mata",5
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","trilha três",4
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","trilha do Ribeirão Santa Helena 1",4
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","trilha 5",4
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","próximo à entrada da cachoeira",4
 "ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","Parque Estadual Vassununga",4
 "ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","Parque Estadual de Vassununga",4
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","Paranapanema",4
 "ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","margem da estrada",4
 "ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","estacao ecologica, margem da estrada",4
 "ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","Estação Ecológica Grevilea",4
 "ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","estacao ecologica grevilea",4
 "ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","Coletado na Estação Ecológica",4
 "ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","coletado na estacao ecologica",4
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","caminho da casa do motor",4
 "ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","Alt",4
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","630 m",4
 "ESTAÇÃO ECOLÓGICA DE PARANAPANEMA",": 630 m",4
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","trilha cinco",3
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","região da Grevílea",3
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","Matinha da Sede",3
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","final da trilha 2",3
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","em frente ao talhão do pinus",3
-"ESTAÇÃO ECOLÓGICA DE PARANAPANEMA","610 m",3
-"ESTAÇÃO ECOLÓGICA DE PAULO DE FARIA","EEc de Paulo de Faria",359
-"ESTAÇÃO ECOLÓGICA DE PAULO DE FARIA","Estação Ecológica",338
-"ESTAÇÃO ECOLÓGICA DE PAULO DE FARIA","Estação Ecologica",4
 "ESTAÇÃO ECOLÓGICA DE RIBEIRÃO PRETO","Estação Ecológica Mata Santa Tereza",45
 "ESTAÇÃO ECOLÓGICA DE RIBEIRÃO PRETO","estacao ecologica mata santa tereza",45
 "ESTAÇÃO ECOLÓGICA DE RIBEIRÃO PRETO","mata de santa tereza",13
@@ -1778,7 +1734,6 @@
 "ESTAÇÃO ECOLÓGICA DE XITUÉ","Parque Est. Imtervales, trilha da cachoeira das pedrinhas",3
 "ESTAÇÃO ECOLÓGICA DE XITUÉ","Myrsine sp",3
 "ESTAÇÃO ECOLÓGICA DE XITUÉ","Imtervales",3
-"ESTAÇÃO ECOLÓGICA DE XITUÉ","Floresta Ombrófila Densa",3
 "ESTAÇÃO ECOLÓGICA DE XITUÉ","e Agarista sp",3
 "ESTAÇÃO ECOLÓGICA DE XITUÉ","Trilha de acesso à Estação Xituê",2
 "ESTAÇÃO ECOLÓGICA DE XITUÉ","Trilha de acesso à E.E. Xituê. ",2
@@ -1826,28 +1781,19 @@
 "ESTAÇÃO ECOLÓGICA DOS TUPINIQUINS","1 km ne of cananeia",2
 "ESTAÇÃO ECOLÓGICA DOS TUPINIQUINS","Ilha do Cardoso, Praia de Cambriú",1
 "ESTAÇÃO ECOLÓGICA DOS TUPINIQUINS","Ilha de Castilho",1
-"ESTAÇÃO ECOLÓGICA IBICATU","EEc de Ibicatú",92
-"ESTAÇÃO ECOLÓGICA IBICATU","Estação ecológica de Ibicatú",74
-"ESTAÇÃO ECOLÓGICA IBICATU","Fragmento de Floresta Estacional Semidecidual perturbado por gado",41
 "ESTAÇÃO ECOLÓGICA IBICATU","estacao experimental de ibicatu",34
 "ESTAÇÃO ECOLÓGICA IBICATU","Estação Experimental de Ibicatu",32
 "ESTAÇÃO ECOLÓGICA IBICATU","Floresta Estacional Semidecidual",6
-"ESTAÇÃO ECOLÓGICA IBICATU","Estação Ecológica Ibicatú",6
 "ESTAÇÃO ECOLÓGICA IBICATU","Próximo à porteira de entrada da Estação Ecológica de Ibitacu. Floresta Estacional Semidecidual",4
 "ESTAÇÃO ECOLÓGICA IBICATU","Próximo à porteira de entrada da Estação Ecológica de Ibitacu",4
 "ESTAÇÃO ECOLÓGICA IBICATU","proximo a porteira de entrada da estacao ecologica de ibitacu",4
 "ESTAÇÃO ECOLÓGICA IBICATU","próxima à área de agropecuária",2
 "ESTAÇÃO ECOLÓGICA IBICATU","Estação Experimental de Ibicatu, Floresta Estacional Semidecidual, próxima à área de agropecuária. -22,778198; 47,823927",2
-"ESTAÇÃO ECOLÓGICA IBICATU","Estação Ecologica Ibicatú",2
-"ESTAÇÃO ECOLÓGICA IBICATU","Estação Ecológica de Ibicatu",2
 "ESTAÇÃO ECOLÓGICA IBICATU","823927",2
 "ESTAÇÃO ECOLÓGICA IBICATU","778198",2
 "ESTAÇÃO ECOLÓGICA IBICATU","-22",2
 "ESTAÇÃO ECOLÓGICA ITABERÁ","reserva ecologica de itabera",97
 "ESTAÇÃO ECOLÓGICA ITABERÁ","Reserva Ecológica de Itaberá",93
-"ESTAÇÃO ECOLÓGICA ITABERÁ","Estação Ecológica",10
-"ESTAÇÃO ECOLÓGICA ITABERÁ","estacao ecologica",10
-"ESTAÇÃO ECOLÓGICA ITABERÁ","trilha do meio",7
 "ESTAÇÃO ECOLÓGICA ITABERÁ","Reserva Ecológica de Iataberá",2
 "ESTAÇÃO ECOLÓGICA ITABERÁ","reserva ecologica de iatabera",2
 "ESTAÇÃO ECOLÓGICA ITABERÁ","Reserva ecológica d Itaberá",2
@@ -1859,19 +1805,12 @@
 "ESTAÇÃO ECOLÓGICA ITABERÁ","estaca oecologica de itabera",2
 "ESTAÇÃO ECOLÓGICA ITABERÁ","ECOLÓGICA DE ITABERÁ",2
 "ESTAÇÃO ECOLÓGICA ITABERÁ","ecologica de itabera",2
-"ESTAÇÃO ECOLÓGICA ITAPEVA","estacao ecologica",919
-"ESTAÇÃO ECOLÓGICA ITAPEVA","Estação Ecológica",875
 "ESTAÇÃO ECOLÓGICA ITAPEVA","Estação Experimental",107
 "ESTAÇÃO ECOLÓGICA ITAPEVA","estacao experimental",107
 "ESTAÇÃO ECOLÓGICA ITAPEVA","estacao experimental de itapeva",97
 "ESTAÇÃO ECOLÓGICA ITAPEVA","Engenheiro Maia",66
-"ESTAÇÃO ECOLÓGICA ITAPEVA","trilha da Vila",42
 "ESTAÇÃO ECOLÓGICA ITAPEVA","Estação Experimental de Itapeva, Engenheiro Maia",35
-"ESTAÇÃO ECOLÓGICA ITAPEVA","Estaçao Ecológica",35
 "ESTAÇÃO ECOLÓGICA ITAPEVA","Estação Experimental de Itapeva",33
-"ESTAÇÃO ECOLÓGICA ITAPEVA","trilha 1",18
-"ESTAÇÃO ECOLÓGICA ITAPEVA","trilha 2",17
-"ESTAÇÃO ECOLÓGICA ITAPEVA","aceiro da SP",12
 "ESTAÇÃO ECOLÓGICA JATAÍ","Luís Antônio",17
 "ESTAÇÃO ECOLÓGICA JATAÍ","Luís Antônio, BR-SP, BR",16
 "ESTAÇÃO ECOLÓGICA JATAÍ","luis antonio",16
@@ -1890,20 +1829,15 @@
 "ESTAÇÃO ECOLÓGICA JATAÍ","Cerrado stricti sensu",1
 "ESTAÇÃO ECOLÓGICA JATAÍ","14210-000",1
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Barra do Ribeira",354
-"ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","EEc de Juréia-Itatins",352
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","estacao ecologica da jureia",325
-"ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Reserva Ecológica Juréia-Itatins",269
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Estação Ecológica da Juréia",123
-"ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Itatins",93
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","estacao ecologica de jureia",71
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Estação Ecológica de Juréia- Guaraú",68
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","estacao ecologica de jureia- guarau",68
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Arredores da foz do Rio Guaraú",67
-"ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Iguape",63
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Estação Ecológica da Juréia. Arredores da foz do Rio Guaraú",63
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Trilha do Costão",60
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","trilha do costao",60
-"ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Trilha do Imperador",59
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Terra de Gigantes",44
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","km 7",44
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Fazenda Ituaú - Terra de Gigantes, Estrada Velha Salto Capivari, km 7",44
@@ -1914,9 +1848,7 @@
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Jureia",42
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Estação Ecológica de Juréia",42
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Estaçao Ecológica Juréia-Itains",38
-"ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Trilha para a Figueira Grande",35
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","estacao ecologica jureia",32
-"ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Caminho do Imperador",31
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Guarauzinho",28
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Estação Ecológica Juréia",28
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Guaraú",25
@@ -1925,11 +1857,9 @@
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Estaçao Ecológica Juréia-Itains, trilha do Imperador",21
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Estação ecológica Juréia - Guaraú",21
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","estacao ecologica jureia - guarau",21
-"ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Est",21
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Serra de Peruíbe",20
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","serra de peruibe",20
 "ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Juréia-Itatins",20
-"ESTAÇÃO ECOLÓGICA JURÉIA-ITATINS","Trilha em direção ao Poço",19
 "ESTAÇÃO ECOLÓGICA MICO LEÃO PRETO","Municipio Teodoro Sampaio, 35 km a oeste em direcao a Rosana",1
 "ESTAÇÃO ECOLÓGICA MICO LEÃO PRETO","Municipio Teodoro Sampaio",1
 "ESTAÇÃO ECOLÓGICA MICO LEÃO PRETO","35 km a oeste em direcao a Rosana",1
@@ -2342,7 +2272,6 @@
 "PARQUE ESTADUAL DA CAMPINA DO ENCANTADO","parque estadualpariquera abaixo",12
 "PARQUE ESTADUAL DA CAMPINA DO ENCANTADO","Pariquera Abaixo (PEPA)",12
 "PARQUE ESTADUAL DA CAMPINA DO ENCANTADO","P.E.Pariquera Abaixo (PEPA)",12
-"PARQUE ESTADUAL DA CAMPINA DO ENCANTADO","Floresta ombrófila densa",12
 "PARQUE ESTADUAL DA CAMPINA DO ENCANTADO","Dario",12
 "PARQUE ESTADUAL DA CAMPINA DO ENCANTADO","passando pelo viveiro",11
 "PARQUE ESTADUAL DA CAMPINA DO ENCANTADO","Parque Estadual de Pariquera Abaixo",11
@@ -2410,13 +2339,10 @@
 "PARQUE ESTADUAL DA CANTAREIRA","Núcleo Engordador",32
 "PARQUE ESTADUAL DA CANTAREIRA","Núcleo Águas Claras",28
 "PARQUE ESTADUAL DA ILHA ANCHIETA","ilha anchieta",697
-"PARQUE ESTADUAL DA ILHA ANCHIETA","PE da Ilha Anchieta",46
 "PARQUE ESTADUAL DA ILHA ANCHIETA","trilha para a praia do sul",44
-"PARQUE ESTADUAL DA ILHA ANCHIETA","Trilha da Prainha",40
 "PARQUE ESTADUAL DA ILHA ANCHIETA","Ubatuba",39
 "PARQUE ESTADUAL DA ILHA ANCHIETA","Trilha Praia do Leste",31
 "PARQUE ESTADUAL DA ILHA ANCHIETA","trilha da Praia do Leste",21
-"PARQUE ESTADUAL DA ILHA ANCHIETA","Parque Estadual da Ilha de Anchieta",20
 "PARQUE ESTADUAL DA ILHA ANCHIETA","Ilha Anchieta, Ubatuba, SP, BR",20
 "PARQUE ESTADUAL DA ILHA ANCHIETA","Trilha da Praia do Sul",15
 "PARQUE ESTADUAL DA ILHA ANCHIETA","Ilha de Anchieta",14
@@ -2428,17 +2354,7 @@
 "PARQUE ESTADUAL DA ILHA ANCHIETA","trilha para o Saco Grande",10
 "PARQUE ESTADUAL DA ILHA ANCHIETA","trilha para a praia do leste",10
 "PARQUE ESTADUAL DA ILHA ANCHIETA","Parque Estadual Ilha de Anchieta",9
-"PARQUE ESTADUAL DA ILHA DO CARDOSO","ilha do cardoso",7465
-"PARQUE ESTADUAL DA ILHA DO CARDOSO","parque estadual ilha do cardoso",118
-"PARQUE ESTADUAL DA ILHA DO CARDOSO","Restinga de Itacuruçá",115
-"PARQUE ESTADUAL DA ILHA DO CARDOSO","Ilha do Cardoso, Restinga de Itacuruçá",108
-"PARQUE ESTADUAL DA ILHA DO CARDOSO","Centro de Pesquisas",108
-"PARQUE ESTADUAL DA ILHA DO CARDOSO","Ilha do Cardoso)",100
 "PARQUE ESTADUAL DA ILHA DO CARDOSO","cananeia",100
-"PARQUE ESTADUAL DA ILHA DO CARDOSO","Perequê (P",98
-"PARQUE ESTADUAL DA ILHA DO CARDOSO","Arredores do Centro de Pesquisa",97
-"PARQUE ESTADUAL DA ILHA DO CARDOSO","Ilha do Cardoso, Marujá",93
-"PARQUE ESTADUAL DA ILHA DO CARDOSO","Arredores do Centro de Pesquisa - Perequê (P.E. Ilha do Cardoso)",91
 "PARQUE ESTADUAL DAS FONTES DO IPIRANGA","PE das Fontes do Ipiranga",6570
 "PARQUE ESTADUAL DAS FONTES DO IPIRANGA","Jardim Botânico de São Paulo",4533
 "PARQUE ESTADUAL DAS FONTES DO IPIRANGA","in grounds of the Instituto de Botânica",760
@@ -2551,8 +2467,6 @@
 "PARQUE ESTADUAL DE ITABERABA","Marsilac",28
 "PARQUE ESTADUAL DE ITABERABA","instituto astronomico e geofisico",24
 "PARQUE ESTADUAL DE ITABERABA","Instituto Astronômico e Geofísico",22
-"PARQUE ESTADUAL DE ITABERABA","floresta ombrofila densa",20
-"PARQUE ESTADUAL DE ITABERABA","Floresta Ombrófila Densa",18
 "PARQUE ESTADUAL DE ITABERABA","PE das Fontes do Ipiranga",16
 "PARQUE ESTADUAL DE ITABERABA","Parque Estadual das Fontes do Ipiranga",14
 "PARQUE ESTADUAL DE ITABERABA","Instituto Agronômico e Geofisico",10
@@ -2796,7 +2710,6 @@
 "PARQUE ESTADUAL DO JURUPARÁ","UHE da Fumaça",15
 "PARQUE ESTADUAL DO JURUPARÁ","Reserva Votorantim",11
 "PARQUE ESTADUAL DO JURUPARÁ","Trilha do Chagas, UHE da Fumaça, Floresta Ombrófila Densa, à margem esquerda do Rio Juquiá",9
-"PARQUE ESTADUAL DO JURUPARÁ","Floresta Ombrófila Densa",9
 "PARQUE ESTADUAL DO JURUPARÁ","Complexo Juquiá",9
 "PARQUE ESTADUAL DO JURUPARÁ","à margem esquerda do Rio Juquiá",9
 "PARQUE ESTADUAL DO JURUPARÁ","cidade universitaria armando de salles oliveira",8
@@ -2915,7 +2828,6 @@
 "PARQUE ESTADUAL DO RIO TURVO","núcleo cedro",18
 "PARQUE ESTADUAL DO RIO TURVO","Nearest Named Place: Serra do Mar",18
 "PARQUE ESTADUAL DO RIO TURVO","heading N to São Paulo",18
-"PARQUE ESTADUAL DO RIO TURVO","Floresta Ombrófila Densa",17
 "PARQUE ESTADUAL DO RIO TURVO","parque estadual de jacupiranga nucleo cedro",16
 "PARQUE ESTADUAL DO RIO TURVO","Trilha do Rolado",14
 "PARQUE ESTADUAL DO RIO TURVO","Núcleo da Caverna do Diabo",14
@@ -3115,7 +3027,6 @@
 "PARQUE ESTADUAL NASCENTES DO PARANAPANEMA","trecho com intensa extração seletiva de palmito e madeira",20
 "PARQUE ESTADUAL NASCENTES DO PARANAPANEMA","Parque Estadual Intervales, Trilha do Carmo Acima, em direção aos Três Córregos, trecho com intensa extração seletiva de palmito e madeira, com poucas espécies finais da sucessão, com melhora no final da trilha (2 km)",20
 "PARQUE ESTADUAL NASCENTES DO PARANAPANEMA","Parque Estadual Intervales - trilha saindo 500, antes da sede do núcleo Barra Grande em direcão a E.E Xitue Floresta Ombrófila Densa Montana vegetação conservada com escorregamentos naturais e cin",20
-"PARQUE ESTADUAL NASCENTES DO PARANAPANEMA","Floresta Ombrófila Densa",20
 "PARQUE ESTADUAL NASCENTES DO PARANAPANEMA","em direção aos Três Córregos",20
 "PARQUE ESTADUAL NASCENTES DO PARANAPANEMA","E Xitue Floresta Ombrófila Densa Montana vegetação conservada com escorregamentos naturais e cin",20
 "PARQUE ESTADUAL NASCENTES DO PARANAPANEMA","com poucas espécies finais da sucessão",20
@@ -3198,7 +3109,6 @@
 "PARQUE ESTADUAL TURÍSTICO DO ALTO DO RIBEIRA","Iporanga - SP, 18330-000, Brasil",20
 "PARQUE ESTADUAL TURÍSTICO DO ALTO DO RIBEIRA","iporanga - sp",20
 "PARQUE ESTADUAL TURÍSTICO DO ALTO DO RIBEIRA","nucleo bulha d'agua",19
-"PARQUE ESTADUAL TURÍSTICO DO ALTO DO RIBEIRA","Floresta Ombrófila Densa",19
 "PARQUE ESTADUAL TURÍSTICO DO ALTO DO RIBEIRA","Parque Estadual Turístico do Alto Ribeiro (PETAR)",18
 "PARQUE ESTADUAL TURÍSTICO DO ALTO DO RIBEIRA","Parque Estadual do Petar",18
 "PARQUE ESTADUAL TURÍSTICO DO ALTO DO RIBEIRA","Iporanga/Apiai",17
@@ -3322,6 +3232,12 @@
 "PARQUE NATURAL MUNICIPAL DO BASALTO","araraquara - sp",11
 "PARQUE NATURAL MUNICIPAL DO BASALTO","Araraquara",11
 "PARQUE NATURAL MUNICIPAL DO BASALTO","14808",11
+"PARQUE NATURAL MUNICIPAL DOS JATOBÁS","Próximo ao Aeroporto de Viracopos",113
+"PARQUE NATURAL MUNICIPAL DOS JATOBÁS","Fragmento 2 (TAV)",113
+"PARQUE NATURAL MUNICIPAL DOS JATOBÁS","fragmento 2",113
+"PARQUE NATURAL MUNICIPAL DOS JATOBÁS","Fragmento 2 (TAV). Próximo ao Aeroporto de Viracopos. Cerrado",111
+"PARQUE NATURAL MUNICIPAL DOS JATOBÁS","Cerrado",111
+"PARQUE NATURAL MUNICIPAL DOS JATOBÁS","Fragmento 2 (TAV). Próximo ao Aeroporto de Viracopos",2
 "PARQUE NATURAL MUNICIPAL DO TRABIJU","Trabiju",9
 "PARQUE NATURAL MUNICIPAL DO TRABIJU","Riberao Grande",2
 "PARQUE NATURAL MUNICIPAL DO TRABIJU","Pindamonhangaba; Riberao Grande; Fazenda Sao Sebastiao do Ribeirao Grande. Mata pluvial montana, mata de encosta",2
@@ -3330,12 +3246,6 @@
 "PARQUE NATURAL MUNICIPAL DO TRABIJU","mata de encosta",2
 "PARQUE NATURAL MUNICIPAL DO TRABIJU","fazenda sao sebastiao do ribeirao grande, mata pluvial montana, mata de encosta",2
 "PARQUE NATURAL MUNICIPAL DO TRABIJU","Fazenda Sao Sebastiao do Ribeirao Grande",2
-"PARQUE NATURAL MUNICIPAL DOS JATOBÁS","Próximo ao Aeroporto de Viracopos",113
-"PARQUE NATURAL MUNICIPAL DOS JATOBÁS","Fragmento 2 (TAV)",113
-"PARQUE NATURAL MUNICIPAL DOS JATOBÁS","fragmento 2",113
-"PARQUE NATURAL MUNICIPAL DOS JATOBÁS","Fragmento 2 (TAV). Próximo ao Aeroporto de Viracopos. Cerrado",111
-"PARQUE NATURAL MUNICIPAL DOS JATOBÁS","Cerrado",111
-"PARQUE NATURAL MUNICIPAL DOS JATOBÁS","Fragmento 2 (TAV). Próximo ao Aeroporto de Viracopos",2
 "PARQUE NATURAL MUNICIPAL ENGENHO SAO JORGE DOS ERASMOS","Monumento Nacional Ruínas Engenho São Jorge dos Erasmos",206
 "PARQUE NATURAL MUNICIPAL ENGENHO SAO JORGE DOS ERASMOS","monumento nacional ruinas engenho sao jorge dos erasmos",206
 "PARQUE NATURAL MUNICIPAL ESTORIL - VIRGÍLIO SIMIONATO","São Bernardo do Campo",5
@@ -3421,7 +3331,6 @@
 "PARQUE NATURAL MUNICIPAL MORRO DO OURO","Apiahy, dans le foret",2
 "PARQUE NATURAL MUNICIPAL MORRO DO OURO","""Vila-Vella""",2
 "PARQUE NATURAL MUNICIPAL NASCENTES DE PARANAPIACABA","paranapiacaba",295
-"PARQUE NATURAL MUNICIPAL NASCENTES DE PARANAPIACABA","Floresta Ombrófila Densa",78
 "PARQUE NATURAL MUNICIPAL NASCENTES DE PARANAPIACABA","Paranapiacaba, Trilha dos Jipeiros",62
 "PARQUE NATURAL MUNICIPAL NASCENTES DE PARANAPIACABA","Santo André",56
 "PARQUE NATURAL MUNICIPAL NASCENTES DE PARANAPIACABA","Parque Natural Municipal Nascentes de Paranapiacab",56
@@ -3826,19 +3735,6 @@
 "RESERVA EXTRATIVISTA TAQUARI","Cananéia, BR-SP, BR",1
 "RESERVA EXTRATIVISTA TAQUARI","Cananéia",1
 "RESERVA EXTRATIVISTA TAQUARI","cananeia",1
-"RESERVA PARTICULAR DO PATRIMÔNIO NATURAL  RIO DOS PILÕES","Propriedade particular",2
-"RESERVA PARTICULAR DO PATRIMÔNIO NATURAL  RIO DOS PILÕES","Paranapiacaba",2
-"RESERVA PARTICULAR DO PATRIMÔNIO NATURAL  RIO DOS PILÕES","Em propriedade particular",2
-"RESERVA PARTICULAR DO PATRIMÔNIO NATURAL  RIO DOS PILÕES","Trilha da Pontinha",1
-"RESERVA PARTICULAR DO PATRIMÔNIO NATURAL  RIO DOS PILÕES","Trilha da comunidade",1
-"RESERVA PARTICULAR DO PATRIMÔNIO NATURAL  RIO DOS PILÕES","Subprefeitura de Paranapiacaba e Parque Andreense. Pq. Nascentes de Paranapiacaba. Trilha da comunidade",1
-"RESERVA PARTICULAR DO PATRIMÔNIO NATURAL  RIO DOS PILÕES","Subprefeitura de Paranapiacaba e Parque Andreense",1
-"RESERVA PARTICULAR DO PATRIMÔNIO NATURAL  RIO DOS PILÕES","Paranapiacaba, Trilha da Pontinha",1
-"RESERVA PARTICULAR DO PATRIMÔNIO NATURAL  RIO DOS PILÕES","Paranapiacaba, Núcleo Olho D'Água-entrada",1
-"RESERVA PARTICULAR DO PATRIMÔNIO NATURAL  RIO DOS PILÕES","Núcleo Olho D'Água-entrada",1
-"RESERVA PARTICULAR DO PATRIMÔNIO NATURAL  RIO DOS PILÕES","Nascentes de Paranapiacaba",1
-"RESERVA PARTICULAR DO PATRIMÔNIO NATURAL  RIO DOS PILÕES","Coleta para projeto de pesquisa entitulado 'Rede de interação planta-polinizador em paisagens homogêneas de Mata Atlântica' do edital Universal MCTI/CNPq No14/2014",1
-"RESERVA PARTICULAR DO PATRIMÔNIO NATURAL  RIO DOS PILÕES","coleta para projeto de pesquisa entitulado 'rede de interacao planta-polinizador em paisagens homogeneas de mata atlantica' do edital universal mcti/cnpq no14/2014",1
 "RESERVA PARTICULAR DO PATRIMÔNIO NATURAL ÁGUAS CLARAS","Propriedade de João",254
 "RESERVA PARTICULAR DO PATRIMÔNIO NATURAL ÁGUAS CLARAS","propriedade de joao",254
 "RESERVA PARTICULAR DO PATRIMÔNIO NATURAL BOTUJURU-SERRA DO ITAPETY","Serra do Itapeti",11
