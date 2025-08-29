@@ -1,15 +1,14 @@
 #' Isolate Problem Cases
 #'
 #' @importFrom parallel parSapply detectCores makeCluster
-isolateProblemCases <- function(x, FUN, breaks = 10, no_cores = detectCores() -1, ...) {
-
-    # Initiate cluster
-    cl <- makeCluster(no_cores)
+isolateProblemCases <- function(x, FUN, breaks = 10, parallel = FALSE, no_cores = detectCores() -1, ...) {
 
     n <- nrow(x)
     groups <- cut(1:n, breaks)
     l_orig <- split(x, groups)
-    if(no_cores > 1) {
+    if(parallel && no_cores > 1) {
+        # Initiate cluster
+        cl <- makeCluster(no_cores)
         l_prob <- parSapply(makeCluster(no_cores), l_orig, function(x1) {
             tryCatch(
                 {FUN(x1); FALSE},
