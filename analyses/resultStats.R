@@ -61,6 +61,24 @@ summary(sapply(total, is.na))
 table(total$downloadedFrom, useNA="always")
 
 table(is.na(total$id))
+table(total$tax.notes)
+
+total <- unique(total)
+sp <- split(total, total$tax.notes)
+sapply(sp, nrow)
+
+x <- sp[[1]]
+x <- getTaxonId(x)
+table(x$taxon.rank)
+table(is.na(x$id))
+table(x$id)
+table(x$family)
+table(x$scientificNameAuthorship)
+table(x$family.new)
+
+total <- getTaxonId(total)
+
+names(sp)
 
 1802/22494
 
