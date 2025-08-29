@@ -72,11 +72,46 @@ locTable <- function(x) {
     LT[,c(5,1:4)]
 }
 
-x <- locTable(dtTreated[[4]])
+
+locTable2 <- function(x) {
+    if(nrow(x)==0) {
+        return(NULL)
+    }
+    x <- subset(x, confidenceLocality != "High")
+    if(nrow(x)==0) {
+        return(NULL)
+    }
+
+    DT <- x[,c("recordID", "locality.new", "municipality.new", "stateProvince.new")]
+    DT2 <- DT
+    DT2$locality.new <- x$locality.scrap
+    DT <- rbind(DT, DT2)
+    names(DT) <- c("recordID", "Localidade", "Municipio", "Estado")
+
+    DT <- subset(DT, nchar(Localidade) > 2 & !tolower(rmLatin(Localidade)) %in% c("sao paulo", "brasil", "brazil", "faz", "floresta ombrofila densa", "mata secundaria") & grepl("[A-z]",Localidade))
+    if(nrow(DT)==0) {
+        return(NULL)
+    }
+
+    DT$Municipio[is.na(DT$Municipio)] <- "" # So that aggregate doesn't exclude these cases
+    DT$Estado[is.na(DT$Estado)] <- "" # So that aggregate doesn't exclude these cases
+
+    LT <- aggregate(DT$recordID, list(Localidade = DT$Localidade, Municipio = DT$Municipio, Estado = DT$Estado), function(y) length(unique(y)))
+
+    names(LT)[4] <- "Freq"
+    LT <- subset(LT, Freq >= nrow(x)/100 | Freq > 500)
+    LT <- LT[order(LT$Freq, LT$Localidade, decreasing = T),]
+    LT <- LT[!duplicated(tolower(rmLatin(paste(LT$Municipio, LT$Localidade)))),]
+
+    LT$Nome_UC <- x$Nome_UC[1]
+    LT[,c(5,1:4)]
+}
+
+x <- locTable2(dtTreated[[4]])
 head(x)
 
 for(x in dtTreated) LT <- locTable(x)
-tabs <- lapply(dtTreated, locTable)
+tabs <- lapply(dtTreated, locTable2)
 TABS <- dplyr::bind_rows(tabs)
 # write.csv(TABS, "results/locationsTable.csv", row.names = F)
 TABS2 <- read.csv("results/locationsTable.csv")
