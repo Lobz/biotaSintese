@@ -22,38 +22,66 @@ locTable <- function(x) {
         return(NULL)
     }
     x <- subset(x, confidenceLocality != "High")
-    x$locality <- gsub("Sr\\. $","Sr ",x$locality)
-
-    locs <- unlist(stringr::str_split(x$locality,",|[.]|;| - "))
-    locs <- sub("\\.$","",locs)
-    locs <- plantR:::squish(locs)
-    Local <- c(c(x$locality.new, x$locality, x$locality.scrap)[is.na(x$NAME_3)],x$NAME_3)
-    Local <- sub("\\.$","",Local)
-    Locality <- c(locs[!locs %in% Local], Local)
-    Locality <- Locality[nchar(Locality) > 2 & tolower(rmLatin(Locality)) != "sao paulo"]
-    Locality <- Locality[!tolower(rmLatin(Locality)) %in% c("sao paulo", "brasil", "brazil", "faz", "floresta ombrofila densa", "mata secundaria")]
-    LT <- as.data.frame(table(Locality), stringsAsFactors=F, names = c("Locality", "Freq"))
-    if(nrow(LT)==0) {
+    if(nrow(x)==0) {
         return(NULL)
     }
+    x$locality <- gsub("Sr\\. $","Sr ",x$locality)
+
+    locsList <- stringr::str_split(x$locality,",|[.]|;| - ")
+    lens <- sapply(locsList, length)
+    id <- sapply(1:nrow(x), function(i) rep(x$recordID[i],lens[i]))
+    muns <- sapply(1:nrow(x), function(i) rep(x$NAME_2[i],lens[i]))
+    states  <- sapply(1:nrow(x), function(i) rep(x$NAME_1[i],lens[i]))
+    locs <- unlist(locsList)
+    id <- unlist(id)
+    muns <- unlist(muns)
+    states <- unlist(states)
+    length(muns)==length(locs)
+
+    locs <- sub("\\.$","",locs)
+    locs <- plantR:::squish(locs)
+    Local <- c(x$locality.new, x$locality, x$locality.scrap, x$NAME_3)
+    ID <- rep(x$recordID, 4)
+    Muns <- rep(x$NAME_2, 4)
+    States <- rep(x$NAME_1, 4)
+    Local <- sub("\\.$","",Local)
+    Localidade <- c(locs, Local)
+    recordID <- c(id, ID)
+    Municipio <- c(muns, Muns)
+    Estado <- c(states, States)
+    DT <- data.frame(recordID, Estado, Municipio, Localidade)
+    if(nrow(DT)==0) {
+        return(NULL)
+    }
+    DT <- subset(DT, nchar(Localidade) > 2 & !tolower(rmLatin(Localidade)) %in% c("sao paulo", "brasil", "brazil", "faz", "floresta ombrofila densa", "mata secundaria") & grepl("[A-z]",Localidade))
+    if(nrow(DT)==0) {
+        return(NULL)
+    }
+
+    DT$Municipio[is.na(DT$Municipio)] <- "" # So that aggregate doesn't exclude these cases
+    DT$Estado[is.na(DT$Estado)] <- "" # So that aggregate doesn't exclude these cases
+
+    LT <- aggregate(DT$recordID, list(Localidade = DT$Localidade, Municipio = DT$Municipio, Estado = DT$Estado), function(y) length(unique(y)))
+
+    names(LT)[4] <- "Freq"
     LT <- subset(LT, Freq >= nrow(x)/100 | Freq > 500)
-    LT <- LT[order(LT$Freq, LT$Locality, decreasing = T),]
-    LT <- LT[!duplicated(tolower(LT$Locality)),]
+    LT <- LT[order(LT$Freq, LT$Localidade, decreasing = T),]
+    LT <- LT[!duplicated(tolower(rmLatin(paste(LT$Municipio, LT$Localidade)))),]
 
     LT$Nome_UC <- x$Nome_UC[1]
-    LT[,c(3,1,2)]
-
+    LT[,c(5,1:4)]
 }
 
-x <- locTable(dtTreated[[2]])
+x <- locTable(dtTreated[[4]])
 head(x)
 
+for(x in dtTreated) LT <- locTable(x)
 tabs <- lapply(dtTreated, locTable)
 TABS <- dplyr::bind_rows(tabs)
 # write.csv(TABS, "results/locationsTable.csv", row.names = F)
 TABS2 <- read.csv("results/locationsTable.csv")
 
-TABS3 <- merge(TABS, TABS2, sort=F)
+TABS3 <- subset(TABS, Localidade %in% TABS2$Locality)
 write.csv(TABS3, "results/locationsTable.csv", row.names = F)
 
 # We should generate a gazeteer for everyone
