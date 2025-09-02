@@ -82,7 +82,7 @@ locTable2 <- function(x) {
         return(NULL)
     }
 
-    DT <- x[,c("recordID", "locality.new", "municipality.new", "stateProvince.new")]
+    DT <- x[,c("recordID", "locality.new", "NAME_2","NAME_1")]
     DT2 <- DT
     DT2$locality.new <- x$locality.scrap
     DT <- rbind(DT, DT2)
@@ -135,16 +135,17 @@ table(total$selectionCategory, useNA="always")
 
 loctab <- unique(total[,c("Nome_UC","locality")])
 
+## Second source of tab: names that "look like" they might be UCs
 
-fromLoc <- subset(total, selectionCategory != "coord_original")
-fromCoord <- subset(total, selectionCategory == "coord_original")
+load("data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
 
-table(fromCoord$NAME_0, useNA="always")
-table(fromCoord$stateProvince.new, useNA="always")
-table(fromCoord$NAME_1, useNA="always")
-table(is.na(fromCoord$NAME_2), is.na(fromCoord$locality), useNA="always")
-table(is.na(fromCoord$locality), useNA="always")
-table(is.na(fromCoord$NAME_2), useNA="always")
+locs <- unique(unlist(sapply(dtTreated, function(x) unique(x$loc))))
 
-fromCoord <- remove_fields(fromCoord, c("NAME_0", "NAME_1", "NAME_2", "NAME_3"))
-fromCoord <- checkCoord(fromCoord, dist.center = F)
+locs
+
+not_used <- subset(saopaulo, !loc %in% locs)
+
+termsList <- c("exp", "instituto florestal", "reserva")
+terms_pattern <- paste0(termsList, collapse = "|")
+possible_ucs <- grepl(terms_pattern, not_used$loc)
+sort(table(not_used$loc[possible_ucs]))
