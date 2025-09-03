@@ -2,11 +2,6 @@
 
 ## Issues
 
-### ValidateDup needs to merge these columns:
-
-- scientificNameAuthorship
-- id
-
 ### Gazetteer has duplicated loc.correct
 
 [23] "brazil_sao paulo_porto ferreira_pe porto ferreira (antiga reserva estadual porto ferreira)"
@@ -18,21 +13,20 @@ Error in -tmp[, lon] : argumento inválido para operador unário
 
 fix: use as.numeric
 
-### checkDist error if there are duplicated name/author pair in flora
-
-This could be solved adding multiple="any", "first" ou "last"
-
-        x1 <- dplyr::left_join(x1, plantR::bfoNames[, key.cols],
-            by = stats::setNames(c("tax.name", "tax.authorship"),
-                c(tax.name, tax.author)), keep = TRUE)
-
-Sugestion: if the join returned bigger size, show a warning and redo the join with multiple="first"
-
-## getOccs
-
-- add grepl for NAME_3 -> done
-
 ## locationTables
 
 - remove all locations that match grep(uc_string) -> done?? maybe redo later
 - search database for all occurrences of "estação experimental", "floresta d", 'eec", etc
+
+## Listas de UCs
+
+- Ver com colegas quais UCs devemos focar e quais devemos filtrar (ex: APAs que contém zonas industriais e metrópoles)
+- Baixar dados do ICMBIO https://www.gov.br/icmbio/pt-br/assuntos/dados_geoespaciais https://www.gov.br/icmbio/pt-br/assuntos/dados_geoespaciais/mapa-tematico-e-dados-geoestatisticos-das-unidades-de-conservacao-federais
+- Escrever script para combinar dados do ICMBIO com os do CNUC
+- Enviar emails para: ICMBio, Reservas Votorantim, Instituto Florestal, Secretaria do Estado, etc, perguntando sobre dados de UCs
+- Email para Tathy sobre UCs do IF e planos de manejo
+- lista cncflora (perguntar Guilherme) tem no site do JBRJ
+- ari de Teixeira oliveira-filho ou Danilo neves da UFMG - neotroptree (Renato tem contato)
+- fazer lista preliminar de todos os possíveis nomes científicos (certos ou errados) baixando por exemplo do gbif, usar para fazer um filtro pelo bash por exemplo com grep para aplicar em bancos de dados imensos (ex: gbif sem filtros)
+- fazer um arquivo com a lista de nomes que não foram identificados no plantr
+- wdpa world database of protected areas wdpar no cran?
