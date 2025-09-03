@@ -36,10 +36,10 @@ getTaxonId <- function(total) {
     total <- tryAgain(total, not_found, prepSpecies)
 
     # Try again with verbatim
-    total <- tryAgain(total, not_found, formatTax, tax.name = "verbatimScientificName", use.author = F)
+    total <- tryAgain(total, not_found, prepSpecies, tax.names = tax.names.v, use.author = F)
 
     # And again with author
-    total <- tryAgain(total, not_found, formatTax, tax.name = "verbatimScientificName")
+    total <- tryAgain(total, not_found, prepSpecies, tax.name = tax.names.v)
 
     # Isolate authorship
     total[not_found(total),] <- isolateAuthorship(total[not_found(total),], overwrite.authorship = FALSE)
@@ -126,13 +126,6 @@ getTaxonId <- function(total) {
             x
         })
 
-    if (use.suggestion) {
-        total$scientificName.new[!is.na(total$suggestedName)] <- total$suggestedName[!is.na(total$suggestedName)]
-        total$scientificNameAuthorship.new[!is.na(total$suggestedAuthorship)] <- total$suggestedAuthorship[!is.na(total$suggestedAuthorship)]
-        total$family.new[!is.na(total$suggestedFamily)] <- total$suggestedFamily[!is.na(total$suggestedFamily)]
-    }
-    total <- prepFamily(x = total, fam.name = "family.new",
-    gen.name = "genus", spp.name = "scientificName.new", kingdom = "plantae")
 
     total formatTax()
 }
