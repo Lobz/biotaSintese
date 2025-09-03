@@ -4,7 +4,7 @@
 #'
 pairwiseMap <- function(x, y, FUN, ...) {
     if("list" %in% class(x) & "list" %in% class(y)) {
-        sapply(1:length(x), function(i) {FUN(x[[i]], y[[i]], ...)})
+        lapply(1:length(x), function(i) {FUN(x[[i]], y[[i]], ...)})
     }
     else {
         sapply(1:length(x), function(i) {FUN(x[i], y[i], ...)})

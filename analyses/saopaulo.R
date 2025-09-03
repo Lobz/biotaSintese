@@ -45,7 +45,7 @@ saopaulo <- formatOcc(saopaulo, noNumb = NA, noYear = NA, noName = NA)
 
 saopaulo <- formatLoc(saopaulo)
 
-# gonna fucking hand redo formatLoc
+# gonna hand redo formatLoc
 # fixLoc is already done, thank you
 remove_spaces <- function(x) {
   x<- gsub(" +$","",x, perl=T)
@@ -61,8 +61,11 @@ remove_punct <- function(x) {
 }
 
 fix_sp <- function(x) {
-    gsub("s.?.?o? paulo", "sao paulo", x)
+    gsub("s(.?.?o?| #227;o) paulo", "sao paulo", x)
 }
+
+saopaulo$stateProvince.new <- fix_sp(saopaulo$stateProvince.new)
+saopaulo$locality.new <- fix_sp(saopaulo$locality.new)
 
 finLoc <- function(x) {
   # strLoc
@@ -83,6 +86,8 @@ finLoc <- function(x) {
   x[x==""] <- NA
   x <- x[,names(saopaulo)]
 }
+
+saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country",finLoc)
 
 # fix state name
 saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country", function(x) {
@@ -108,6 +113,14 @@ saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country", 
 
 })
 
+# Get those MEX002 cases
+saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer %in% c("country","state") & grepl("\\w&saopaulo", x$locality.new), function(x) {
+  x$municipality.new <- sub("&saopaulo","",x$locality.new)
+  x$stateProvince.new <- sub(".*&","",x$locality.new)
+  x$locality.new <- x$municipality.new
+
+  x <- finLoc(x)
+})
 
 saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country", function(x) {
   x$municipality.new[grepl("ubatuba",x$stateProvince.new)] <- "ubatuba"

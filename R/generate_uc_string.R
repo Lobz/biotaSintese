@@ -40,6 +40,7 @@ uc_abbrevs <- data.frame(
 #'
 #' @param x UC names
 standardize_uc_name <- function(x) {
+    x <- plantR:::squish(x)
     x <- sub("^AREA", "ÁREA", x)
     x <- sub("PATRIM.NIO", "PATRIMÔNIO", x)
     x <- sub("PATRIMÔNIO NATURA ", "PATRIMÔNIO NATURAL ", x, fixed = T)

@@ -1,14 +1,36 @@
+devtools::load_all()
 library(sf) # used for spatial operations
 library(plantR) # used foi reading and cleaning occurrence data
 
 UC_de_interesse <- "JORDÃO"
 # UC_de_interesse <- "PORTO FERREIRA"
 
-ucs <- read.csv("~/BIOTA/unidades-de-conservacao/cnuc_2024_10.csv", sep=";", dec=",")
+ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
 str(ucs)
+ucs$Nome.da.UC <- standardize_uc_name(ucs$Nome.da.UC)
 uc_data <- subset(ucs, grepl(UC_de_interesse, Nome.da.UC, ignore.case=T))
 Nome_UC <- uc_data$Nome.da.UC
 nome_file <- gsub(" ","",tolower(rmLatin(Nome_UC)))
+
+ucs_icmbio <- read.csv("data/raw-data/DadosGeoestatisticos_UCs_21jul2025.csv", skip=4)
+str(ucs_icmbio)
+ucs_icmbio$Nome.da.UC <- standardize_uc_name(ucs_icmbio$Nome.da.Unidade.de.Conservação.conforme.o.Ato.legal)
+
+dim(ucs)
+dim(ucs_icmbio)
+not_found <- setdiff(ucs_icmbio$Nome.da.UC, ucs$Nome.da.UC)
+not_found <- sub("PROTEÇÃO AMBIENTAL D..? ", "PROTEÇÃO AMBIENTAL ", not_found)
+(not_found <- setdiff(not_found, ucs$Nome.da.UC))
+not_found <- sub("PROTEÇÃO AMBIENTAL ", "PROTEÇÃO AMBIENTAL DE ", not_found)
+(not_found <- setdiff(rmLatin(not_found), rmLatin(ucs$Nome.da.UC)))
+nomes <- rmLatin(ucs$Nome.da.UC)
+nomes <- gsub(" D\\w\\w? ", " ", nomes)
+not_found <- gsub(" D\\w\\w? ", " ", not_found)
+(not_found <- setdiff(not_found, nomes))
+nomes <- gsub(" - ", "-", nomes)
+not_found <- gsub(" - ", "-", not_found)
+(not_found <- setdiff(not_found, nomes))
+
 
 table(ucs$Grupo)
 table(ucs$Plano.de.Manejo)

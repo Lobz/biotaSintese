@@ -537,7 +537,12 @@ remove_fields <- function(x, to_remove = c(
     'level2Gid',
     'level2Name',
     'level3Gid',
-    'level3Name'
+    'level3Name',
+    'NAME_0',
+    'NAME_1',
+    'NAME_2',
+    'NAME_3',
+    'NAME_4'
   )) {
 
   x[, !names(x) %in% to_remove]

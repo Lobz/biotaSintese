@@ -4,7 +4,7 @@ library(stringr)
 library(florabr)
 
 # Flag for reruning all analysis
-rerun <- FALSE
+rerun <- TRUE
 
 # Data from Catalogo
 load("data/raw-data/catalogoCompleto.RData")
@@ -47,10 +47,12 @@ try({
     print(paste("Found",nrow(total),"records."))
     ucs[i,]$NumRecords <- nrow(total)
 
+    # Filter decent locality
+
     # Match taxonomy to taxonomy backbone
     total <- getTaxonId(total)
 
-    # Finished; validate taxonomist
+    # validate taxonomist
     total <- validateTax(total, generalist = T)
     total$tax.check <- factor(total$tax.check, levels = c("unknown", "low", "medium", "high"), ordered = T)
 

@@ -19,29 +19,31 @@ getTaxonId <- function(total) {
     table(noName)
 
     # Which records have not been matched?
-    not_found <- function(x) x$tax.notes == "not found"
+    not_found <- function(x) {
+        x$tax.notes == "not found" | grepl("not resolved|+1",x$tax.notes)
+    }
 
     # Match scientificName to oficial F&FBR backbone
     if("tax.notes" %in% names(total)) {
-        total <- tryAgain(total, not_found, formatTax, use.authors = F)
+        total <- tryAgain(total, not_found, formatTax)
     } else {
-        total <- formatTax(total, use.authors = F)
+        total <- formatTax(total)
     }
 
-    # we're gonna try again with author (see issue #170 in plantR)
-    total <- tryAgain(total, not_found, formatTax)
+    # we're gonna try again without author (see issue #170 in plantR)
+    total <- tryAgain(total, not_found, formatTax, use.authors = F)
 
     # Try again with verbatim
-    total <- tryAgain(total, not_found, formatTax, tax.name = "verbatimScientificName", use.author = F)
+    total <- tryAgain(total, not_found, formatTax, tax.name = "verbatimScientificName")
 
     # And again with author
-    total <- tryAgain(total, not_found, formatTax, tax.name = "verbatimScientificName")
+    total <- tryAgain(total, not_found, formatTax, tax.name = "verbatimScientificName", use.author = F)
 
     # Isolate authorship
     total[not_found(total),] <- isolateAuthorship(total[not_found(total),], overwrite.authorship = FALSE)
 
     # we're gonna try again without author (see issue #170 in plantR)
-    total <- tryAgain(total, not_found, formatTax, use.author = F)
+    total <- tryAgain(total, not_found, formatTax)
 
     # For records that have authorship inside scientific name, we want to remove that
     total <- tryAgain(total,

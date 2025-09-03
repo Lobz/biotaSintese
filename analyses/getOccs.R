@@ -17,7 +17,7 @@ valid_points <- fixDatum(valid_points)
 
 # Data about UCs from CNUC
 ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
-ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC"))
+ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC", "Municípios.Abrangidos"))
 
 # Make a summary table
 ucs$NumRecords <- NA
@@ -35,13 +35,44 @@ ucs$NumNoMatch <- NA
 ucs$Nome.da.UC <- standardize_uc_name(ucs$Nome.da.UC)
 ucs <- ucs[order(ucs$Nome.da.UC), ]
 
-# Generate string for regex grepl in locality data
-uc_strings <- generate_uc_string(ucs$Nome.da.UC)
+# Lookup what are the names of UCs in plantR
+dt <- data.frame(country="BR", stateProvince="SP", municipality=ucs$Municípios.Abrangidos, locality=ucs$Nome.da.UC)
+dt$municipality <- gsub("\\(.*\\)", "", dt$municipality)
+dt <- formatLoc(dt)
+
+in_gazet <- subset(dt, resolution.gazetteer == "locality")
+in_gazet
+locs <- getAdmin(in_gazet) # TO DO: open issue locs issing from getAdmin
+problem.cases <- in_gazet[is.na(locs$NAME_3),]
+prob.locality <- subset(saopaulo, resolution.gazetteer == "locality" & is.na(NAME_3), select=c(loc.cols, "loc.correct"))
+prob.mun <- subset(saopaulo, resolution.gazetteer == "county" & is.na(NAME_2), select=c(loc.cols, "loc.correct"))
+prob.state <- subset(saopaulo, resolution.gazetteer == "state" & is.na(NAME_1), select=c(loc.cols, "loc.correct"))
+prob.all <- dplyr::bind_rows(problem.cases, prob.locality, prob.mun, prob.state)[,c(loc.cols, "loc.correct")]
+dim(prob.all) # 16242 records!
+prob.all <- prob.all[!duplicated(prob.all$loc.correct),]
+dim(prob.all) # 167 loc corrects!
+
+write.csv(prob.all, "tests/test-data/test-formatLoc_vs_getAdmin.csv")
+
+# Save gazetteer string to lookup cases treated by plantR
+ucs$loc.correct <- dt$loc.correct
+ucs$loc.correct[dt$resolution.gazetteer != "locality"] <- NA
 
 # Which occs are associated with each UC
-occs_ucs <- lapply(uc_strings, grepl, x = saopaulo$locality, ignore.case = TRUE, perl = TRUE)
+occs_exact <- lapply(ucs$loc.correct, function(s) {
+    if(is.na(s)) return(FALSE)
+    grepl(s, saopaulo$loc.correct, fixed=T)
+})
+# Generate string for regex grepl in locality data
+uc_strings <- generate_uc_string(ucs$Nome.da.UC)
+# Use regex to look for more occs
+occs_loc <- lapply(uc_strings, grepl, x = saopaulo$locality, ignore.case = TRUE, perl = TRUE)
+occs_ucs <- pairwiseMap(occs_exact, occs_loc, FUN=function(x,y) {x|y})
 names(occs_ucs) <- ucs$Nome.da.UC
 save(occs_ucs, file="data/derived-data/occs_ucs.RData")
+
+ucs$Municípios.Abrangidos <- NULL
+ucs$loc.correct <- NULL
 # load("data/derived-data/points_ucs.RData")
 
 # Select a subset of UCs (for testing)
