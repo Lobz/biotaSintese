@@ -1,5 +1,3 @@
-library(stringr)
-library(dplyr)
 
 parseRefloraCatUC <- function(data) {
     # data$Gênero[952] %>% stringr::str_to_title()
