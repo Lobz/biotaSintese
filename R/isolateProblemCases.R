@@ -33,4 +33,5 @@ isolateProblemCases <- function(x, FUN, breaks = 10, parallel = FALSE, no_cores 
 }
 
 loc.cols <- c("country", "stateProvince", "municipality", "locality")
+loc.cols.plantR <- c("country.new", "stateProvince.new", "municipality.new", "locality.new", "locality.scrap", "resol.orig", "loc", "loc.correct", "latitude.gazetteer", "longitude.gazetteer", "resolution.gazetteer")
 tax.cols <- c("scientificName", "family")
