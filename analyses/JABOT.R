@@ -13,6 +13,11 @@ jabot$taxonRank <- factor(jabot$taxonRank,
     labels = taxonRanks,
     ordered = TRUE)
 
-
+# Normalize basisOfRecord
+table(jabot$basisofrecord, useNA="always")
+jabot$verbatimBasisOfRecord <- jabot$basisofrecord
+jabot$basisofrecord[jabot$basisofrecord=="Preserved Specimen"] <- "PRESERVED_SPECIMEN"
+jabot$basisofrecord[jabot$basisofrecord=="Xiloteca"] <- "PRESERVED_SPECIMEN"
+jabot$basisofrecord <- as.basisOfRecord(jabot$verbatimBasisOfRecord)
 
 save(jabot,file="data/derived-data/jabot_saopaulo.RData")

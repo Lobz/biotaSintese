@@ -85,15 +85,16 @@ for(i in 2:nrow(togo)) {
     save(splsaopaulo, file="data/raw-data/spl_saopaulo.RData")
 }
 
+# Normalize taxonRank and basisOfRecord
+table(splsaopaulo$basisofrecord, useNA="always")
+splsaopaulo$verbatimbasisofrecord <- splsaopaulo$basisofrecord
+splsaopaulo$basisofrecord <- sub("([a-z])([A-Z])", "\\1_\\2", splsaopaulo$basisofrecord)
+splsaopaulo$basisofrecord[which(startsWith(splsaopaulo$basisofrecord, "Machine"))] <- "MACHINE_OBSERVATION"
+splsaopaulo$basisofrecord[which(startsWith(splsaopaulo$basisofrecord, "Preserved"))] <- "PRESERVED_SPECIMEN"
+splsaopaulo$basisofrecord[which(startsWith(splsaopaulo$basisofrecord, "Xil"))] <- "PRESERVED_SPECIMEN"
+splsaopaulo$basisofrecord[splsaopaulo$basisofrecord=="Carpo"] <- "PRESERVED_SPECIMEN"
+splsaopaulo$basisofrecord <- toupper(splsaopaulo$basisofrecord)
+splsaopaulo$basisofrecord <- as.basisOfRecord(splsaopaulo$basisofrecord)
+
 save(splsaopaulo, file="data/raw-data/spl_saopaulo.RData")
 # todo: decide what to do with barcode NA
-
-    # Merge and treat data
-spl <- formatDwc(
-    splink_data = splsaopaulo
-    )
-
-
-spl <- formatOcc(spl)
-spl <- formatLoc(spl)
-save(spl,file="data/derived-data/occs_splink_sp.RData")

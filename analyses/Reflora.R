@@ -37,5 +37,7 @@ reflora$year <- as.numeric(year)
 
 reflora$month <- as.numeric(reflora$month)
 
+reflora$basisOfRecord <- "PRESERVED_SPECIMEN"
+reflora$basisOfRecord <- as.basisOfRecord(reflora$basisOfRecord)
 
 save(reflora,file="data/raw-data/reflora_all.RData")
