@@ -30,8 +30,8 @@ locTable <- function(x) {
     locsList <- stringr::str_split(x$locality,",|[.]|;| - ")
     lens <- sapply(locsList, length)
     id <- sapply(1:nrow(x), function(i) rep(x$recordID[i],lens[i]))
-    muns <- sapply(1:nrow(x), function(i) rep(x$NAME_2[i],lens[i]))
-    states  <- sapply(1:nrow(x), function(i) rep(x$NAME_1[i],lens[i]))
+    muns <- sapply(1:nrow(x), function(i) rep(x$municipality.correct[i],lens[i]))
+    states  <- sapply(1:nrow(x), function(i) rep(x$stateProvince.correct[i],lens[i]))
     locs <- unlist(locsList)
     id <- unlist(id)
     muns <- unlist(muns)
@@ -40,10 +40,10 @@ locTable <- function(x) {
 
     locs <- sub("\\.$","",locs)
     locs <- plantR:::squish(locs)
-    Local <- c(x$locality.new, x$locality, x$locality.scrap, x$NAME_3)
+    Local <- c(x$locality.new, x$locality, x$locality.scrap, x$locality.correct)
     ID <- rep(x$recordID, 4)
-    Muns <- rep(x$NAME_2, 4)
-    States <- rep(x$NAME_1, 4)
+    Muns <- rep(x$municipality.correct, 4)
+    States <- rep(x$stateProvince.correct, 4)
     Local <- sub("\\.$","",Local)
     Localidade <- c(locs, Local)
     recordID <- c(id, ID)
@@ -82,7 +82,7 @@ locTable2 <- function(x) {
         return(NULL)
     }
 
-    DT <- x[,c("recordID", "locality.new", "NAME_2","NAME_1")]
+    DT <- x[,c("recordID", "locality.new", "municipality.correct","stateProvince.correct")]
     DT2 <- DT
     DT2$locality.new <- x$locality.scrap
     DT <- rbind(DT, DT2)

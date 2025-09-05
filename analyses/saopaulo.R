@@ -61,11 +61,9 @@ remove_punct <- function(x) {
 }
 
 fix_sp <- function(x) {
-    gsub("s(.?.?o?| #227;o) paulo", "sao paulo", x)
+    gsub("^s(.?.?o?| #227;o) paulo", "sao paulo", x, ignore.case=T)
+    gsub("(\\s|,|\\.|-)s(.?.?o?| #227;o) paulo", "\\1sao paulo", x, ignore.case=T)
 }
-
-saopaulo$stateProvince.new <- fix_sp(saopaulo$stateProvince.new)
-saopaulo$locality.new <- fix_sp(saopaulo$locality.new)
 
 finLoc <- function(x) {
   # strLoc
@@ -86,6 +84,10 @@ finLoc <- function(x) {
   x[x==""] <- NA
   x <- x[,names(saopaulo)]
 }
+
+saopaulo$stateProvince.new <- fix_sp(saopaulo$stateProvince.new)
+saopaulo$municipality.new <- fix_sp(saopaulo$municipality.new)
+saopaulo$locality.new <- fix_sp(saopaulo$locality.new)
 
 saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country",finLoc)
 
@@ -114,9 +116,9 @@ saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country", 
 })
 
 # Get those MEX002 cases
-saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer %in% c("country","state") & grepl("\\w&saopaulo", x$locality.new), function(x) {
-  x$municipality.new <- sub("&saopaulo","",x$locality.new)
-  x$stateProvince.new <- sub(".*&","",x$locality.new)
+saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer %in% c("country","state") & grepl("&SAO PAULO", x$locality, fixed=T), function(x) {
+  x$municipality.new <- tolower(sub("&SAO PAULO","",x$locality))
+  x$stateProvince.new <- "sao paulo"
   x$locality.new <- x$municipality.new
 
   x <- finLoc(x)
@@ -184,43 +186,47 @@ saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country" &
 locs <- getAdmin(saopaulo$loc.correct)
 names(locs)[1]<-"loc.correct.mun"
 saopaulo[,names(locs)] <- NULL
+names(locs)<-c("loc.correct.admin", "country.correct", "stateProvince.correct", "municipality.correct", "locality.correct", "source.loc")
 saopaulo <- cbind(saopaulo,locs)
 
-saopaulo <- subset(saopaulo, NAME_0 == "Brazil" | is.na(NAME_0))
+saopaulo <- subset(saopaulo, country.correct == "Brazil" | is.na(country.correct))
 
-noCountry <- subset(saopaulo, is.na(NAME_0))
+# noCountry <- subset(saopaulo, is.na(country.correct))
 
-saopaulo <- subset(saopaulo, NAME_1 == "São Paulo" | is.na(NAME_1))
+saopaulo <- subset(saopaulo, stateProvince.correct == "São Paulo" | is.na(stateProvince.correct))
 # sort(table(saopaulo$stateProvince.new, useNA="always"))
-# table(saopaulo$NAME_1, useNA="always")
-# table(saopaulo$NAME_2, useNA="always")
+# table(saopaulo$stateProvince.correct, useNA="always")
+# table(saopaulo$municipality.correct, useNA="always")
 # dim(saopaulo)
 
 # Treat gps data
-saopaulo <- prepCoord(saopaulo)
-# Try again using verbatim coordinates
+saopaulo <- formatCoord(saopaulo)
+table(saopaulo$origin.coord)
+# Try again using verbatim coordinates -> this isn't working for some reason
 saopaulo <- tryAgain(saopaulo,
     condition = function(x) {
-      x$coord.check == FALSE
+      x$origin.coord == "coord_gazet"
     },
     FUN = function(x) {
-        x <- remove_fields(x, c("decimalLatitude.new", "decimalLongitude.new", "coord.check"))
-        x <- prepCoord(x, lat = "verbatimLatitude", lon = "verbatimLongitude")
-        names(x)[ncol(x)-2:1] <- c("decimalLatitude.new", "decimalLongitude.new")
+        x$decimalLatitude <- x$verbatimLatidude
+        x$decimalLongitude <- x$verbatimLongidude
+        x <- formatCoord(x)
         x
     }
 )
-saopaulo <- getCoord(saopaulo)
+table(is.na(saopaulo$decimalLatitude.new))
 
 table(is.na(saopaulo$locality), saopaulo$origin.coord)
 
 saopaulo <- validateLoc(saopaulo)
 
 # First pass in formatTax
-saopaulo <- formatTax(saopaulo, parallel = TRUE, cores = detectCores() - 1)
+saopaulo <- formatTax(saopaulo)
 
 # validate coord
-saopaulo <- validateCoord(saopaulo) # NOT WORKING
+saopaulo <- validateCoord(saopaulo) # WORKING
+
+sp_deduped <- validateDup(saopaulo, noNumb = NA, noYear = NA, noName = NA, prop=1)
 
 # str(saopaulo)
 

@@ -64,7 +64,7 @@ summary(is.na(total$locality))
 
 # Create sf points for all records
 my_points <- st_as_sf(total, coords = c("decimalLongitude.new", "decimalLatitude.new"))
-plot(my_points[,"NAME_2"])
+plot(my_points[,"municipality.correct"])
 plot(shapes_sp[2], col="grey", add= TRUE) ## WHY NOT WORK????
 
 

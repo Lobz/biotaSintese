@@ -43,10 +43,10 @@ dt <- formatLoc(dt)
 in_gazet <- subset(dt, resolution.gazetteer == "locality")
 in_gazet
 locs <- getAdmin(in_gazet) # TO DO: open issue locs issing from getAdmin
-problem.cases <- in_gazet[is.na(locs$NAME_3),]
-prob.locality <- subset(saopaulo, resolution.gazetteer == "locality" & is.na(NAME_3), select=c(loc.cols, "loc.correct"))
-prob.mun <- subset(saopaulo, resolution.gazetteer == "county" & is.na(NAME_2), select=c(loc.cols, "loc.correct"))
-prob.state <- subset(saopaulo, resolution.gazetteer == "state" & is.na(NAME_1), select=c(loc.cols, "loc.correct"))
+problem.cases <- in_gazet[is.na(locs$locality.correct),]
+prob.locality <- subset(saopaulo, resolution.gazetteer == "locality" & is.na(locality.correct), select=c(loc.cols, "loc.correct"))
+prob.mun <- subset(saopaulo, resolution.gazetteer == "county" & is.na(municipality.correct), select=c(loc.cols, "loc.correct"))
+prob.state <- subset(saopaulo, resolution.gazetteer == "state" & is.na(stateProvince.correct), select=c(loc.cols, "loc.correct"))
 prob.all <- dplyr::bind_rows(problem.cases, prob.locality, prob.mun, prob.state)[,c(loc.cols, "loc.correct")]
 dim(prob.all) # 16242 records!
 prob.all <- prob.all[!duplicated(prob.all$loc.correct),]

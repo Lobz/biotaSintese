@@ -4,7 +4,7 @@ devtools::load_all()
 library(parallel)
 
 br <- latamMap$brazil
-spMap <- subset(br, NAME_1 == "sao paulo")
+spMap <- subset(br, stateProvince.correct == "sao paulo")
 spMap1 <- list(sp=spMap)
 
 occs <- saopaulo
@@ -27,7 +27,7 @@ checkDist(testData)
 
 
 lon = "decimalLongitude.new"; lat = "decimalLatitude.new";
-    low.map = "plantR"; high.map = spMap1; country.shape = "NAME_0";
+    low.map = "plantR"; high.map = spMap1; country.shape = "country.correct";
     country.gazetteer = "country.gazet"; tax.name = "suggestedName";
     tax.author = "suggestedAuthorship"; sep = "_"; loc = "loc.correct";
     source = "bfo"; output = "same.col"
@@ -70,7 +70,7 @@ head(dups)
 dupsIDs <- dups$recordID
 
 dt <- subset(occs, recordID %in% dupsIDs)
-dt <- remove_fields(dt, c("NAME_0", "NAME_1", "NAME_2", "NAME_3"))
+dt <- remove_fields(dt, c("country.correct", "stateProvince.correct", "municipality.correct", "locality.correct"))
 dt <- validateCoord(dt)
 dtt <- isolateProblemCases(dt, validateCoord)
 if(nrow(dtt) < nrow(dt))

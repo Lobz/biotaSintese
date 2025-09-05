@@ -32,19 +32,19 @@ sapply(points_muns, length)
 plotMun <- function(name, plot = TRUE, save = TRUE) {
     gps_filter <- points_muns[[name]]
     filtered_gps <- valid_points[gps_filter,]
-    # othermuns <- unique(filtered_gps$NAME_2)
+    # othermuns <- unique(filtered_gps$municipality.correct)
     # plot(filtered_gps, add=T, col = "blue")
-    filtered_name <- saopaulo[which(tolower(saopaulo$NAME_2)==tolower(name)),]
+    filtered_name <- saopaulo[which(tolower(saopaulo$municipality.correct)==tolower(name)),]
     if(nrow(filtered_name) == 0) {
         print(paste("Zero matches:", name))
-        print(sort(table(filtered_gps$NAME_2)) )
+        print(sort(table(filtered_gps$municipality.correct)) )
     }
-    name_filter <- which(tolower(valid_points$NAME_2)==tolower(name))
+    name_filter <- which(tolower(valid_points$municipality.correct)==tolower(name))
 
     # Summary from GPS
     total <- nrow(filtered_gps)
     correct <- length(intersect(name_filter, gps_filter))
-    na <- sum(is.na(filtered_gps$NAME_2))
+    na <- sum(is.na(filtered_gps$municipality.correct))
     wrong <- total - correct - na
     summ_gps <- c(total_gps=total,correct=correct,wrong_name=wrong,name_not_av=na)
 
@@ -65,7 +65,7 @@ plotMun <- function(name, plot = TRUE, save = TRUE) {
         plot(sp$geom, main=name)
         plot(st_geometry(shapes[name,]), add=T)
         plot(valid_points$geometry[name_filter], col=rgb(0,0,1,0.1), pch = 4, add=T)
-        barplot(sort(table(filtered_gps$NAME_2[filtered_gps$NAME_2 != name]), decreasing = TRUE)[1:3], main="Top three wrong municipalities", las=1, horiz=T)
+        barplot(sort(table(filtered_gps$municipality.correct[filtered_gps$municipality.correct != name]), decreasing = TRUE)[1:3], main="Top three wrong municipalities", las=1, horiz=T)
         barplot(summ_name[2:4], main = "Coords of points filtered by municipality")
         barplot(summ_gps[2:4], main="Municipality of points filtered by GPS")
         },
