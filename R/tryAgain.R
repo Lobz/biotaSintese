@@ -9,7 +9,7 @@
 #' @param ... Aditional parameters to pass to FUN
 #'
 #' @details You may pass aditional parameters to the function FUN. This function assumes that FUN preserves the order of the rows of x, and that condition() may be applied to both x and FUN(x). FUN may change the values of any columns of x, but only on rows that pass condition before FUN and do not pass condition after FUN.
-tryAgain <- function(x, condition, FUN, add_cols = FALSE, ...) {
+tryAgain <- function(x, condition, FUN, success_condition = function(x) !condition(x), add_cols = FALSE, ...) {
     # Select rows to treat
     unmatched <- condition(x)
     if(!any(unmatched, na.rm=T)) {
@@ -24,7 +24,7 @@ tryAgain <- function(x, condition, FUN, add_cols = FALSE, ...) {
     results <- FUN(to_rematch, ...)
 
     # Select which rows have succesfully changed with FUN
-    rematched <- !condition(results)
+    rematched <- success_condition(results)
     if(!any(rematched, na.rm=T)) {
         print("Retrying wielded no results")
         return(x)
