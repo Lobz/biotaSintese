@@ -30,3 +30,7 @@ fix: use as.numeric
 - fazer lista preliminar de todos os possíveis nomes científicos (certos ou errados) baixando por exemplo do gbif, usar para fazer um filtro pelo bash por exemplo com grep para aplicar em bancos de dados imensos (ex: gbif sem filtros)
 - fazer um arquivo com a lista de nomes que não foram identificados no plantr
 - wdpa world database of protected areas wdpar no cran?
+
+## Data cleaning
+
+- todo: decide what to do with barcode NA
