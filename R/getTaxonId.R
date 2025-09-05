@@ -30,14 +30,14 @@ getTaxonId <- function(total) {
         total <- formatTax(total)
     }
 
-    # we're gonna try again without author (see issue #170 in plantR)
-    total <- tryAgain(total, not_found, formatTax, use.authors = F)
-
     # Try again with verbatim
     total <- tryAgain(total, not_found, formatTax, tax.name = "verbatimScientificName")
 
+    # we're gonna try again without author (see issue #170 in plantR)
+    # total <- tryAgain(total, not_found, formatTax, use.authors = F)
+
     # And again with author
-    total <- tryAgain(total, not_found, formatTax, tax.name = "verbatimScientificName", use.author = F)
+    # total <- tryAgain(total, not_found, formatTax, tax.name = "verbatimScientificName", use.author = F)
 
     # Isolate authorship
     total[not_found(total),] <- isolateAuthorship(total[not_found(total),], overwrite.authorship = FALSE)
