@@ -34,3 +34,7 @@ fix: use as.numeric
 ## Data cleaning
 
 - todo: decide what to do with barcode NA
+
+### Notes
+
+- last update improved loc resolution for ~ 47k records (I had to redo all treatements so I don't have the exact number of cases where it resulted in worse resolution...)

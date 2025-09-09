@@ -11,7 +11,9 @@ load("data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
 saopaulo$recordID <- 1:nrow(saopaulo) # I need a unique ID for this
 
 # Data with valid coordinates: either original coordinates or locality
-valid_coords <- subset(saopaulo, origin.coord == "coord_original" | resolution.gazetteer == "locality")
+valid_coords <- subset(saopaulo, origin.coord == "coord_original" | resolution.gazetteer == "locality" & !is.na(decimalLongitude.new))
+valid_coords <- subset(valid_coords,  !is.na(as.numeric(decimalLongitude.new)))
+table(valid_coords$geo.check)
 valid_points <- st_as_sf(valid_coords, coords = c("decimalLongitude.new", "decimalLatitude.new"))
 # Unify and convert datum to match SIRGAS 2000
 valid_points <- fixDatum(valid_points)
@@ -29,12 +31,12 @@ points_muns <- st_intersects(shapes, valid_points)
 names(points_muns) <- shapes$name_muni
 sapply(points_muns, length)
 
-plotMun <- function(name, plot = TRUE, save = TRUE) {
+plotMun <- function(name, plot = TRUE, save = TRUE, refdf = saopaulo) {
     gps_filter <- points_muns[[name]]
     filtered_gps <- valid_points[gps_filter,]
     # othermuns <- unique(filtered_gps$municipality.correct)
     # plot(filtered_gps, add=T, col = "blue")
-    filtered_name <- saopaulo[which(tolower(saopaulo$municipality.correct)==tolower(name)),]
+    filtered_name <- refdf[which(tolower(refdf$municipality.correct)==tolower(name)),]
     if(nrow(filtered_name) == 0) {
         print(paste("Zero matches:", name))
         print(sort(table(filtered_gps$municipality.correct)) )
@@ -42,32 +44,45 @@ plotMun <- function(name, plot = TRUE, save = TRUE) {
     name_filter <- which(tolower(valid_points$municipality.correct)==tolower(name))
 
     # Summary from GPS
-    total <- nrow(filtered_gps)
+    total_gps <- nrow(filtered_gps)
     correct <- length(intersect(name_filter, gps_filter))
     na <- sum(is.na(filtered_gps$municipality.correct))
-    wrong <- total - correct - na
-    summ_gps <- c(total_gps=total,correct=correct,wrong_name=wrong,name_not_av=na)
+    wrong <- total_gps - correct - na
+    summ_gps <- c(total_gps=total_gps,correct=correct,wrong_name=wrong,name_not_av=na)
 
     # Summary from Name
-    total <- nrow(filtered_name)
+    total_name <- nrow(filtered_name)
     wrong <- length(name_filter) - correct
-    na <- total - correct - wrong
-    summ_name <- c(total_name=total,correct=correct,wrong_gps=wrong,gps_not_av=na)
+    na <- total_name - correct - wrong
+    summ_name <- c(total_name=total_name,correct=correct,wrong_gps=wrong,gps_not_av=na)
 
+    total <- total_gps + total_name
     # Plots
-    if(plot & total > 0) {
+    if(plot && total > 0) {
         tryCatch( {
 
         if(save) {
             png(paste0("plots/municipios/", tolower(plantR::rmLatin(name)), ".png"), height=480, width=640)
         }
-        par(mfrow=c(2,2))
-        plot(sp$geom, main=name)
-        plot(st_geometry(shapes[name,]), add=T)
-        plot(valid_points$geometry[name_filter], col=rgb(0,0,1,0.1), pch = 4, add=T)
-        barplot(sort(table(filtered_gps$municipality.correct[filtered_gps$municipality.correct != name]), decreasing = TRUE)[1:3], main="Top three wrong municipalities", las=1, horiz=T)
-        barplot(summ_name[2:4], main = "Coords of points filtered by municipality")
-        barplot(summ_gps[2:4], main="Municipality of points filtered by GPS")
+        if(total_gps > 0 && total_name > 0){
+            par(mfrow=c(2,2))
+        } else {
+            par(mfrow=c(2,1))
+        }
+        if(total_name > 0) {
+            plot(sp$geom, main=name)
+            plot(st_geometry(shapes[name,]), add=T)
+            plot(valid_points$geometry[name_filter], col=rgb(0,0,1,0.1), pch = 4, add=T)
+        }
+        if(summ_gps["wrong_name"] > 0){
+            barplot(sort(table(filtered_gps$municipality.correct[filtered_gps$municipality.correct != name]), decreasing = TRUE)[1:3], main="Top three wrong municipalities", las=1, horiz=T)
+        }
+        if(total_name > 0) {
+            barplot(summ_name[2:4], main = "Coords of points filtered by municipality")
+        }
+        if(total_gps > 0){
+            barplot(summ_gps[2:4], main="Municipality of points filtered by GPS")
+        }
         },
         finally={
             dev.off()
@@ -83,14 +98,15 @@ plotMun("Valinhos")
 plotMun("Santo André")
 plotMun("Santos")
 plotMun("Embu das Artes")
-plotMun("Campos Do Jordão")
+plotMun("Campos do Jordão")
 plotMun("São Paulo")
+plotMun("Alfredo Marcondes")
 
 tabs <- lapply(rownames(shapes), function(x) try(plotMun(x, plot=T)))
 tabls <- sapply(tabs, function(x) if(class(x) == "integer") FALSE else TRUE)
 tabs <- do.call(rbind, tabs)
 rownames(tabs) <- rownames(shapes)
-write.csv(tabs, "data/derived-data/test_gps_municipalitites.csv")
+write.csv(tabs, "results/test_gps_municipalitites.csv")
 tabs <- read.csv("results/test_gps_municipalitites.csv")
 
 t <- as.data.frame(tabs)

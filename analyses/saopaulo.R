@@ -82,7 +82,7 @@ finLoc <- function(x) {
   x <- cbind.data.frame(x,
                          locs[, colunas], stringsAsFactors = FALSE)
   x[x==""] <- NA
-  x <- x[,names(saopaulo)]
+  x
 }
 
 saopaulo$stateProvince.new <- fix_sp(saopaulo$stateProvince.new)
@@ -116,7 +116,7 @@ saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country", 
 })
 
 # Get those MEX002 cases
-saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer %in% c("country","state") & grepl("&SAO PAULO", x$locality, fixed=T), function(x) {
+saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer %in% c("country") & grepl("&SAO PAULO", x$locality, fixed=T), function(x) {
   x$municipality.new <- tolower(sub("&SAO PAULO","",x$locality))
   x$stateProvince.new <- "sao paulo"
   x$locality.new <- x$municipality.new
@@ -144,15 +144,25 @@ saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country", 
 })
 
 # get municipalitys with unique name
-munis <- geobr::read_municipality()
+munis <- geobr::read_municipality(year = 2024)
 munis <- subset(munis, !duplicated(name_muni))
-states <- geobr::read_state()
+states <- geobr::read_state(year = 2024)
 munis$name_state <- states$name_state[match(munis$code_state, states$code_state)]
 munis$name_state_norm <- tolower(rmLatin(munis$name_state))
 
 saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country" & !is.na(x$municipality), function(x) {
   # find state name in municipality name
   x$stateProvince.new <- munis$name_state_norm[match(x$municipality, munis$name_muni)]
+
+  x <- finLoc(x)
+})
+
+saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country" & is.na(x$municipality), function(x) {
+  # find state name in state name
+  muni <- tolower(rmLatin(x$stateProvince))
+  state <- munis$name_state_norm[match(muni, tolower(rmLatin(munis$name_muni)))]
+  x$municipality.new <- muni
+  x$stateProvince.new <- state
 
   x <- finLoc(x)
 })
@@ -184,9 +194,8 @@ saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country" &
 # sort(table(saopaulo$stateProvince.new, useNA="always"))
 
 locs <- getAdmin(saopaulo$loc.correct)
-names(locs)[1]<-"loc.correct.mun"
-saopaulo[,names(locs)] <- NULL
 names(locs)<-c("loc.correct.admin", "country.correct", "stateProvince.correct", "municipality.correct", "locality.correct", "source.loc")
+saopaulo[,names(locs)] <- NULL
 saopaulo <- cbind(saopaulo,locs)
 
 saopaulo <- subset(saopaulo, country.correct == "Brazil" | is.na(country.correct))
@@ -205,29 +214,36 @@ table(saopaulo$origin.coord)
 # Try again using verbatim coordinates -> this isn't working for some reason
 saopaulo <- tryAgain(saopaulo,
     condition = function(x) {
-      x$origin.coord == "coord_gazet"
+      x$origin.coord == "coord_gazet" & !is.na(x$verbatimLatitude) & !is.na(x$verbatimLongitude)
     },
     FUN = function(x) {
         x$decimalLatitude <- x$verbatimLatidude
         x$decimalLongitude <- x$verbatimLongidude
         x <- formatCoord(x)
         x
-    }
+    },
+    success_condition = function(x) x$origin.coord == "coord_original"
+
 )
 table(is.na(saopaulo$decimalLatitude.new))
 
 table(is.na(saopaulo$locality), saopaulo$origin.coord)
 
-saopaulo <- validateLoc(saopaulo)
 
 # First pass in formatTax
 saopaulo <- formatTax(saopaulo)
 
-# validate coord
-saopaulo <- validateCoord(saopaulo) # WORKING
+# validate
+saopaulo <- validateLoc(saopaulo)
+saopaulo <- validateTax(saopaulo)
+
+map <- latamMap$brazil
+map <- subset(map, NAME_1 == "sao paulo")
+saopaulo <- validateCoord(saopaulo, high.map = map) # WORKING
+save(saopaulo,file="data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
 
 sp_deduped <- validateDup(saopaulo, noNumb = NA, noYear = NA, noName = NA, prop=1)
+names(sp_deduped)
+save(sp_deduped,file="data/derived-data/reflora_gbif_jabot_splink_saopaulo_deduped.RData")
 
 # str(saopaulo)
-
-save(saopaulo,file="data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")

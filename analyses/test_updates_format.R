@@ -10,7 +10,7 @@ splocs <- saopaulo[, loc.cols]
 
 splocs <- formatLoc(saopaulo)
 # Get those MEX002 cases
-splocs <- tryAgain(splocs, function(x) x$resolution.gazetteer %in% c("country","state") & grepl("&SAO PAULO", x$locality, fixed=T), function(x) {
+splocs <- tryAgain(splocs, function(x) x$resolution.gazetteer %in% c("country") & grepl("&SAO PAULO", x$locality, fixed=T), function(x) {
   x$municipality.new <- tolower(sub("&SAO PAULO","",x$locality))
   x$stateProvince.new <- "sao paulo"
   x$locality.new <- x$municipality.new
@@ -18,9 +18,9 @@ splocs <- tryAgain(splocs, function(x) x$resolution.gazetteer %in% c("country","
   x <- finLoc(x)
 })
 # get municipalitys with unique name
-munis <- geobr::read_municipality()
+munis <- geobr::read_municipality(year=2024)
 munis <- subset(munis, !duplicated(name_muni))
-states <- geobr::read_state()
+states <- geobr::read_state(year=2024)
 munis$name_state <- states$name_state[match(munis$code_state, states$code_state)]
 munis$name_state_norm <- tolower(rmLatin(munis$name_state))
 
@@ -31,7 +31,15 @@ splocs <- tryAgain(splocs, function(x) x$resolution.gazetteer == "country" & !is
   x <- finLoc(x)
 })
 
+splocs <- tryAgain(splocs, function(x) x$resolution.gazetteer == "country" & is.na(x$municipality), function(x) {
+  # find state name in state name
+  muni <- tolower(rmLatin(x$stateProvince))
+  state <- munis$name_state_norm[match(muni, tolower(rmLatin(munis$name_muni)))]
+  x$municipality.new <- muni
+  x$stateProvince.new <- state
 
+  x <- finLoc(x)
+})
 
 res.old <- factor(saopaulo$resolution.gazetteer, levels=c("locality","county","state","country"), ordered = T)
 res.new <- factor(splocs$resolution.gazetteer, levels=c("locality","county","state","country"), ordered = T)
@@ -46,8 +54,9 @@ sum(better)
 sum(worse)
 sum(same)
 
-saopaulo[which(worse & saopaulo$resolution.gazetteer=="county")[1:10+200],c(loc.cols, loc.cols.plantR)]
-splocs[which(worse & saopaulo$resolution.gazetteer=="county")[1:10+200],c(loc.cols, loc.cols.plantR)]
+i<-10
+saopaulo[which(worse & saopaulo$resolution.gazetteer=="county")[1:10+i],c(loc.cols, loc.cols.plantR)]
+splocs[which(worse & saopaulo$resolution.gazetteer=="county")[1:10+i],c(loc.cols, loc.cols.plantR)]
 
 x <- saopaulo
 saopaulo[better, names(splocs)] <- splocs[better, ]
