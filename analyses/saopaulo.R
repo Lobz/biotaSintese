@@ -212,19 +212,19 @@ saopaulo <- subset(saopaulo, stateProvince.correct == "São Paulo" | is.na(state
 saopaulo <- formatCoord(saopaulo)
 table(saopaulo$origin.coord)
 # Try again using verbatim coordinates -> this isn't working for some reason
-saopaulo <- tryAgain(saopaulo,
-    condition = function(x) {
-      x$origin.coord == "coord_gazet" & !is.na(x$verbatimLatitude) & !is.na(x$verbatimLongitude)
-    },
-    FUN = function(x) {
-        x$decimalLatitude <- x$verbatimLatidude
-        x$decimalLongitude <- x$verbatimLongidude
-        x <- formatCoord(x)
-        x
-    },
-    success_condition = function(x) x$origin.coord == "coord_original"
+# saopaulo <- tryAgain(saopaulo,
+#     condition = function(x) {
+#       x$origin.coord == "coord_gazet" & !is.na(x$verbatimLatitude) & !is.na(x$verbatimLongitude)
+#     },
+#     FUN = function(x) {
+#         x$decimalLatitude <- x$verbatimLatidude
+#         x$decimalLongitude <- x$verbatimLongidude
+#         x <- formatCoord(x)
+#         x
+#     },
+#     success_condition = function(x) x$origin.coord == "coord_original"
 
-)
+# )
 table(is.na(saopaulo$decimalLatitude.new))
 
 table(is.na(saopaulo$locality), saopaulo$origin.coord)
