@@ -12,16 +12,13 @@ uc_data <- subset(ucs, grepl(UC_de_interesse, Nome.da.UC, ignore.case=T))
 Nome_UC <- uc_data$Nome.da.UC
 nome_file <- gsub(" ","",tolower(rmLatin(Nome_UC)))
 
-ucs_icmbio <- read.csv("data/raw-data/DadosGeoestatisticos_UCs_21jul2025.csv", skip=4)
+ucs_icmbio <- read.csv("data/raw-data/DadosGeoestatisticos_UCs_21jul2025.csv")
 str(ucs_icmbio)
 ucs_icmbio$Nome.da.UC <- standardize_uc_name(ucs_icmbio$Nome.da.Unidade.de.Conservação.conforme.o.Ato.legal)
 
 dim(ucs)
 dim(ucs_icmbio)
 not_found <- setdiff(ucs_icmbio$Nome.da.UC, ucs$Nome.da.UC)
-not_found <- sub("PROTEÇÃO AMBIENTAL D..? ", "PROTEÇÃO AMBIENTAL ", not_found)
-(not_found <- setdiff(not_found, ucs$Nome.da.UC))
-not_found <- sub("PROTEÇÃO AMBIENTAL ", "PROTEÇÃO AMBIENTAL DE ", not_found)
 (not_found <- setdiff(rmLatin(not_found), rmLatin(ucs$Nome.da.UC)))
 nomes <- rmLatin(ucs$Nome.da.UC)
 nomes <- gsub(" D\\w\\w? ", " ", nomes)
