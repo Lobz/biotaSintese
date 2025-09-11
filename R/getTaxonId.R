@@ -22,28 +22,23 @@ getTaxonId <- function(total) {
     not_found <- function(x) {
         x$tax.notes == "not found" | grepl("not resolved|+1",x$tax.notes)
     }
+    found <- function(x) !not_found(x)
 
     # Match scientificName to oficial F&FBR backbone
     if("tax.notes" %in% names(total)) {
-        total <- tryAgain(total, not_found, formatTax)
+        total <- tryAgain(total, not_found, formatTax, label = "Default formatTax")
     } else {
         total <- formatTax(total)
     }
 
     # Try again with verbatim
-    total <- tryAgain(total, not_found, formatTax, tax.name = "verbatimScientificName")
+    total <- tryAgain(total, not_found, formatTax, tax.name = "verbatimScientificName", label = "Verbatim")
 
     # we're gonna try again without author (see issue #170 in plantR)
     # total <- tryAgain(total, not_found, formatTax, use.authors = F)
 
     # And again with author
     # total <- tryAgain(total, not_found, formatTax, tax.name = "verbatimScientificName", use.author = F)
-
-    # Isolate authorship
-    total[not_found(total),] <- isolateAuthorship(total[not_found(total),], overwrite.authorship = FALSE)
-
-    # we're gonna try again without author (see issue #170 in plantR)
-    total <- tryAgain(total, not_found, formatTax)
 
     # For records that have authorship inside scientific name, we want to remove that
     total <- tryAgain(total,
@@ -59,7 +54,9 @@ getTaxonId <- function(total) {
             x$scientificName <- sub(", \\d+","",x$scientificName)
             x <- formatTax(x)
             x
-        })
+        },
+        success_condition = found,
+        label = "Removed auth 1")
 
     total <- tryAgain(total,
         condition = function(x) {
@@ -74,14 +71,21 @@ getTaxonId <- function(total) {
             x$scientificName <- sub(", \\d+","",x$scientificName)
             x <- formatTax(x)
             x
-        })
-
+        },
+        success_condition = found,
+        label = "Removed auth 2")
 
     # Isolate authorship
-    total <- tryAgain(total, not_found, function(x) {formatTax(isolateAuthorship(x))})
+    total[not_found(total),] <- isolateAuthorship(total[not_found(total),], overwrite.authorship = FALSE)
+
+    # we're gonna try again without author (see issue #170 in plantR)
+    total <- tryAgain(total, not_found, formatTax, label = "Isolated")
+
+    # Isolate authorship
+    total <- tryAgain(total, not_found, function(x) {formatTax(isolateAuthorship(x))}, label = "Isolate 2")
 
     # What's still unmatched? Genus rank
-    total <- tryAgain(total, condition = function(x) not_found(x) & x$taxonRank=="genus", FUN = formatTax, tax.name = "genus")
+    total <- tryAgain(total, condition = function(x) not_found(x) & x$taxonRank=="genus", FUN = formatTax, tax.name = "genus", label = "Genus")
 
     # What's still unmatched? Vars and subspecies
     total <- tryAgain(total,
@@ -92,7 +96,9 @@ getTaxonId <- function(total) {
             x <- formatTax(x)
             x$scientificName <- saved
             x
-        })
+        },
+        success_condition = found,
+        label = "Var.")
     total <- tryAgain(total,
         condition = function(x) not_found(x) & grepl("\\w+ \\w+ \\w", x$scientificName),
         FUN = function(x) {
@@ -101,7 +107,9 @@ getTaxonId <- function(total) {
             x <- formatTax(x)
             x$scientificName <- saved
             x
-        })
+        },
+        success_condition = found,
+        label = "Subsp.")
     total <- tryAgain(total,
         condition = function(x) not_found(x) & grepl("\\w+ \\w+ \\w", x$scientificName),
         FUN = function(x) {
@@ -110,7 +118,9 @@ getTaxonId <- function(total) {
             x <- formatTax(x)
             x$scientificName <- saved
             x
-        })
+        },
+        success_condition = found,
+        label = "F.")
 
     # What's still unmatched? Try again with less rigor?
     # total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, sug.dist=0.8 )
@@ -124,7 +134,9 @@ getTaxonId <- function(total) {
             x <- formatTax(x)
             x$scientificName <- saved
             x
-        })
+        },
+        success_condition = found,
+        label = "Remove infra")
 
 
     total
