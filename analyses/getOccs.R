@@ -11,6 +11,7 @@ saopaulo$recordID <- 1:nrow(saopaulo) # I need a unique ID for this
 
 # Data with valid coordinates: either original coordinates or locality
 valid_coords <- subset(saopaulo, origin.coord == "coord_original" | resolution.gazetteer == "locality")
+str(valid_coords)
 valid_points <- st_as_sf(valid_coords, coords = c("decimalLongitude.new", "decimalLatitude.new"))
 # Unify and convert datum to match SIRGAS 2000
 valid_points <- fixDatum(valid_points)
@@ -42,17 +43,7 @@ dt <- formatLoc(dt)
 
 in_gazet <- subset(dt, resolution.gazetteer == "locality")
 in_gazet
-locs <- getAdmin(in_gazet) # TO DO: open issue locs issing from getAdmin
-problem.cases <- in_gazet[is.na(locs$locality.correct),]
-prob.locality <- subset(saopaulo, resolution.gazetteer == "locality" & is.na(locality.correct), select=c(loc.cols, "loc.correct"))
-prob.mun <- subset(saopaulo, resolution.gazetteer == "county" & is.na(municipality.correct), select=c(loc.cols, "loc.correct"))
-prob.state <- subset(saopaulo, resolution.gazetteer == "state" & is.na(stateProvince.correct), select=c(loc.cols, "loc.correct"))
-prob.all <- dplyr::bind_rows(problem.cases, prob.locality, prob.mun, prob.state)[,c(loc.cols, "loc.correct")]
-dim(prob.all) # 16242 records!
-prob.all <- prob.all[!duplicated(prob.all$loc.correct),]
-dim(prob.all) # 167 loc corrects!
-
-write.csv(prob.all, "tests/test-data/test-formatLoc_vs_getAdmin.csv")
+locs <- getAdmin(in_gazet)
 
 # Save gazetteer string to lookup cases treated by plantR
 ucs$loc.correct <- dt$loc.correct
