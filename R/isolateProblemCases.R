@@ -3,6 +3,9 @@
 #' @importFrom parallel parSapply detectCores makeCluster
 isolateProblemCases <- function(x, FUN, breaks = 10, parallel = FALSE, no_cores = detectCores() -1, ...) {
 
+    if(!"function" %in% class(FUN)) {
+        stop("FUN must be a function")
+    }
     n <- nrow(x)
     groups <- cut(1:n, breaks)
     l_orig <- split(x, groups)
