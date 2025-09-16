@@ -16,9 +16,39 @@ ucs_icmbio <- read.csv("data/raw-data/DadosGeoestatisticos_UCs_21jul2025.csv")
 str(ucs_icmbio)
 ucs_icmbio$Nome.da.UC <- standardize_uc_name(ucs_icmbio$Nome.da.Unidade.de.Conservação.conforme.o.Ato.legal)
 
+# Download sheets of data from IF
+dt <- download_sheets("https://docs.google.com/spreadsheets/d/1UuUJJaS1mkewQnzz5xLPnbbQTL4P9UQ1LgL2dYwcwLI", n=13)
+
+x <- dt[[1]]
+my_names <- names(x)[-1]
+
+fix_name <- function(x) {
+    if(all("Telefone" %in% names(x))) {
+        # Tabela normal
+        type <- names(x)[1]
+        if(type=="Área de Proteção Ambiental Marinha") {
+            return(x[1])
+        }
+        return(paste(type, x[,type]))
+    } else if("RPPN" %in% names(x)) {
+        return(paste("RPPN", x$RPPN))
+    } else return(NULL)
+}
+
+ucs_if <- unlist(lapply(dt, fix_name))
+ucs_if <- sort(toupper(standardize_uc_name(ucs_if)))
+
+sort(table(ucs$Órgão.Gestor))
+ucs_cnuc_if <- subset(ucs, Órgão.Gestor=="FUNDAÇÃO PARA CONSERVAÇÃO E A PRODUÇÃO FLORESTAL DO ESTADO DE SÃO PAULO - SP")
+dim(ucs_cnuc_if)
+nomes_if_cnuc <- sort(ucs_cnuc_if$Nome.da.UC)
+
 dim(ucs)
 dim(ucs_icmbio)
-not_found <- setdiff(ucs_icmbio$Nome.da.UC, ucs$Nome.da.UC)
+length(ucs_if)
+(not_found <- setdiff(rmLatin(ucs_if), rmLatin(ucs$Nome.da.UC)))
+(not_found2 <- setdiff(rmLatin(nomes_if_cnuc), rmLatin(ucs_if)))
+(not_found <- setdiff(ucs_icmbio$Nome.da.UC, ucs$Nome.da.UC))
 (not_found <- setdiff(rmLatin(not_found), rmLatin(ucs$Nome.da.UC)))
 nomes <- rmLatin(ucs$Nome.da.UC)
 nomes <- gsub(" D\\w\\w? ", " ", nomes)
