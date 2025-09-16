@@ -38,3 +38,6 @@ fix: use as.numeric
 ### Notes
 
 - last update improved loc resolution for ~ 47k records (I had to redo all treatements so I don't have the exact number of cases where it resulted in worse resolution...)
+
+- APA Bacia do Paraíba do Sul 0?????
+- Nome repetido
