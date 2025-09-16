@@ -27,6 +27,22 @@ saopaulo1 <- formatDwc(gbif_data = gbif, user_data = jabot)
 saopaulo2 <- formatDwc(splink_data = splsaopaulo, user_data = reflora)
 saopaulo <- dplyr::bind_rows(saopaulo1, saopaulo2)
 
+# Select fields
+plantR_minimum <- c("institutionCode", "collectionCode",
+            "catalogNumber", "recordNumber", "recordedBy", "year",
+            "country", "stateProvince", "county", "municipality",
+            "locality", "decimalLatitude", "decimalLongitude",
+            "identifiedBy", "dateIdentified", "typeStatus", "family",
+            "scientificName", "scientificNameAuthorship")
+other <- fix.cols <- c("recordedBy", "country", "stateProvince",
+                "county", "municipality", "locality", "identifiedBy",
+                "fieldNotes", "occurrenceRemarks", "habitat")
+            fix.cols <- c("recordedBy", "country", "stateProvince",
+                "locality", "identifiedBy", "county", "verbatimLocality",
+                "fieldNotes", "occurrenceRemarks", "habitat",
+                "datasetName")
+        cand_cols <- c("recordNumber")
+
 rm(gbif, reflora, jabot, splsaopaulo, goodNames, saopaulo1, saopaulo2)
 gc()
 
@@ -230,8 +246,8 @@ table(is.na(saopaulo$decimalLatitude.new))
 table(is.na(saopaulo$locality), saopaulo$origin.coord)
 
 
-# First pass in formatTax
-saopaulo <- formatTax(saopaulo)
+# formatTax
+saopaulo <- getTaxonId(saopaulo)
 
 # validate
 saopaulo <- validateLoc(saopaulo)

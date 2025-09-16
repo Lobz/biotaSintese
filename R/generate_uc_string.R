@@ -7,9 +7,10 @@ generate_uc_string <- function(x) {
 
     s <- tolower(x)
     # interchangeable names
-    m <- tolower(paste0(uc_abbrevs$short,"|",uc_abbrevs$long))
-    for(n in m)
-        s <- sub(n,paste0("(",n,")",str_de),s,perl=T)
+    short_long <- tolower(paste0("(",uc_abbrevs$short,"|",uc_abbrevs$long,")"))
+    for(n in short_long){
+        s <- gsub(paste0("(^|\\s|-|\\.)",n,"(\\s|-|,)"),paste0(n,str_de),s,perl=T)
+    }
 
     # de/dos/da pode estar incorreto ou faltante
     s <- gsub(" (d[oae]s?|-) ",str_de,s)
@@ -21,29 +22,30 @@ generate_uc_string <- function(x) {
     s <- gsub("[úûüù`]","[úûüùu _?]?",s)
     s <- gsub("[ç`]","[çc _?]?",s)
     s <- gsub("-","[ -]",s)
-    paste0("(",s,")")
+    s <- gsub("'","['’]?",s)
+    s
 }
 
 uc_abbrevs <- data.frame(
-    short= c("APA", "RPPN", "ARIE", "RDS", "MNE", "FLONA", "PE", "PARNA", "PNM",
-             "EEC","ESEC","ESEX","RESEX","REBIO","REVIS","RVS","MONA"),
+    short= c("APA", "RPPN", "ARIE", "RDS", "MNE", "FLONA", "FE", "PE", "PARNA", "PNM",
+             "EEC|ESEC","ESEX","RESEX","REBIO","REVIS|RVS","MONA","ZVS"),
     long = c("ÁREA DE PROTEÇÃO AMBIENTAL",
             "RESERVA PARTICULAR DO PATRIMÔNIO NATURAL",
             "ÁREA DE RELEVANTE INTERESSE ECOLÓGICO",
             "RESERVA DE DESENVOLVIMENTO SUSTENTÁVEL",
             "MONUMENTO NATURAL ESTADUAL",
             "FLORESTA NACIONAL",
+            "FLORESTA ESTADUAL",
             "PARQUE ESTADUAL",
             "PARQUE NACIONAL",
             "PARQUE NATURAL MUNICIPAL",
-            "ESTAÇÃO ECOLÓGICA",
             "ESTAÇÃO ECOLÓGICA",
             "ESTAÇÃO EXPERIMENTAL",
             "RESERVA EXTRATIVISTA",
             "RESERVA BIOLÓGICA",
             "REFÚGIO DE VIDA SILVESTRE",
-            "REFÚGIO DE VIDA SILVESTRE",
-            "MONUMENTO NATURAL"
+            "MONUMENTO NATURAL",
+            "ZONA DE VIDA SILVESTRE"
             ))
 
 #' Standardize UC Name
@@ -62,18 +64,32 @@ standardize_uc_name <- function(x) {
     x <- sub("PATRIMÔNIO NATURA ", "PATRIMÔNIO NATURAL ", x, fixed = T)
     x <- sub(" AGUAS", " ÁGUAS", x, fixed = T)
     x <- sub("SITIO", "SÍTIO", x, fixed = T)
+    # Remove problematic characters
     x <- gsub("\"", "", x, fixed = T)
+    x <- gsub("’", "'", x, fixed = T)
+    x <- gsub("\\s", " ", x, perl = T)
+    x <- gsub(",.*","", x, perl = T)
     for(i in 1:nrow(uc_abbrevs)){
         x <- sub(paste0("^", uc_abbrevs$short[i]), uc_abbrevs$long[i], x)
-        # x <- sub(paste0(uc_abbrevs$long[i]," (D[OAE]S?|-) "), paste0(uc_abbrevs$long[i]," "), x)
+        x <- sub(paste0(uc_abbrevs$long[i]," (D[OAE]S?|-) "), paste0(uc_abbrevs$long[i]," "), x)
+    }
+    x <- plantR:::squish(x)
+    x
+}
+
+shorten_uc_name <- function(x) {
+    L <- uc_abbrevs$long
+    S <- sub("\\|.*","",uc_abbrevs$short)
+    for(i in 1:nrow(uc_abbrevs)){
+        x <- gsub(L[i], S[i], x)
     }
     x
 }
 
-generate_filename <- function(x) {
-    for(i in 1:nrow(uc_abbrevs)){
-        x <- sub(paste0("^",uc_abbrevs$short[i]), uc_abbrevs$long[i], x)
-    }
+slug <- function(x) {
+    x <- shorten_uc_name(x)
+    x <- plantR::rmLatin(x)
+    x <- plantR:::squish(x)
+    x <- gsub("\\s+","_",x)
     x
-
 }

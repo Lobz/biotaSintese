@@ -32,6 +32,7 @@ sample_size = nrow(ucs)
 
 # If using sample, I want to remove sample from done
 done <- subset(done, !Nome.da.UC %in% ucs$Nome.da.UC)
+ucs$nome_file <- slug(ucs$Nome.da.UC)
 
 for(i in 1:sample_size){
 try({
@@ -40,9 +41,9 @@ try({
     Nome_UC <- uc_data$Nome.da.UC
     print("Getting data for UC:")
     print(Nome_UC)
-    nome_file <- gsub(" ","",tolower(rmLatin(Nome_UC)))
+    nome_file <- uc_data$nome_file
 
-    load(file=paste0("results/total/occs_",nome_file,".RData"))
+    load(file=paste0("results/total/",nome_file,".rda"))
 
     print(paste("Found",nrow(total),"records."))
     ucs[i,]$NumRecords <- nrow(total)
@@ -139,6 +140,7 @@ try({
     write.csv(finalList, paste0("results/checklist/",nome_file,"_modeloCatalogo.csv"), na="", row.names=FALSE)
 })
 }
+ucs$nome_file <- NULL
 
 # Save summary
 total <- dplyr::bind_rows(done, ucs)

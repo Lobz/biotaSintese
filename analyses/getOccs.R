@@ -5,17 +5,6 @@ library(florabr)
 library(parallel)
 library(sf)
 
-# Pre-treated data from GBIF, REflora and JABOT
-load("data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
-saopaulo$recordID <- 1:nrow(saopaulo) # I need a unique ID for this
-
-# Data with valid coordinates: either original coordinates or locality
-valid_coords <- subset(saopaulo, origin.coord == "coord_original" | resolution.gazetteer == "locality")
-str(valid_coords)
-valid_points <- st_as_sf(valid_coords, coords = c("decimalLongitude.new", "decimalLatitude.new"))
-# Unify and convert datum to match SIRGAS 2000
-valid_points <- fixDatum(valid_points)
-
 # Data about UCs from CNUC
 ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
 ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC", "Municípios.Abrangidos"))
@@ -49,6 +38,10 @@ locs <- getAdmin(in_gazet)
 ucs$loc.correct <- dt$loc.correct
 ucs$loc.correct[dt$resolution.gazetteer != "locality"] <- NA
 
+# Pre-treated data from GBIF, REflora and JABOT
+load("data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
+saopaulo$recordID <- 1:nrow(saopaulo) # I need a unique ID for this
+
 # Which occs are associated with each UC
 occs_exact <- lapply(ucs$loc.correct, function(s) {
     if(is.na(s)) return(FALSE)
@@ -57,19 +50,25 @@ occs_exact <- lapply(ucs$loc.correct, function(s) {
 # Generate string for regex grepl in locality data
 uc_strings <- generate_uc_string(ucs$Nome.da.UC)
 # Use regex to look for more occs
-occs_loc <- lapply(uc_strings, grepl, x = saopaulo$locality, ignore.case = TRUE, perl = TRUE)
+occs_loc <- lapply(uc_strings, grepl, x = paste(saopaulo$municipality, saopaulo$locality), ignore.case = TRUE, perl = TRUE)
 occs_ucs <- pairwiseMap(occs_exact, occs_loc, FUN=function(x,y) {x|y})
 names(occs_ucs) <- ucs$Nome.da.UC
 save(occs_ucs, file="data/derived-data/occs_ucs.RData")
 
 ucs$Municípios.Abrangidos <- NULL
 ucs$loc.correct <- NULL
-# load("data/derived-data/points_ucs.RData")
 
 # Select a subset of UCs (for testing)
 # ucs <- subset(ucs, !grepl("-",Municípios.Abrangidos))
 # ucs <- ucs[sample(1:nrow(ucs), 10), ]
-sample_size = nrow(ucs)
+(sample_size = nrow(ucs))
+
+# Data with valid coordinates: either original coordinates or locality
+valid_coords <- subset(saopaulo, origin.coord == "coord_original" | resolution.gazetteer == "locality")
+str(valid_coords)
+valid_points <- st_as_sf(valid_coords, coords = c("decimalLongitude.new", "decimalLatitude.new"))
+# Unify and convert datum to match SIRGAS 2000
+valid_points <- fixDatum(valid_points)
 
 # Shape data
 shapes <- st_read("data/raw-data/shp_cnuc_2025_03/cnuc_2025_03.shp")
@@ -90,15 +89,19 @@ intersecUCs <- read.csv("results/intersecUCs.csv")
 # Attribute confidence based on intersections
 intersecUCs$confidence <- ifelse(intersecUCs$prop > 98, "High",
                              ifelse(intersecUCs$status == "covered_buffer" | intersecUCs$prop > 80, "Medium", "Low"))
+intersecUCs$nome_uc <- standardize_uc_name(intersecUCs$nome_uc)
+intersecUCs$outra_uc <- standardize_uc_name(intersecUCs$outra_uc)
+
+ucs$nome_file <- slug(ucs$Nome.da.UC)
 
 for(i in 1:sample_size){
 try({
 
     uc_data <- ucs[i,]
     print("Getting data for UC:")
-    print(uc_data)
+    print(uc_data[1])
     Nome_UC <- uc_data$Nome.da.UC
-    nome_file <- gsub(" ","",tolower(rmLatin(Nome_UC)))
+    nome_file <- uc_data$nome_file
 
     # Which records are in the gps shp
     rcs_intersect <- valid_points$recordID[points_ucs[[Nome_UC]]]
@@ -147,14 +150,15 @@ try({
 
     total <- saopaulo[occs_total,]
 
-    # total$uc_name <- Nome_UC
-    save(total, file=paste0("results/total/occs_",nome_file,".RData"))
-    # load(file=paste0("data/derived-data/occs_",nome_file,".RData"))
+    total$Nome_UC <- Nome_UC
+    save(total, file=paste0("results/total/",nome_file,".rda"))
 
     print(paste("Found",nrow(total),"records."))
     ucs[i,]$NumRecords <- nrow(total)
 })
 }
+
+ucs$nome_file <- NULL
 
 # Save summary
 write.csv(ucs, "results/summary_multilist.csv", row.names=FALSE)
