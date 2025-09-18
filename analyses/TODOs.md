@@ -24,7 +24,6 @@ fix: use as.numeric
 - Baixar dados do ICMBIO https://www.gov.br/icmbio/pt-br/assuntos/dados_geoespaciais https://www.gov.br/icmbio/pt-br/assuntos/dados_geoespaciais/mapa-tematico-e-dados-geoestatisticos-das-unidades-de-conservacao-federais
 - Escrever script para combinar dados do ICMBIO com os do CNUC
 - Enviar emails para: ICMBio, Reservas Votorantim, Instituto Florestal, Secretaria do Estado, etc, perguntando sobre dados de UCs
-- Email para Tathy sobre UCs do IF e planos de manejo
 - lista cncflora (perguntar Guilherme) tem no site do JBRJ
 - ari de Teixeira oliveira-filho ou Danilo neves da UFMG - neotroptree (Renato tem contato)
 - fazer lista preliminar de todos os possíveis nomes científicos (certos ou errados) baixando por exemplo do gbif, usar para fazer um filtro pelo bash por exemplo com grep para aplicar em bancos de dados imensos (ex: gbif sem filtros)
@@ -35,9 +34,10 @@ fix: use as.numeric
 
 - todo: decide what to do with barcode NA
 
+- try getLoc again after substituting \\s*,\\s* with _
+
 ### Notes
 
 - last update improved loc resolution for ~ 47k records (I had to redo all treatements so I don't have the exact number of cases where it resulted in worse resolution...)
 
-- APA Bacia do Paraíba do Sul 0?????
 - Nome repetido

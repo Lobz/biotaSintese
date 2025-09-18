@@ -1,7 +1,6 @@
 devtools::load_all()
 library(plantR) # used for reading and cleaning occurrence data
 library(stringr)
-library(sf)
 
 tt <- list.files("results/total-treated", full.names = T)
 dtTreated <- lapply(tt, read.csv, na.strings = c("NA",""), colClasses = "character")
@@ -107,6 +106,68 @@ locTable2 <- function(x) {
     LT[,c(5,1:4)]
 }
 
+locTable3 <- function(x) {
+    if(nrow(x)==0) {
+        return(NULL)
+    }
+    x <- subset(x, confidenceLocality != "High" & resolution.gazetteer != "locality")
+    if(nrow(x)==0) {
+        return(NULL)
+    }
+
+    df <- x[,c("recordID",loc.cols)]
+    # Formating the locality information
+    occs.fix <- fixLoc(df)
+    # Creating locality strings used to query the gazetteer
+    occs.locs <- strLoc(occs.fix)
+    occs.locs1 <- occs.locs
+    # Final editing the locality strings (reduces variation in locality notation)
+    occs.locs$loc.string <- prepLoc(occs.locs$loc.string)
+    occs.locs$loc.string1 <- prepLoc(occs.locs$loc.string1)
+    occs.locs$loc.string2 <- prepLoc(occs.locs$loc.string2)
+
+    locs.basic <- getLoc(occs.locs)
+    # This was a good idea but it doesn't work
+    # locs.subs <- tryAgain(locs.basic, condition=function(x) x$resolution.gazetteer!="locality", FUN <- function(occs) {
+    #     occs <- remove_fields(occs, c("loc", "loc.correct", "resolution.gazetteer", "latitude.gazetter", "longitude.gazetteer"))
+    #     occs$loc.string <- gsub("\\s*,\\s*","_",occs$loc.string)
+    #     occs$loc.string1 <- gsub("\\s*,\\s*","_",occs$loc.string1)
+    #     occs$loc.string2 <- gsub("\\s*,\\s*","_",occs$loc.string2)
+    #     occs <- getLoc(occs)
+    #     occs
+    # })
+    # This does work tho
+    locs.subs <- tryAgain(locs.basic, function(x) x$resolution.gazetteer!="locality", add_cols = T, FUN =function(occs) {
+        occs <- remove_fields(occs, c("loc", "loc.correct", "resolution.gazetteer", "latitude.gazetter", "longitude.gazetteer"))
+        occs$loc.orig <- occs$loc.string1
+        occs$loc.string1 <- gsub("\\s*,.*","",occs$loc.string1)
+        occs <- getLoc(occs)
+        occs
+    })
+    locs.subs <- tryAgain(locs.subs, function(x) x$resolution.gazetteer!="locality", add_cols = T, FUN =function(occs) {
+        occs <- remove_fields(occs, c("loc", "loc.correct", "resolution.gazetteer", "latitude.gazetter", "longitude.gazetteer"))
+        occs$loc.orig <- occs$loc.string2
+        occs$loc.string2 <- gsub("\\s*,.*","",occs$loc.string2)
+        occs <- getLoc(occs)
+        occs
+    })
+
+    locs.fixed <- subset(locs.subs, !is.na(loc.orig), select=c("loc.orig", "loc.correct"))
+    locs.unfix <- subset(locs.subs, is.na(loc.orig))
+    my_locs <- c(locs.unfix$loc.string, locs.unfix$loc.string1, locs.unfix$loc.string2)
+    locs <- data.frame(loc.orig=my_locs, loc.correct=rep(locs.unfix$loc.correct,3))
+    locs <- subset(locs, loc.orig != loc.correct)
+    locs$loc.correct <- ""
+    DT <- rbind(locs.fixed, locs)
+
+    LT <- aggregate(DT$loc.orig, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), length)
+
+    names(LT)[3] <- "Freq"
+    LT <- LT[order(LT$Freq, decreasing = T),]
+
+    LT
+}
+
 x <- locTable2(dtTreated[[4]])
 head(x)
 
@@ -119,14 +180,10 @@ TABS2 <- read.csv("results/locationsTable.csv")
 TABS3 <- subset(TABS, Localidade %in% TABS2$Locality)
 write.csv(TABS3, "results/locationsTable.csv", row.names = F)
 
-# We should generate a gazeteer for everyone
-# Point data
-shapes <- st_read("data/raw-data/shp_cnuc_2025_03/cnuc_2025_03.shp")
-shapes$nome_uc <- standardize_uc_name(shapes$nome_uc)
+total <- dplyr::bind_rows(dtTreated)
+tabs_locs <- locTable3(total)
+write.csv(tabs_locs,"results/locationsTable_getLoc.csv", row.names = F)
 
-dt <- data.frame(country="BR", stateProvince="SP", municipality=ucs$Municípios.Abrangidos, locality=ucs$Nome.da.UC)
-dt$municipality <- gsub("\\(.*\\)", "", dt$municipality)
-dt <- formatLoc(dt)
 
 
 total <- dplyr::bind_rows(dtTreated)
@@ -145,7 +202,15 @@ locs
 
 not_used <- subset(saopaulo, !loc %in% locs)
 
-termsList <- c("exp", "instituto florestal", "reserva")
-terms_pattern <- paste0(termsList, collapse = "|")
+    terms_pattern <- "parque|reserva|reserve|fazenda|nacional|estadual|parna|flona|rebio|rppn|e\\.e\\.|biologica|ecologica|extrativista|park|farm|hacienda|estrada|rodovia|carretera|road|camino|sitio|mata|horto|jardim|campus|pico|serra|sierra|morro|chapada|colina|monumento|exp|floresta|refúgio"
 possible_ucs <- grepl(terms_pattern, not_used$loc)
 sort(table(not_used$loc[possible_ucs]))
+
+not_good <- not_used$resolution.gazetteer != "locality" & not_used$loc != not_used$loc.correct
+sort(table(not_used$loc[possible_ucs & not_good]))
+dt <- not_used[possible_ucs & not_good,]
+dt <- dt[order(dt$loc),]
+write.csv(dt[, c(loc.cols, loc.cols.plantR)], "data/derived-data/temp_unused locations.csv", row.names=F)
+
+matao <- dt[dt$loc=="brazil_sao paulo_matao",]
+table(matao$municipality)

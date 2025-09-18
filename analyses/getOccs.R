@@ -85,7 +85,7 @@ save(points_ucs, file="data/derived-data/points_ucs.RData")
 # load("data/derived-data/points_ucs.RData")
 
 # Get intersection table
-intersecUCs <- read.csv("results/intersecUCs.csv")
+intersecUCs <- read.csv("results/locations/intersecUCs.csv")
 # Attribute confidence based on intersections
 intersecUCs$confidence <- ifelse(intersecUCs$prop > 98, "High",
                              ifelse(intersecUCs$status == "covered_buffer" | intersecUCs$prop > 80, "Medium", "Low"))

@@ -162,7 +162,7 @@ saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country", 
 # get municipalitys with unique name
 munis <- geobr::read_municipality(year = 2024)
 munis <- subset(munis, !duplicated(name_muni))
-states <- geobr::read_state(year = 2024)
+states <- geobr::read_state(year = 2020)
 munis$name_state <- states$name_state[match(munis$code_state, states$code_state)]
 munis$name_state_norm <- tolower(rmLatin(munis$name_state))
 
@@ -246,19 +246,26 @@ table(is.na(saopaulo$decimalLatitude.new))
 table(is.na(saopaulo$locality), saopaulo$origin.coord)
 
 
-# formatTax
+# formatTax and validateTax
 saopaulo <- getTaxonId(saopaulo)
 
 # validate
 saopaulo <- validateLoc(saopaulo)
-saopaulo <- validateTax(saopaulo)
 
 map <- latamMap$brazil
 map <- subset(map, NAME_1 == "sao paulo")
 saopaulo <- validateCoord(saopaulo, high.map = map) # WORKING
 save(saopaulo,file="data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
 
-sp_deduped <- validateDup(saopaulo, noNumb = NA, noYear = NA, noName = NA, prop=1)
+sp_deduped <- validateDup(saopaulo, noNumb = NA, noYear = NA, noName = NA, prop=1,
+          tax.names = c(family = "family.new", species = "scientificName.new", tax.auth =
+    "scientificNameAuthorship.new", det.name = "identifiedBy.new", det.year =
+    "yearIdentified.new", tax.check = "tax.check", tax.rank = "taxon.rank", status =
+    "scientificNameStatus", id = "id", name.full = "scientificNameFull", gen = "genus.new", sp = "species.new"),
+  geo.names = c(lat = "decimalLatitude.new", lon = "decimalLongitude.new", org.coord =
+    "origin.coord", prec.coord = "precision.coord", geo.check = "geo.check", datum = "geodeticDatum"),
+  loc.names = unique(c(loc.cols, loc.cols.plantR, loc.str = "loc.correct", res.gazet = "resolution.gazetteer", res.orig =
+    "resol.orig", loc.check = "loc.check")))
 names(sp_deduped)
 save(sp_deduped,file="data/derived-data/reflora_gbif_jabot_splink_saopaulo_deduped.RData")
 
