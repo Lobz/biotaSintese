@@ -138,6 +138,37 @@ getTaxonId <- function(total) {
         success_condition = found,
         label = "Remove infra")
 
+    # validate taxonomist
+    total <- validateTax(total, generalist = T)
+    total$tax.check <- factor(total$tax.check, levels = c("unknown", "low", "medium", "high"), ordered = T)
+
+    # fix missing taxon rank
+    total$taxon.rank <- as.taxon.rank(total$taxon.rank)
+    table((total$taxon.rank), useNA = "always")
+    table(is.na(total$taxon.rank))
+    # If there's another entry of the same taxon, get the taxon rank from there
+    total <- total[order(total$taxon.rank),]
+    fix_these <- which(is.na(total$taxon.rank))
+    x<- total$scientificName.new[fix_these]
+    total$taxon.rank[fix_these] <- total$taxon.rank[match(x, total$scientificName.new)]
+    # If possible, get it from taxonRank
+    fix_these <- which(is.na(total$taxon.rank))
+    total$taxon.rank[fix_these] <- tolower(total$taxonRank[fix_these])
+    # Otherwise, look at scientific name
+    fix_these <- which(is.na(total$taxon.rank))
+    x<- total$scientificName.new[fix_these]
+    x <- sub(" sp.","",x)
+    rank <- rep(NA, length(fix_these))
+    rank[grepl(" ",x)] <- "species"
+    rank[grepl(" \\w+ ",x)] <- "subspecies" # anything with more than two words is less than species
+    rank[grepl(" subsp[. ]",x)] <- "subspecies"
+    rank[grepl(" var[. ]",x)] <- "variety"
+    rank[x == total$family.new[fix_these]] <- "family"
+    rank[is.na(rank)] <- "genus" # single word and not family? genus.
+    total$taxon.rank[fix_these] <- rank
+
+    # get species and genus?
+    total <- get_species_and_genus(total)
 
     total
 }
