@@ -2,18 +2,18 @@ devtools::load_all()
 library(plantR) # used for reading and cleaning occurrence data
 library(stringr)
 
-tt <- list.files("results/total-treated", full.names = T)
-dtTreated <- lapply(tt, read.csv, na.strings = c("NA",""), colClasses = "character")
+tt <- list.files("results/total", full.names = T)
+dt <- lapply(tt, function(s) {load(s); return(total)})
 nome_file <- sub(".*/","",tt)
 nome_file <- sub(".csv","",nome_file)
-names(dtTreated) <- nome_file
+names(dt) <- nome_file
 
 ucs <- read.csv("results/summary_multilist.csv")
 ucs$nome_file <- gsub(" ","",tolower(rmLatin(ucs$Nome.da.UC)))
 rownames(ucs) <- ucs$nome_file
 
 for(x in nome_file){
-    dtTreated[[x]]$Nome_UC <- ucs[x,1]
+    dt[[x]]$Nome_UC <- ucs[x,1]
 }
 
 locTable <- function(x) {
@@ -152,41 +152,59 @@ locTable3 <- function(x) {
         occs
     })
 
-    locs.fixed <- subset(locs.subs, !is.na(loc.orig), select=c("loc.orig", "loc.correct"))
+    locs.subs[,c("stateProvince", "municipality", "locality")] <- x[,c("NAME_1", "NAME_2", "locality.new")]
+
+    locs.fixed <- subset(locs.subs, !is.na(loc.orig))
     locs.unfix <- subset(locs.subs, is.na(loc.orig))
     my_locs <- c(locs.unfix$loc.string, locs.unfix$loc.string1, locs.unfix$loc.string2)
-    locs <- data.frame(loc.orig=my_locs, loc.correct=rep(locs.unfix$loc.correct,3))
+    locs <- rbind(locs.unfix, locs.unfix, locs.unfix)
+    locs$loc.orig <- my_locs
+
     locs <- subset(locs, loc.orig != loc.correct)
     locs$loc.correct <- ""
+    locs[is.na(locs)] <- ""
     DT <- rbind(locs.fixed, locs)
 
     LT <- aggregate(DT$loc.orig, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), length)
+    LT_st <- aggregate(DT$stateProvince.new, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), function(x) paste(unique(x), collapse="|"))
+    names(LT_st)[3] <- "stateProvince"
+    LT_mun <- aggregate(DT$municipality.new, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), function(x) paste(unique(x), collapse="|"))
+    names(LT_mun)[3] <- "municipality"
+    LT_locality <- aggregate(DT$locality.new, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), function(x) paste(unique(x), collapse="|"))
+    names(LT_locality)[3] <- "locality"
 
     names(LT)[3] <- "Freq"
     LT <- LT[order(LT$Freq, decreasing = T),]
 
-    LT
+    LT_full <- dplyr::left_join(LT, LT_st, by=c("loc", "loc.correct"))
+    LT_full <- dplyr::left_join(LT_full, LT_mun, by=c("loc", "loc.correct"))
+    LT_full <- dplyr::left_join(LT_full, LT_locality, by=c("loc", "loc.correct"))
+
+    head(LT_full)
+
+    LT_full
 }
 
-x <- locTable2(dtTreated[[4]])
+x <- locTable2(dt[[4]])
 head(x)
 
-for(x in dtTreated) LT <- locTable(x)
-tabs <- lapply(dtTreated, locTable2)
+for(x in dt) LT <- locTable(x)
+tabs <- lapply(dt, locTable2)
 TABS <- dplyr::bind_rows(tabs)
 # write.csv(TABS, "results/locationsTable.csv", row.names = F)
 TABS2 <- read.csv("results/locationsTable.csv")
 
 TABS3 <- subset(TABS, Localidade %in% TABS2$Locality)
-write.csv(TABS3, "results/locationsTable.csv", row.names = F)
+write.csv(TABS3, "results/locations/locationsTable.csv", row.names = F)
 
-total <- dplyr::bind_rows(dtTreated)
+total <- dplyr::bind_rows(dt)
 tabs_locs <- locTable3(total)
-write.csv(tabs_locs,"results/locationsTable_getLoc.csv", row.names = F)
+write.csv(tabs_locs,"results/locations/locationsTable_getLoc.csv", row.names = F)
 
+head(tabs_locs)
+x <- subset(total, )
 
-
-total <- dplyr::bind_rows(dtTreated)
+total <- dplyr::bind_rows(dt)
 nrow(total)
 table(total$selectionCategory, useNA="always")
 
@@ -196,7 +214,7 @@ loctab <- unique(total[,c("Nome_UC","locality")])
 
 load("data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
 
-locs <- unique(unlist(sapply(dtTreated, function(x) unique(x$loc))))
+locs <- unique(unlist(sapply(dt, function(x) unique(x$loc))))
 
 locs
 

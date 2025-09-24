@@ -22,6 +22,9 @@ shapes <- shapes[is_valid, ]
 # We will NOT be trusting the cnuc text data for what municipalities are included in each UC
 # Instead, we will use the shape data and compare it with geobr data
 
+# Get relevant dataset info
+datasets <- list_geobr()
+
 # Read state data from geobr
 state_info <- datasets[datasets[,1]=="`read_state`",]
 state_latest_year <- sub(".* ","",state_info$years)
