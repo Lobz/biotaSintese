@@ -55,7 +55,9 @@ prop.gps <- lapply(dtOrig, function(x) {
 })
 
 
-total <- dplyr::bind_rows(dtOrig)
+total <- dplyr::bind_rows(dtTreated)
+
+t <- plantR::validateTax(total, generalist = T)
 
 summary(sapply(total, is.na))
 table(total$downloadedFrom, useNA="always")

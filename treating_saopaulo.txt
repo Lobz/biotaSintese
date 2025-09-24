@@ -1,0 +1,334 @@
+
+country 
+  95422 
+
+ country   county locality    state 
+   94166      582      121      553 
+[1] "Replaced 1256 lines"
+
+no_info 
+    600 
+
+country  county 
+    598       2 
+[1] "Replaced 600 lines"
+
+no_info 
+     10 
+
+country 
+     10 
+[1] "Replaced 10 lines"
+
+no_info 
+     54 
+
+ country   county locality    state 
+       9       23        4       18 
+[1] "Replaced 54 lines"
+
+no_info 
+   3644 
+
+country  county 
+   3641       3 
+[1] "Replaced 3644 lines"
+
+country 
+  98424 
+
+country  county   state 
+  97923     329     172 
+[1] "Replaced 501 lines"
+
+country 
+    430 
+
+county  state 
+   317    113 
+[1] "Replaced 430 lines"
+
+country no_info 
+  97493      24 
+
+ country   county locality  no_info    state 
+   91709     4611      906       24      267 
+[1] "Replaced 5784 lines"
+
+country 
+  51047 
+
+country  county 
+  36545   14502 
+[1] "Replaced 14507 lines"
+
+country 
+  36540 
+
+ country   county locality 
+   33665     2796       79 
+[1] "Replaced 2875 lines"
+
+country 
+  64916 
+
+ country   county locality 
+   64820       94        2 
+[1] "Replaced 96 lines"
+
+country 
+  33589 
+
+country  county   state 
+  32285      51    1253 
+[1] "Replaced 1838 lines"
+
+ state 
+222928 
+
+  county locality    state 
+      67        3   222858 
+[1] "Using correct state name: Replaced 70 lines"
+
+ county 
+1801286 
+
+  county locality 
+ 1794976     6310 
+[1] "Using correct state and municipality name: Replaced 6310 lines"
+The following family names were automatically replaced:
+
+|Genus          |Old fam.         |New fam.         |
+|:--------------|:----------------|:----------------|
+|Acianthera     |Bromeliaceae     |Orchidaceae      |
+|Acrostichum    |Dryopteridaceae  |Pteridaceae      |
+|Agalinis       |Vivianiaceae     |Orobanchaceae    |
+|Amaranthaceae  |Chenopodiaceae   |Amaranthaceae    |
+|Amaryllidaceae |Alliaceae        |Amaryllidaceae   |
+|Amauropelta    |Dryopteridaceae  |Thelypteridaceae |
+|Anadenanthera  |Malpighiaceae    |Fabaceae         |
+|Anadenanthera  |Rhamnaceae       |Fabaceae         |
+|Antigonon      |Euphorbiaceae    |Polygonaceae     |
+|Apocynaceae    |Asclepiadaceae   |Apocynaceae      |
+|Asparagaceae   |Agavaceae        |Asparagaceae     |
+|Asphodelaceae  |Xanthorrhoeaceae |Asphodelaceae    |
+|Bixaceae       |Cochlospermaceae |Bixaceae         |
+|Brassia        |Brassicaceae     |Orchidaceae      |
+|Bredemeyera    |Cactaceae        |Polygalaceae     |
+|Bunchosia      |Rosaceae         |Malpighiaceae    |
+|Byttneria      |Gesneriaceae     |Malvaceae        |
+|Caesalpinia    |Asteraceae       |Fabaceae         |
+|Caesarea       |Vivianiaceae     |Francoaceae      |
+|Caesaria       |Vivianiaceae     |Francoaceae      |
+|Caladium       |Orchidaceae      |Araceae          |
+|Caprifoliaceae |Valerianaceae    |Caprifoliaceae   |
+|Cassia         |Arecaceae        |Fabaceae         |
+|Cecropia       |Acanthaceae      |Urticaceae       |
+|Celastraceae   |Hippocrateaceae  |Celastraceae     |
+|Cestrum        |Asteraceae       |Solanaceae       |
+|Chromolaena    |Arecaceae        |Asteraceae       |
+|Chusquea       |Fabaceae         |Poaceae          |
+|Cochlidium     |Aspleniaceae     |Polypodiaceae    |
+|Copaifera      |Arecaceae        |Fabaceae         |
+|Cordia         |Eriocaulaceae    |Cordiaceae       |
+|Cupania        |Rutaceae         |Sapindaceae      |
+|Dioscorea      |Euphorbiaceae    |Dioscoreaceae    |
+|Doryopteris    |Dryopteridaceae  |Pteridaceae      |
+|Dryopteris     |Polypodiaceae    |Dryopteridaceae  |
+|Dryopteris     |Pteridaceae      |Dryopteridaceae  |
+|Dryopteris     |Thelypteridaceae |Dryopteridaceae  |
+|Echinochloa    |Orchidaceae      |Poaceae          |
+|Elaphoglossum  |Pteridaceae      |Dryopteridaceae  |
+|Eugenia        |Eriocaulaceae    |Myrtaceae        |
+|Ficus          |Caricaceae       |Moraceae         |
+|Froesia        |Quiinaceae       |Ochnaceae        |
+|Goniopteris    |Dryopteridaceae  |Thelypteridaceae |
+|Gouania        |Combretaceae     |Rhamnaceae       |
+|Guarea         |Salicaceae       |Meliaceae        |
+|Helicteres     |Asteraceae       |Malvaceae        |
+|Hemidictyum    |Aspleniaceae     |Hemidictyaceae   |
+|Hennecartia    |Euphorbiaceae    |Monimiaceae      |
+|Hibiscus       |Euphorbiaceae    |Malvaceae        |
+|Hibiscus       |Oxalidaceae      |Malvaceae        |
+|Histiopteris   |Pteridaceae      |Dennstaedtiaceae |
+|Ixora          |Asteraceae       |Rubiaceae        |
+|Justicia       |Euphorbiaceae    |Acanthaceae      |
+|Justicia       |Rubiaceae        |Acanthaceae      |
+|Lacunaria      |Quiinaceae       |Ochnaceae        |
+|Lantana        |Asteraceae       |Verbenaceae      |
+|Leucaena       |Eriocaulaceae    |Fabaceae         |
+|Licania        |Lauraceae        |Chrysobalanaceae |
+|Licaria        |Rosaceae         |Lauraceae        |
+|Lindsaea       |Pteridaceae      |Lindsaeaceae     |
+|Linostigma     |Vivianiaceae     |Francoaceae      |
+|Mabea          |Ebenaceae        |Euphorbiaceae    |
+|Malvaceae      |Bombacaceae      |Malvaceae        |
+|Malvaceae      |Sterculiaceae    |Malvaceae        |
+|Malvaceae      |Tiliaceae        |Malvaceae        |
+|Miconia        |Arecaceae        |Melastomataceae  |
+|Miconia        |Begoniaceae      |Melastomataceae  |
+|Mikania        |Euphorbiaceae    |Asteraceae       |
+|Mollinedia     |Gesneriaceae     |Monimiaceae      |
+|Myrciaria      |Cactaceae        |Myrtaceae        |
+|Myrsine        |Asteraceae       |Primulaceae      |
+|Nymphoides     |Gentianaceae     |Menyanthaceae    |
+|Ouratea        |Cactaceae        |Ochnaceae        |
+|Oxossia        |Turneraceae      |Passifloraceae   |
+|Paullinia      |Trigoniaceae     |Sapindaceae      |
+|Peperomia      |Urticaceae       |Piperaceae       |
+|Piriqueta      |Turneraceae      |Passifloraceae   |
+|Primulaceae    |Myrsinaceae      |Primulaceae      |
+|Psychotria     |Ranunculaceae    |Rubiaceae        |
+|Pteridaceae    |Adiantaceae      |Pteridaceae      |
+|Quiina         |Quiinaceae       |Ochnaceae        |
+|Rhamnidium     |Elaeocarpaceae   |Rhamnaceae       |
+|Ruppia         |Potamogetonaceae |Ruppiaceae       |
+|Salicaceae     |Flacourtiaceae   |Salicaceae       |
+|Sambucus       |Adoxaceae        |Viburnaceae      |
+|Santalaceae    |Eremolepidaceae  |Santalaceae      |
+|Santalaceae    |Viscaceae        |Santalaceae      |
+|Sapindus       |Caryophyllaceae  |Sapindaceae      |
+|Savia          |Lamiaceae        |Phyllanthaceae   |
+|Schweiggeria   |Cactaceae        |Violaceae        |
+|Sloanea        |Eriocaulaceae    |Elaeocarpaceae   |
+|Solanum        |Bignoniaceae     |Solanaceae       |
+|Solanum        |Lauraceae        |Solanaceae       |
+|Strelitzia     |Heliconiaceae    |Strelitziaceae   |
+|Strychnos      |Rhamnaceae       |Loganiaceae      |
+|Swartzia       |Marcgraviaceae   |Fabaceae         |
+|Talisia        |Commelinaceae    |Sapindaceae      |
+|Tassadia       |Plantaginaceae   |Apocynaceae      |
+|Tecoma         |Fabaceae         |Bignoniaceae     |
+|Tectaria       |Dryopteridaceae  |Tectariaceae     |
+|Tibouchina     |Gesneriaceae     |Melastomataceae  |
+|Turnera        |Turneraceae      |Passifloraceae   |
+|Turneraceae    |Turneraceae      |Passifloraceae   |
+|Turpinia       |Heliotropiaceae  |Staphyleaceae    |
+|Verbesina      |Cactaceae        |Asteraceae       |
+|Viburnum       |Adoxaceae        |Viburnaceae      |
+|Viguiera       |Caryophyllaceae  |Asteraceae       |
+|Vitex          |Asteraceae       |Lamiaceae        |
+|Viviania       |Vivianiaceae     |Francoaceae      |
+|Vivianiaceae   |Vivianiaceae     |Francoaceae      |
+|piriqueta      |Turneraceae      |Passifloraceae   |
+|quiina         |Quiinaceae       |Ochnaceae        |
+|turnera        |Turneraceae      |Passifloraceae   |
+
+The following family names were automatically replaced:
+
+|Genus          |Old fam.         |New fam.         |
+|:--------------|:----------------|:----------------|
+|Allium         |Liliaceae        |Amaryllidaceae   |
+|Anemia         |Schizaeaceae     |Anemiaceae       |
+|Asplenium      |Polypodiaceae    |Aspleniaceae     |
+|Averrhoa       |Punicaceae       |Oxalidaceae      |
+|Bacopa         |Scrophulariaceae |Plantaginaceae   |
+|Casearia       |Flacourtiaceae   |Salicaceae       |
+|Chorisia       |Bombacaceae      |Malvaceae        |
+|Coccoloba      |Polygalaceae     |Polygonaceae     |
+|Congea         |Verbenaceae      |Lamiaceae        |
+|Cordia         |Boraginaceae     |Cordiaceae       |
+|Ditassa        |Asclepiadaceae   |Apocynaceae      |
+|Doryopteris    |Adiantaceae      |Pteridaceae      |
+|Dryopteris     |Polypodiaceae    |Dryopteridaceae  |
+|Gmelina        |Verbenaceae      |Lamiaceae        |
+|Heisteria      |Olacaceae        |Erythropalaceae  |
+|Heliotropium   |Boraginaceae     |Heliotropiaceae  |
+|Lagerstroemia  |Ochnaceae        |Lythraceae       |
+|Lindsaea       |Pteridaceae      |Lindsaeaceae     |
+|Ludwigia       |Ochnaceae        |Onagraceae       |
+|Matelea        |Asclepiadaceae   |Apocynaceae      |
+|Mazus          |Plantaginaceae   |Mazaceae         |
+|Miconia        |Malvaceae        |Melastomataceae  |
+|Muntingia      |Meliaceae        |Muntingiaceae    |
+|Nothoscordum   |Alliaceae        |Amaryllidaceae   |
+|Passiflora     |Myrtaceae        |Passifloraceae   |
+|Phormium       |Asparagaceae     |Asphodelaceae    |
+|Piriqueta      |Turneraceae      |Passifloraceae   |
+|Punica         |Punicaceae       |Lythraceae       |
+|Quararibea     |Bombacaceae      |Malvaceae        |
+|Rapanea        |Myrsinaceae      |Primulaceae      |
+|Sphinctastonia |Asclepiadaceae   |Apocynaceae      |
+|Ternstroemia   |Theaceae         |Pentaphylacaceae |
+|Torenia        |Plantaginaceae   |Linderniaceae    |
+|Turnera        |Turneraceae      |Passifloraceae   |
+|Vitex          |Verbenaceae      |Lamiaceae        |
+|Waltheria      |Sterculiaceae    |Malvaceae        |
+|peplonia       |Asclepiadaceae   |Apocynaceae      |
+|rapanea        |Myrsinaceae      |Primulaceae      |
+|spinacia       |Chenopodiaceae   |Amaranthaceae    |
+|turnera        |Turneraceae      |Passifloraceae   |
+
+[1] "Verbatim: Replaced 17505 lines"
+[1] "Isolated authorship for 32393 records."
+The following family names were automatically replaced:
+
+|Genus      |Old fam.      |New fam.        |
+|:----------|:-------------|:---------------|
+|Dryopteris |Polypodiaceae |Dryopteridaceae |
+|Lindsaea   |Pteridaceae   |Lindsaeaceae    |
+|Turnera    |Turneraceae   |Passifloraceae  |
+|Viburnum   |Adoxaceae     |Viburnaceae     |
+
+[1] "Isolated: Replaced 4789 lines"
+[1] "Isolated authorship for 35197 records."
+The following family names were automatically replaced:
+
+|Genus      |Old fam.      |New fam.        |
+|:----------|:-------------|:---------------|
+|Dryopteris |Polypodiaceae |Dryopteridaceae |
+|Lindsaea   |Pteridaceae   |Lindsaeaceae    |
+|Piriqueta  |Turneraceae   |Passifloraceae  |
+|Turnera    |Turneraceae   |Passifloraceae  |
+|Viburnum   |Adoxaceae     |Viburnaceae     |
+
+[1] "Isolate 2: Replaced 5221 lines"
+[1] "Genus: Replaced 50 lines"
+The following family names were automatically replaced:
+
+|Genus   |Old fam.    |New fam.       |
+|:-------|:-----------|:--------------|
+|Turnera |Turneraceae |Passifloraceae |
+
+[1] "Var.: Replaced 3170 lines"
+The following family names were automatically replaced:
+
+|Genus     |Old fam.    |New fam.       |
+|:---------|:-----------|:--------------|
+|Piriqueta |Turneraceae |Passifloraceae |
+
+[1] "Subsp.: Replaced 1403 lines"
+[1] "F.: Replaced 14 lines"
+The following family names were automatically replaced:
+
+|Genus      |Old fam.      |New fam.        |
+|:----------|:-------------|:---------------|
+|Dryopteris |Polypodiaceae |Dryopteridaceae |
+|Lindsaea   |Pteridaceae   |Lindsaeaceae    |
+|Piriqueta  |Turneraceae   |Passifloraceae  |
+|Turnera    |Turneraceae   |Passifloraceae  |
+|Viburnum   |Adoxaceae     |Viburnaceae     |
+|turnera    |Turneraceae   |Passifloraceae  |
+
+[1] "Remove infra: Replaced 7925 lines"
+Top people with many determinations but not in the taxonomist list: 
+
+|Identifier         | Records|
+|:------------------|-------:|
+|Mamede, M.C.H.     |   17435|
+|Bernacci, L.C.     |    9173|
+|Hoehne, W.         |    9167|
+|Peralta, D.F.      |    7481|
+|Rodrigues, R.R.    |    6484|
+|Bianchini, R.S.    |    6205|
+|Salino, A.         |    6126|
+|Hoehne, F.C.       |    5366|
+|Prado, J.          |    5311|
+|Leitao Filho, H.F. |    5256|
+
+noName
+  FALSE    TRUE 
+1731263   40115 
+noName
+  FALSE    TRUE 
+1741792   29586 

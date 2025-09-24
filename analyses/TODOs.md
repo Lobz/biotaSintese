@@ -30,6 +30,8 @@ fix: use as.numeric
 - fazer um arquivo com a lista de nomes que não foram identificados no plantr
 - wdpa world database of protected areas wdpar no cran?
 
+- perguntar para marisa se há reserva técnica para fazer serviço de terceiros para dados de localidades e plano de manejo
+
 ## Data cleaning
 
 - todo: decide what to do with barcode NA
