@@ -6,8 +6,10 @@ getTaxonId <- function(total) {
     noName <- is.na(total$scientificName)
     table(noName)
     # if species is present, use that
-    total$scientificName[noName] <- total$species[noName]
-    noName <- is.na(total$scientificName)
+    if("species" %in% names(total)) {
+        total$scientificName[noName] <- total$species[noName]
+        noName <- is.na(total$scientificName)
+    }
     table(noName)
     # else, use genus
     total$scientificName[noName] <- total$genus[noName]
@@ -41,39 +43,33 @@ getTaxonId <- function(total) {
     # total <- tryAgain(total, not_found, formatTax, tax.name = "verbatimScientificName", use.author = F)
 
     # For records that have authorship inside scientific name, we want to remove that
+    try(
     total <- tryAgain(total,
         condition = function(x) {
-            auth <- gsub("\\(","\\\\(",x$scientificNameAuthorship.new)
-            auth <- gsub("\\)","\\\\)",auth)
-            not_found(x) & pairwiseMap(auth, x$scientificName, grepl)
+            not_found(x) & pairwiseMap(auth, x$scientificName, grepl, fixed = T)
             },
         FUN = function(x) {
-            auth <- gsub("\\(","\\\\(",x$scientificNameAuthorship.new)
-            auth <- gsub("\\)","\\\\)",auth)
-            x$scientificName <- str_squish(pairwiseMap(auth, x$scientificName, function(x,y) sub(x, "", y)))
+            x$scientificName <- str_squish(pairwiseMap(auth, x$scientificName, function(x,y) sub(x, "", y, fixed = T)))
             x$scientificName <- sub(", \\d+","",x$scientificName)
             x <- formatTax(x)
             x
         },
         success_condition = found,
-        label = "Removed auth 1")
-
+        label = "Removed auth 1"))
+    try(
     total <- tryAgain(total,
         condition = function(x) {
-            auth <- gsub("\\(","\\\\(",x$scientificNameAuthorship)
-            auth <- gsub("\\)","\\\\)",auth)
-            not_found(x) & pairwiseMap(auth, x$scientificName, grepl)
+            not_found(x) & pairwiseMap(auth, x$scientificName, grepl, fixed = T)
             },
         FUN = function(x) {
-            auth <- gsub("\\(","\\\\(",x$scientificNameAuthorship)
-            auth <- gsub("\\)","\\\\)",auth)
-            x$scientificName <- str_squish(pairwiseMap(auth, x$scientificName, function(x,y) sub(x, "", y)))
+            x$scientificName <- str_squish(pairwiseMap(auth, x$scientificName, function(x,y) sub(x, "", y, fixed = T)))
             x$scientificName <- sub(", \\d+","",x$scientificName)
             x <- formatTax(x)
             x
         },
         success_condition = found,
         label = "Removed auth 2")
+    )
 
     # Isolate authorship
     total[not_found(total),] <- isolateAuthorship(total[not_found(total),], overwrite.authorship = FALSE)

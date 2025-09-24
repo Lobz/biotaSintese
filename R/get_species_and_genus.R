@@ -12,11 +12,11 @@ get_species_and_genus <- function(x) {
     x$taxon.rank <- factor(x$taxon.rank, levels = taxonRanks, ordered=TRUE)
 
     sp <- which(x$taxon.rank <= "species")
-    x$species.new[sp] <- str_extract(x$scientificName.new[sp], "^[\\w|-]+ [\\w|-]+")
+    x$species.new[sp] <- stringr::str_extract(x$scientificName.new[sp], "^[\\w|-]+ [\\w|-]+")
     x$genus.new[sp] <- str_extract(x$scientificName.new[sp], "[\\w|-]+")
     gen <- which(x$taxon.rank == "genus")
     x$species.new[gen] <- NA
-    x$genus.new[gen] <- str_extract(x$scientificName.new[gen], "[\\w|-]+")
+    x$genus.new[gen] <- stringr::str_extract(x$scientificName.new[gen], "[\\w|-]+")
     fam <- which(x$taxon.rank >= "family")
     x$species.new[fam] <- NA
     x$genus.new[fam] <- NA
