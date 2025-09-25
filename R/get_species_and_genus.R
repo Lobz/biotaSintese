@@ -13,7 +13,7 @@ get_species_and_genus <- function(x) {
 
     sp <- which(x$taxon.rank <= "species")
     x$species.new[sp] <- stringr::str_extract(x$scientificName.new[sp], "^[\\w|-]+ [\\w|-]+")
-    x$genus.new[sp] <- str_extract(x$scientificName.new[sp], "[\\w|-]+")
+    x$genus.new[sp] <- stringr::str_extract(x$scientificName.new[sp], "[\\w|-]+")
     gen <- which(x$taxon.rank == "genus")
     x$species.new[gen] <- NA
     x$genus.new[gen] <- stringr::str_extract(x$scientificName.new[gen], "[\\w|-]+")

@@ -71,7 +71,7 @@ valid_points <- st_as_sf(valid_coords, coords = c("decimalLongitude.new", "decim
 valid_points <- fixDatum(valid_points)
 
 # Shape data
-shapes <- st_read("data/raw-data/shp_cnuc_2025_03/cnuc_2025_03.shp")
+shapes <- st_read("data/raw-data/shp_cnuc_2025_08/cnuc_2025_08.shp")
 shapes <- subset(shapes, uf == "SÃO PAULO")
 shapes$nome_uc <- standardize_uc_name(shapes$nome_uc)
 shapes <- subset(shapes, nome_uc %in% ucs$Nome.da.UC)

@@ -49,7 +49,7 @@ getTaxonId <- function(total) {
             not_found(x) & pairwiseMap(auth, x$scientificName, grepl, fixed = T)
             },
         FUN = function(x) {
-            x$scientificName <- str_squish(pairwiseMap(auth, x$scientificName, function(x,y) sub(x, "", y, fixed = T)))
+            x$scientificName <- plantR:::squish(pairwiseMap(auth, x$scientificName, function(x,y) sub(x, "", y, fixed = T)))
             x$scientificName <- sub(", \\d+","",x$scientificName)
             x <- formatTax(x)
             x
@@ -62,7 +62,7 @@ getTaxonId <- function(total) {
             not_found(x) & pairwiseMap(auth, x$scientificName, grepl, fixed = T)
             },
         FUN = function(x) {
-            x$scientificName <- str_squish(pairwiseMap(auth, x$scientificName, function(x,y) sub(x, "", y, fixed = T)))
+            x$scientificName <- plantR:::squish(pairwiseMap(auth, x$scientificName, function(x,y) sub(x, "", y, fixed = T)))
             x$scientificName <- sub(", \\d+","",x$scientificName)
             x <- formatTax(x)
             x
@@ -111,6 +111,18 @@ getTaxonId <- function(total) {
         FUN = function(x) {
             saved <- x$scientificName
             x$scientificName <- sub("(\\w+ \\w+ )", "\\1 f. ", x$scientificName)
+            x <- formatTax(x)
+            x$scientificName <- saved
+            x
+        },
+        success_condition = found,
+        label = "F.")
+
+    total <- tryAgain(total,
+        condition = function(x) not_found(x) & grepl("\\w+ \\w+ \\w", x$scientificName),
+        FUN = function(x) {
+            saved <- x$scientificName
+            x$scientificName <- sub("(\\w+ \\w+ )", "\\1 form ", x$scientificName)
             x <- formatTax(x)
             x$scientificName <- saved
             x
