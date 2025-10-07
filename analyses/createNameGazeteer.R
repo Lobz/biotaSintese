@@ -12,6 +12,7 @@ ucs <- read.csv("results/summary_multilist.csv")
 ucs$nome_file <- gsub(" ","",tolower(rmLatin(ucs$Nome.da.UC)))
 rownames(ucs) <- ucs$nome_file
 
+total <- dplyr::bind_rows(dt)
 for(x in nome_file){
     dt[[x]]$Nome_UC <- ucs[x,1]
 }
@@ -106,16 +107,22 @@ locTable2 <- function(x) {
     LT[,c(5,1:4)]
 }
 
-locTable3 <- function(x) {
-    if(nrow(x)==0) {
-        return(NULL)
-    }
-    x <- subset(x, confidenceLocality != "High" & resolution.gazetteer != "locality")
-    if(nrow(x)==0) {
-        return(NULL)
-    }
 
-    df <- x[,c("recordID",loc.cols)]
+x <- locTable2(dt[[4]])
+head(x)
+
+for(x in dt) LT <- locTable(x)
+tabs <- lapply(dt, locTable2)
+TABS <- dplyr::bind_rows(tabs)
+# write.csv(TABS, "results/locationsTable.csv", row.names = F)
+TABS2 <- read.csv("results/locationsTable.csv")
+
+TABS3 <- subset(TABS, Localidade %in% TABS2$Locality)
+write.csv(TABS3, "results/locations/locationsTable.csv", row.names = F)
+
+locTable3 <- function(df, filter=""){
+
+    df <- validateDup(df)
     # Formating the locality information
     occs.fix <- fixLoc(df)
     # Creating locality strings used to query the gazetteer
@@ -126,17 +133,14 @@ locTable3 <- function(x) {
     occs.locs$loc.string1 <- prepLoc(occs.locs$loc.string1)
     occs.locs$loc.string2 <- prepLoc(occs.locs$loc.string2)
 
+    if(filter != "") {
+        occs.locs$loc.string[grepl(filter, occs.locs$loc.string)] <- NA
+        occs.locs$loc.string1[grepl(filter, occs.locs$loc.string1)] <- NA
+        occs.locs$loc.string2[grepl(filter, occs.locs$loc.string2)] <- NA
+    }
+
     locs.basic <- getLoc(occs.locs)
-    # This was a good idea but it doesn't work
-    # locs.subs <- tryAgain(locs.basic, condition=function(x) x$resolution.gazetteer!="locality", FUN <- function(occs) {
-    #     occs <- remove_fields(occs, c("loc", "loc.correct", "resolution.gazetteer", "latitude.gazetter", "longitude.gazetteer"))
-    #     occs$loc.string <- gsub("\\s*,\\s*","_",occs$loc.string)
-    #     occs$loc.string1 <- gsub("\\s*,\\s*","_",occs$loc.string1)
-    #     occs$loc.string2 <- gsub("\\s*,\\s*","_",occs$loc.string2)
-    #     occs <- getLoc(occs)
-    #     occs
-    # })
-    # This does work tho
+    locs.basic$loc.orig <- NA
     locs.subs <- tryAgain(locs.basic, function(x) x$resolution.gazetteer!="locality", add_cols = T, FUN =function(occs) {
         occs <- remove_fields(occs, c("loc", "loc.correct", "resolution.gazetteer", "latitude.gazetter", "longitude.gazetteer"))
         occs$loc.orig <- occs$loc.string1
@@ -152,7 +156,15 @@ locTable3 <- function(x) {
         occs
     })
 
-    locs.subs[,c("stateProvince", "municipality", "locality")] <- x[,c("NAME_1", "NAME_2", "locality.new")]
+    adm <- getAdmin(locs.subs)
+
+    locs.subs$stateProvince <- ifelse(is.na(adm$NAME_1), locs.subs$stateProvince.new, adm$NAME_1)
+    locs.subs$municipality <- ifelse(is.na(adm$NAME_2), plantR:::squish(rmLatin(tolower(df$municipality))), adm$NAME_2)
+    locs.subs$locality <- plantR:::squish(rmLatin(tolower(df$locality)))
+
+    locs.subs$lat <- df$decimalLatitude.new
+    locs.subs$lon <- df$decimalLongitude.new
+    locs.subs$source <- df$downloadedFrom
 
     locs.fixed <- subset(locs.subs, !is.na(loc.orig))
     locs.unfix <- subset(locs.subs, is.na(loc.orig))
@@ -165,46 +177,69 @@ locTable3 <- function(x) {
     locs[is.na(locs)] <- ""
     DT <- rbind(locs.fixed, locs)
 
-    LT <- aggregate(DT$loc.orig, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), length)
-    LT_st <- aggregate(DT$stateProvince.new, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), function(x) paste(unique(x), collapse="|"))
-    names(LT_st)[3] <- "stateProvince"
-    LT_mun <- aggregate(DT$municipality.new, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), function(x) paste(unique(x), collapse="|"))
-    names(LT_mun)[3] <- "municipality"
-    LT_locality <- aggregate(DT$locality.new, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), function(x) paste(unique(x), collapse="|"))
-    names(LT_locality)[3] <- "locality"
+    comb.text <- function(x) {
+        x <- gsub("[,.]","",x)
+        if(length(unique(x))==1) return(x[1])
+        t <- sort(table(x), decreasing = T)
+        ta <- paste(names(t),"(",t,")")
+        paste(head(ta[ta>0]), collapse=" | ")
+    }
 
-    names(LT)[3] <- "Freq"
-    LT <- LT[order(LT$Freq, decreasing = T),]
+    #source (and loc and loc.correct)
+    LT <- aggregate(DT$source, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), function(x) paste(sort(unique(tolower(x))),collapse="_"))
+    names(LT)[3] <- "source"
+    #status in gazet and frequency here
+    LT_tmp <- aggregate(DT$loc.orig, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), length)
+    LT$Freq <-LT_tmp$x
+    gazetteer <- read.csv("data/derived-data/gazetteer - gazetteer_new.csv")
 
-    LT_full <- dplyr::left_join(LT, LT_st, by=c("loc", "loc.correct"))
-    LT_full <- dplyr::left_join(LT_full, LT_mun, by=c("loc", "loc.correct"))
-    LT_full <- dplyr::left_join(LT_full, LT_locality, by=c("loc", "loc.correct"))
+    locs_existentes <- unique(gazetteer$loc)
 
-    head(LT_full)
+    LT$alreadyInGazet <- LT$loc %in% locs_existentes
+    match_gazet <- match(LT$loc, gazetteer$loc) # todo: check which line is used in case of dups
+    LT$ordemGazet <- gazetteer$order[match_gazet]
+    LT$statusInGazet <- gazetteer$status[match_gazet]
+    #country
+    LT$country <- "Brazil"
+    #state
+    LT_st <- aggregate(DT$stateProvince, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), function(x) paste(unique(x), collapse="|"))
+    LT$stateProvince <- LT_st$x
+    #mun
+    LT_mun <- aggregate(DT$municipality, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), comb.text)
+    LT$municipality <- LT_mun$x
+    #locality
+    LT_locality <- aggregate(DT$locality, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), comb.text)
+    LT$locality <- LT_locality$x
+    #lat
+    LT_tmp <- aggregate(DT$lat, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), mean)
+    LT$meanLatitude <-LT_tmp$x
+    #lon
+    LT_tmp <- aggregate(DT$lon, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), mean)
+    LT$meanLongitude <-LT_tmp$x
 
-    LT_full
+    LT_final <- LT[order(LT$Freq, decreasing = T),]
+
+    LT_final
 }
 
-x <- locTable2(dt[[4]])
-head(x)
+df <- subset(total, confidenceLocality == "Low" & resolution.gazetteer != "locality")
+LT_final <- locTable3(df)
 
-for(x in dt) LT <- locTable(x)
-tabs <- lapply(dt, locTable2)
-TABS <- dplyr::bind_rows(tabs)
-# write.csv(TABS, "results/locationsTable.csv", row.names = F)
-TABS2 <- read.csv("results/locationsTable.csv")
+names(gazetteer)
 
-TABS3 <- subset(TABS, Localidade %in% TABS2$Locality)
-write.csv(TABS3, "results/locations/locationsTable.csv", row.names = F)
+upl <- read.csv("data/derived-data/locs frequentes - locationsTable_getLoc_new.csv")
 
-total <- dplyr::bind_rows(dt)
-tabs_locs <- locTable3(total)
-write.csv(tabs_locs,"results/locations/locationsTable_getLoc.csv", row.names = F)
+upl$Freq <- LT_final$Freq[match(upl$loc,LT_final$loc)]
+head(upl)
+upl$add <- ifelse(upl$alreadyInGazet..status=="No: add", "Yes", "")
+# upl$status <- pairwiseMap(upl$Freq,upl$statusInGazet, max, na.rm=T)
+upl <- upl[order(upl$Freq),]
+
+write.csv(upl[upl$Freq>100,],"results/locations/locationsTable_getLoc.csv", row.names = F)
 
 head(tabs_locs)
 x <- subset(total, )
 
-total <- dplyr::bind_rows(dt)
 nrow(total)
 table(total$selectionCategory, useNA="always")
 
@@ -214,21 +249,26 @@ loctab <- unique(total[,c("Nome_UC","locality")])
 
 load("data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
 
-locs <- unique(unlist(sapply(dt, function(x) unique(x$loc))))
 
-locs
+df <- subset(saopaulo, resolution.gazetteer != "locality")
 
-not_used <- subset(saopaulo, !loc %in% locs)
+loc_string <- paste(df$country, df$municipality, df$stateProvince, df$locality)
+loc_string <- tolower(rmLatin(loc_string))
 
-    terms_pattern <- "parque|reserva|reserve|fazenda|nacional|estadual|parna|flona|rebio|rppn|e\\.e\\.|biologica|ecologica|extrativista|park|farm|hacienda|estrada|rodovia|carretera|road|camino|sitio|mata|horto|jardim|campus|pico|serra|sierra|morro|chapada|colina|monumento|exp|floresta|refúgio"
-possible_ucs <- grepl(terms_pattern, not_used$loc)
-sort(table(not_used$loc[possible_ucs]))
+pat1 <- "parque|reserva|reserve|fazenda|nacional|estadual|parna|flona|rebio|rppn|e\\.e\\.|biologica|ecologica|extrativista|park|farm|hacienda|sitio|mata|horto|jardim|campus|pico|serra|sierra|morro|chapada|colina|monumento|exp|floresta|refugio|estacao|est.|a\\.p\\.a|faz\\.|faz |ecol\\.|biol\\.|p\\.e\\.|e\\.b\\.|cerrado|rvs"
+terms_pattern <- tolower(rmLatin(paste(c(uc_abbrevs$short, uc_abbrevs$long, pat1), collapse="( |\\.|,|$)|")))
 
-not_good <- not_used$resolution.gazetteer != "locality" & not_used$loc != not_used$loc.correct
-sort(table(not_used$loc[possible_ucs & not_good]))
-dt <- not_used[possible_ucs & not_good,]
-dt <- dt[order(dt$loc),]
-write.csv(dt[, c(loc.cols, loc.cols.plantR)], "data/derived-data/temp_unused locations.csv", row.names=F)
+possible_ucs <- grepl(terms_pattern, loc_string)
+tail(tab(loc_string[possible_ucs]))
+df <- df[possible_ucs, ]
+df <- validateDup(df)
 
-matao <- dt[dt$loc=="brazil_sao paulo_matao",]
-table(matao$municipality)
+LT_unused <- locTable3(df)
+
+head(LT_unused)
+write.csv(LT_unused, "results/locations/potential_locs_full.csv")
+tail(LT_unused)
+LT_final <- subset(LT_unused, Freq>10 & !alreadyInGazet)
+head(LT_final)
+
+write.csv(LT_final, "results/locations/unused_locs.csv")

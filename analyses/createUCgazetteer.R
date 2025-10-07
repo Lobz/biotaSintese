@@ -74,6 +74,26 @@ shapes <- dplyr::bind_rows(single_state, inter_state)
 table(shapes$name_state, useNA="always")
 
 save(shapes, file="data/derived-data/intersected_shapes.rda")
+load("data/derived-data/intersected_shapes.rda")
+table(shapes$name_state)
+
+# Subset to SP because I don't wanna be here all day
+shapes <- subset(shapes, name_state == "São Paulo")
+fix_these <- st_is_empty(shapes$geometry)
+shapes$geometry[fix_these] <- shapes$geom[fix_these]
+shapes$geom <- shapes$geometry
+shapes$geometry <- NULL
+shapes <- st_as_sf(shapes)
+
+# Test intersections
+test_state <- st_intersects(shapes, state)
+str(test_state)
+summary(sapply(test_state, function(x) 20 %in% x)) #ok
+summary(sapply(test_state, function(x) length(x)))
+# intersect properly
+inter_state <- st_intersection(state, shapes)
+save(shapes, inter_state, file="data/derived-data/intersected_shapes.rda")
+load("data/derived-data/intersected_shapes.rda")
 
 # Read munis data from geobr
 munis_info <- datasets[datasets[,1]=="`read_municipality`",]
@@ -88,25 +108,137 @@ str(munis_by_state)
 head(munis_by_state[[1]])
 names(munis_by_state)
 
-ucs_by_state <- split(shapes, inter_state$name_state)
+# Subset to SP because I don't wanna be here all day
+shapes_SP <- subset(inter_state, name_state == "São Paulo")
+ucs_by_state <- split(inter_state, inter_state$name_state)
 head(ucs_by_state[[1]])
 names(ucs_by_state)
+names(munis_by_state)
 
 
 inter_munis_by_state <- list()
 
-for(i in 1:length(ucs_by_state)) {
+for(i in names(ucs_by_state)) {
     try(
         inter_munis_by_state[[i]] <- st_intersection(munis_by_state[[i]], ucs_by_state[[i]])
     )
 }
 
-names(inter_munis_by_state) <- names(ucs_by_state)
-
 rbind(sapply(inter_munis_by_state, nrow), sapply(ucs_by_state, nrow))
 
-inter_munis <- dplyr::bind_rows(inter_munis_by_state)
-dim(inter_munis)
+inter_munis <- inter_munis_by_state[["São Paulo"]]
+centroids <- st_coordinates(st_centroid(inter_munis))
+inter_munis$latitude <- as.character(centroids[,2])
+inter_munis$longitude <- as.character(centroids[,1])
+head(inter_munis)
+
+# inter_munis <- dplyr::bind_rows(inter_munis_by_state)
+# dim(inter_munis)
+
+# Apply plantR
+head(inter_munis)
 
 
-dt <- data.frame(country="Brazil", stateProvince="São Paulo", locality=ucs$Nome.da.UC)
+dt <- data.frame(country="Brazil", stateProvince=inter_munis$name_state,
+    municipality=inter_munis$name_muni, locality=inter_munis$nome_uc,
+    latitude=inter_munis$latitude, longitude=inter_munis$longitude)
+
+dt.fix <- fixLoc(dt)
+head(dt.fix)
+dt.str <- strLoc(dt.fix)
+head(dt.str)
+loc.ideal.long <- prepLoc(dt.str$loc.string1)
+dt.full <- formatLoc(dt)
+table(dt.full$resolution.gazetteer)
+head(dt.full)
+
+write.csv(dt.full, "results/locations/UC_gazetteer.csv", row.names=F)
+dt.full <- read.csv("results/locations/UC_gazetteer.csv")
+head(dt.full)
+
+dt <- dt.full
+dt <- dt[,1:6]
+dt$locality <- shorten_uc_name(dt$locality)
+
+dt.fix <- fixLoc(dt)
+head(dt.fix)
+dt.str <- strLoc(dt.fix)
+head(dt.str)
+loc.ideal.short <- prepLoc(dt.str$loc.string1)
+dt.full2 <- formatLoc(dt)
+table(dt.full2$resolution.gazetteer)
+head(dt.full2)
+
+table(dt.full$resolution.gazetteer,dt.full2$resolution.gazetteer)
+
+correct.long <- dt.full$resolution.gazetteer=="locality"
+correct.short <- dt.full2$resolution.gazetteer=="locality"
+
+same.result <- dt.full$loc.correct==dt.full2$loc.correct
+
+dt$resolution.gazetteer <- "locality"
+dt$loc.ideal.long <- loc.ideal.long
+dt$success.long <- correct.long
+dt$loc.correct.long <- ifelse(correct.long, dt.full$loc.correct, "")
+dt$loc.ideal.short <- loc.ideal.short
+dt$success.short <- correct.short
+dt$loc.correct.short <- ifelse(correct.short, dt.full2$loc.correct, "")
+
+dt$loc.correct <- dt$loc.ideal.short
+dt$loc.correct[correct.long] <- dt$loc.correct.long[correct.long]
+dt$loc.correct[correct.short] <- dt$loc.correct.short[correct.short]
+diff.loc <- correct.long & correct.short & !same.result
+dt$loc.extra <-""
+dt$loc.extra[diff.loc] <- dt$loc.correct.long[diff.loc]
+dt$uc_name <- standardize_uc_name(dt$locality)
+head(dt)
+
+dt.base <- dt[,1:4]
+dt.new <- rbind(dt.base, dt.base)
+dt.new$loc <- c(loc.ideal.short, loc.ideal.long)
+dt.new$loc.correct <- dt$loc.correct
+dt.new$latitude <- dt$latitude
+dt.new$longitude <- dt$longitude
+dt.new$resolution.gazetteer <- "locality"
+dt.new$source <- "cnuc_ibge"
+
+dt.ready <- dt.new[order(dt.new$country, dt.new$stateProvince, dt.new$municipality, dt.new$locality), ]
+head(dt.ready)
+write.csv(dt.ready, "results/locations/ucs_locs_cnuc_shapes.csv")
+
+write.csv(dt[correct.long | correct.short,c("uc_name", "stateProvince", "municipality", "loc.correct", "loc.extra")], "results/locations/uc_locstrings.csv")
+
+# Check legality of gazetteer locs
+gazetteer <- read.csv("../plantR/data-raw/raw_dictionaries/gazetteer.csv")
+
+res_orig <- gazetteer$resolution.gazetteer
+res_orig <- sub("\\|.*", "", res_orig)
+res_orig <- sub("CHECK", "no_info", res_orig)
+res_orig <- sub("bairro|cachoeira|distrito|localidade|mina|serra|sublocalidade|vila", "locality", res_orig)
+
+split_locs <- as.data.frame(stringr::str_split_fixed(gazetteer$loc, "_", n=4))
+colnames(split_locs)=c("country", "stateProvince", "municipality", "locality")
+head(split_locs)
+
+ret <- fixLoc(split_locs)
+ret <- strLoc(ret)
+ret$loc.string <- prepLoc(ret$loc.string)
+ret$loc.string1 <- prepLoc(ret$loc.string1)
+ret$loc.string2 <- prepLoc(ret$loc.string2)
+ret <- getLoc(ret)
+table(res_orig, ret$resolution.gazetteer)
+
+ret$loc.gazet <- gazetteer$loc
+ret$loc.correct.gazet <- gazetteer$loc.correct
+ret$loc.best <- ret$loc.string1
+ret$loc.best[is.na(ret$loc.best)] <- ret$loc.string[is.na(ret$loc.best)]
+head(ret[which(res_orig!=ret$resolution.gazetteer & gazetteer$status=="ok" & res_orig=="locality"),])
+
+checklocs <- cbind(split_locs, ret)
+head(checklocs)
+checklocs$resolution.expected <- res_orig
+checklocs$warning <- ifelse(checklocs$loc.best != checklocs$loc.gazet, "check_loc_impossible", "")
+
+table(res_orig!=ret$resolution.gazetteer & gazetteer$status=="ok", checklocs$loc.best != checklocs$loc.gazet & gazetteer$status=="ok")
+
+write.csv(checklocs, "results/locations/checkloc.csv")
