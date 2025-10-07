@@ -227,10 +227,7 @@ saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "county" & 
   x
 }, success_condition = function(x) x$resolution.gazetteer %in% c("locality"), label = "Using correct state and municipality name")
 
-locs <- getAdmin(saopaulo$loc.correct)
-names(locs)<-c("loc.correct.admin", "country.correct", "stateProvince.correct", "municipality.correct", "locality.correct", "source.loc")
-saopaulo[,names(locs)] <- NULL
-saopaulo <- cbind(saopaulo,locs)
+saopaulo <- addAdmin(saopaulo)
 
 tab(saopaulo$country.correct)
 tab(saopaulo$country.new[is.na(saopaulo$country.correct)])
@@ -276,6 +273,7 @@ saopaulo <- validateLoc(saopaulo)
 map <- latamMap$brazil
 map <- subset(map, NAME_1 == "sao paulo")
 saopaulo <- validateCoord(saopaulo, high.map = map) # WORKING
+saopaulo$recordID <- 1:nrow(saopaulo) # I need a unique ID for this
 save(saopaulo,file="data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
 
 sp_deduped <- validateDup(saopaulo, noNumb = NA, noYear = NA, noName = NA, prop=1,

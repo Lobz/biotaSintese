@@ -40,7 +40,6 @@ ucs$loc.correct[dt$resolution.gazetteer != "locality"] <- NA
 
 # Pre-treated data from GBIF, REflora and JABOT
 load("data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
-saopaulo$recordID <- 1:nrow(saopaulo) # I need a unique ID for this
 
 # Which occs are associated with each UC
 occs_exact <- lapply(ucs$loc.correct, function(s) {
