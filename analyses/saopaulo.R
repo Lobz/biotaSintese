@@ -3,8 +3,13 @@ library(geobr)
 library(plantR)
 library(parallel)
 
-load("data/derived-data/saopaulo_occs.RData")
+load("data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
 
+saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer != "locality", function(x) {
+  x$municipality <- sub("[ ,\\.^]sta\\.","santa", x$municipality)
+  x$locality <- sub("[ ,\\.^]sta\\.","santa", x$locality)
+  x <- formatLoc(x)
+}, success_condition = function(x) grepl("santa", paste(x$locality.new, x$locality.scrap)))
 # gonna hand redo formatLoc
 # fixLoc is already done, thank you
 remove_spaces <- function(x) {
@@ -59,13 +64,13 @@ saopaulo$locality.new <- remove_spaces(saopaulo$locality.new)
 
 saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country",finLoc)
 
-saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer %in% c("no_info") & grepl("mog. mirim|campinas|sorocaba|peruibe|ubatuba|campos d. jordao|cananeia|cardoso|botucatu|moj. mirim",x$municipality.new), function(x) {
+saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer %in% c("no_info") & grepl("mog. mirim|campinas|sorocaba|peruibe|ubatuba|campos d. jordao|cananeia|cardoso|botucatu|moj. mirim|sao paulo",x$municipality.new), function(x) {
 
   x$country.new <- "brazil"
   x <- finLoc(x)
 })
 
-saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer %in% c("no_info") & grepl("mog. mirim|sorocaba|peruibe|ubatuba|campos d. jordao|cananeia|botucatu|moj. mirim",x$locality.new), function(x) {
+saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer %in% c("no_info") & grepl("mog. mirim|sorocaba|peruibe|ubatuba|campos d. jordao|cananeia|botucatu|moj. mirim|sao paulo",x$locality.new), function(x) {
 
   x$country.new <- "brazil"
   x <- finLoc(x)
@@ -244,25 +249,6 @@ saopaulo <- subset(saopaulo, stateProvince.correct == "São Paulo" | is.na(state
 
 # Treat gps data
 saopaulo <- formatCoord(saopaulo)
-tab(saopaulo$origin.coord)
-# Try again using verbatim coordinates -> this isn't working for some reason
-# saopaulo <- tryAgain(saopaulo,
-#     condition = function(x) {
-#       x$origin.coord == "coord_gazet" & !is.na(x$verbatimLatitude) & !is.na(x$verbatimLongitude)
-#     },
-#     FUN = function(x) {
-#         x$decimalLatitude <- x$verbatimLatidude
-#         x$decimalLongitude <- x$verbatimLongidude
-#         x <- formatCoord(x)
-#         x
-#     },
-#     success_condition = function(x) x$origin.coord == "coord_original"
-
-# )
-tab(is.na(saopaulo$decimalLatitude.new))
-
-table(is.na(saopaulo$locality), saopaulo$origin.coord)
-
 
 # formatTax and validateTax
 saopaulo <- getTaxonId(saopaulo)
@@ -273,7 +259,21 @@ saopaulo <- validateLoc(saopaulo)
 map <- latamMap$brazil
 map <- subset(map, NAME_1 == "sao paulo")
 saopaulo <- validateCoord(saopaulo, high.map = map) # WORKING
+saopaulo <- tryAgain(saopaulo, function(x) is.na(x$decimalLatitude.new), formatCoord)
+saopaulo <- tryAgain(saopaulo, function(x) is.na(x$geo.check), validateCoord, high.map=map)
+tab(is.na(saopaulo$geo.check))
+table(saopaulo$geo.check, saopaulo$origin.coord)
+
+# substitute bad coords
+good_coords <- startsWith(saopaulo$geo.check, "ok_county") | startsWith(saopaulo$geo.check, "ok_locality")
+tab(good_coords)
+saopaulo$decimalLatitude.new[!good_coords] <- saopaulo$latitude.gazetteer[!good_coords]
+saopaulo$decimalLongitude.new[!good_coords] <- saopaulo$longitude.gazetteer[!good_coords]
+saopaulo$origin.coord[!good_coords] <- "coord_gazet"
+
+
 saopaulo$recordID <- 1:nrow(saopaulo) # I need a unique ID for this
+
 save(saopaulo,file="data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
 
 sp_deduped <- validateDup(saopaulo, noNumb = NA, noYear = NA, noName = NA, prop=1,

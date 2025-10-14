@@ -271,4 +271,10 @@ tail(LT_unused)
 LT_final <- subset(LT_unused, Freq>10 & !alreadyInGazet)
 head(LT_final)
 
+
+old <- read.csv("data/derived-data/temp_unused locations.csv")
+
+removed <- old$loc
+LT_final <- subset(LT_final, !loc %in% removed)
+
 write.csv(LT_final, "results/locations/unused_locs.csv")

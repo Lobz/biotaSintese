@@ -46,10 +46,10 @@ getTaxonId <- function(total) {
     try(
     total <- tryAgain(total,
         condition = function(x) {
-            not_found(x) & pairwiseMap(auth, x$scientificName, grepl, fixed = T)
+            not_found(x) & pairwiseMap(x$scientificNameAuthorship, x$scientificName, grepl, fixed = T)
             },
         FUN = function(x) {
-            x$scientificName <- plantR:::squish(pairwiseMap(auth, x$scientificName, function(x,y) sub(x, "", y, fixed = T)))
+            x$scientificName <- plantR:::squish(pairwiseMap(x$scientificNameAuthorship, x$scientificName, function(x,y) sub(x, "", y, fixed = T)))
             x$scientificName <- sub(", \\d+","",x$scientificName)
             x <- formatTax(x)
             x
@@ -59,10 +59,10 @@ getTaxonId <- function(total) {
     try(
     total <- tryAgain(total,
         condition = function(x) {
-            not_found(x) & pairwiseMap(auth, x$scientificName, grepl, fixed = T)
+            not_found(x) & pairwiseMap(x$scientificNameAuthorship, x$scientificName, grepl, fixed = T)
             },
         FUN = function(x) {
-            x$scientificName <- plantR:::squish(pairwiseMap(auth, x$scientificName, function(x,y) sub(x, "", y, fixed = T)))
+            x$scientificName <- plantR:::squish(pairwiseMap(x$scientificNameAuthorship, x$scientificName, function(x,y) sub(x, "", y, fixed = T)))
             x$scientificName <- sub(", \\d+","",x$scientificName)
             x <- formatTax(x)
             x

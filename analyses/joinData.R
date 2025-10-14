@@ -53,5 +53,6 @@ saopaulo <- formatLoc(saopaulo)
 # ###### PAUSE
 print("Saving")
 save(saopaulo, file="data/derived-data/saopaulo_occs.RData")
+save(saopaulo, file="data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
 
 print(dim(saopaulo))
