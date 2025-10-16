@@ -15,9 +15,10 @@ nome_file <- gsub(" ","",tolower(rmLatin(Nome_UC)))
 ucs_icmbio <- read.csv("data/raw-data/DadosGeoestatisticos_UCs_21jul2025.csv")
 str(ucs_icmbio)
 ucs_icmbio$Nome.da.UC <- standardize_uc_name(ucs_icmbio$Nome.da.Unidade.de.Conservação.conforme.o.Ato.legal)
+head(ucs_icmbio)
 
 # Download sheets of data from IF
-dt <- download_sheets("https://docs.google.com/spreadsheets/d/1UuUJJaS1mkewQnzz5xLPnbbQTL4P9UQ1LgL2dYwcwLI", n=13)
+dt <- download_sheets("https://docs.google.com/spreadsheets/d/1UuUJJaS1mkewQnzz5xLPnbbQTL4P9UQ1LgL2dYwcwLI", n=12)
 
 x <- dt[[1]]
 my_names <- names(x)[-1]
@@ -27,7 +28,7 @@ fix_name <- function(x) {
         # Tabela normal
         type <- names(x)[1]
         if(type=="Área de Proteção Ambiental Marinha") {
-            return(x[1])
+            return(x[,1])
         }
         return(paste(type, x[,type]))
     } else if("RPPN" %in% names(x)) {
@@ -35,8 +36,14 @@ fix_name <- function(x) {
     } else return(NULL)
 }
 
-ucs_if <- unlist(lapply(dt, fix_name))
-ucs_if <- sort(toupper(standardize_uc_name(ucs_if)))
+fix_name_dt <- function(x) {
+    x$nome_uc <- fix_name(x)
+    x$Nome.da.UC <- standardize_uc_name(toupper(x$nome_uc))
+    x
+}
+
+ucs_if_list <- (lapply(dt, fix_name_dt))
+ucs_if <- dplyr::bind_rows(ucs_if_list)
 
 sort(table(ucs$Órgão.Gestor))
 ucs_cnuc_if <- subset(ucs, Órgão.Gestor=="FUNDAÇÃO PARA CONSERVAÇÃO E A PRODUÇÃO FLORESTAL DO ESTADO DE SÃO PAULO - SP")

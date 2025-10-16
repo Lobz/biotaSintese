@@ -54,46 +54,29 @@ state_latest_year <- sub(".* ","",state_info$years)
 state <- geobr::read_state(year = state_latest_year)
 head(state)
 
-# Since state info is more reliable, we'll be taking single-state UCs at their word
-multi <- grepl(",", shapes$uf)
-table(multi)
-multi_state <- all_shapes[multi,]
-single_state <- all_shapes[!multi,]
-dim(single_state)
-head(single_state)
-
-# Name of state
-single_state$name_state <- state$name_state[match(rmLatin(single_state$uf), toupper(rmLatin(state$name_state)))]
+# Subset to SP because I don't wanna be here all day
+shapes <- subset(shapes, grepl("SÃO PAULO", uf))
+shapes$area_calc <- st_area(shapes)
 
 # Intersect state shapes with UC shapes
-inter_state <- st_intersection(state, multi_state)
+inter_state <- st_intersection(state, shapes)
 head(inter_state)
+table(inter_state$name_state)
 
-# Rejoin
-shapes <- dplyr::bind_rows(single_state, inter_state)
-table(shapes$name_state, useNA="always")
+# Filter areas that are too small
+inter_state$area_calc2 <- st_area(inter_state)
+inter_state$area_prop <- as.numeric(inter_state$area_calc2/inter_state$area_calc)
+boxplot(inter_state$area_prop~ inter_state$name_state)
+save(inter_state, file="data/derived-data/inter_state.rda")
+load("data/derived-data/inter_state.rda")
 
-save(shapes, file="data/derived-data/intersected_shapes.rda")
-load("data/derived-data/intersected_shapes.rda")
-table(shapes$name_state)
+inter_state <- subset(inter_state, area_prop > 0.05)
+table(inter_state$name_state, useNA="always")
+
+table(inter_state$name_state)
 
 # Subset to SP because I don't wanna be here all day
-shapes <- subset(shapes, name_state == "São Paulo")
-fix_these <- st_is_empty(shapes$geometry)
-shapes$geometry[fix_these] <- shapes$geom[fix_these]
-shapes$geom <- shapes$geometry
-shapes$geometry <- NULL
-shapes <- st_as_sf(shapes)
-
-# Test intersections
-test_state <- st_intersects(shapes, state)
-str(test_state)
-summary(sapply(test_state, function(x) 20 %in% x)) #ok
-summary(sapply(test_state, function(x) length(x)))
-# intersect properly
-inter_state <- st_intersection(state, shapes)
-save(shapes, inter_state, file="data/derived-data/intersected_shapes.rda")
-load("data/derived-data/intersected_shapes.rda")
+inter_state <- subset(inter_state, name_state == "São Paulo")
 
 # Read munis data from geobr
 munis_info <- datasets[datasets[,1]=="`read_municipality`",]
@@ -102,14 +85,14 @@ munis <- geobr::read_municipality(year = munis_latest_year)
 munis[ ,c("code_state","abbrev_state","code_region","name_region")] <- NULL
 head(munis)
 
+# Subset to SP because I don't wanna be here all day
+munis <- subset(munis, name_state == "São Paulo")
 # Split into states and intersect
 munis_by_state <- split(munis, munis$name_state)
 str(munis_by_state)
 head(munis_by_state[[1]])
 names(munis_by_state)
 
-# Subset to SP because I don't wanna be here all day
-shapes_SP <- subset(inter_state, name_state == "São Paulo")
 ucs_by_state <- split(inter_state, inter_state$name_state)
 head(ucs_by_state[[1]])
 names(ucs_by_state)
@@ -127,6 +110,20 @@ for(i in names(ucs_by_state)) {
 rbind(sapply(inter_munis_by_state, nrow), sapply(ucs_by_state, nrow))
 
 inter_munis <- inter_munis_by_state[["São Paulo"]]
+
+# Filter areas that are too small
+inter_munis$area_calc_mun <- st_area(inter_munis)
+inter_munis$area_prop_mun <- as.numeric(inter_munis$area_calc_mun/inter_munis$area_calc)
+summary(inter_munis$area_prop_mun)
+boxplot(inter_munis$area_prop_mun~ inter_munis$code_muni)
+save(inter_munis, file="data/derived-data/inter_munis.rda")
+load("data/derived-data/inter_munis.rda")
+
+inter_munis <- subset(inter_munis, area_prop_mun > 0.005)
+dim(inter_munis)
+
+tab(inter_munis$nome_uc)
+
 centroids <- st_coordinates(st_centroid(inter_munis))
 inter_munis$latitude <- as.character(centroids[,2])
 inter_munis$longitude <- as.character(centroids[,1])
@@ -153,7 +150,7 @@ table(dt.full$resolution.gazetteer)
 head(dt.full)
 
 write.csv(dt.full, "results/locations/UC_gazetteer.csv", row.names=F)
-dt.full <- read.csv("results/locations/UC_gazetteer.csv")
+dt.full <- read.csv("results/locations/UC_gazetteer.csv", colClasses="character")
 head(dt.full)
 
 dt <- dt.full
@@ -209,7 +206,7 @@ write.csv(dt.ready, "results/locations/ucs_locs_cnuc_shapes.csv")
 write.csv(dt[correct.long | correct.short,c("uc_name", "stateProvince", "municipality", "loc.correct", "loc.extra")], "results/locations/uc_locstrings.csv")
 
 # Check legality of gazetteer locs
-gazetteer <- read.csv("../plantR/data-raw/raw_dictionaries/gazetteer.csv")
+gazetteer <- read.csv("data/derived-data/gazetteer - gazetteer_new.csv")
 
 res_orig <- gazetteer$resolution.gazetteer
 res_orig <- sub("\\|.*", "", res_orig)

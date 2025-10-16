@@ -162,8 +162,8 @@ locTable3 <- function(df, filter=""){
     locs.subs$municipality <- ifelse(is.na(adm$NAME_2), plantR:::squish(rmLatin(tolower(df$municipality))), adm$NAME_2)
     locs.subs$locality <- plantR:::squish(rmLatin(tolower(df$locality)))
 
-    locs.subs$lat <- df$decimalLatitude.new
-    locs.subs$lon <- df$decimalLongitude.new
+    locs.subs$lat <- ifelse(df$origin.coord=="coord_original",df$decimalLatitude.new,NA)
+    locs.subs$lon <- ifelse(df$origin.coord=="coord_original",df$decimalLongitude.new,NA)
     locs.subs$source <- df$downloadedFrom
 
     locs.fixed <- subset(locs.subs, !is.na(loc.orig))
@@ -211,10 +211,10 @@ locTable3 <- function(df, filter=""){
     LT_locality <- aggregate(DT$locality, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), comb.text)
     LT$locality <- LT_locality$x
     #lat
-    LT_tmp <- aggregate(DT$lat, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), mean)
+    LT_tmp <- aggregate(DT$lat, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), mean, na.rm=T)
     LT$meanLatitude <-LT_tmp$x
     #lon
-    LT_tmp <- aggregate(DT$lon, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), mean)
+    LT_tmp <- aggregate(DT$lon, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), mean, na.rm=T)
     LT$meanLongitude <-LT_tmp$x
 
     LT_final <- LT[order(LT$Freq, decreasing = T),]
@@ -277,4 +277,6 @@ old <- read.csv("data/derived-data/temp_unused locations.csv")
 removed <- old$loc
 LT_final <- subset(LT_final, !loc %in% removed)
 
-write.csv(LT_final, "results/locations/unused_locs.csv")
+LT <- dplyr::bind_rows(old[1,],LT_final)[-1,]
+
+write.csv(LT, "results/locations/unused_locs.csv", na="", row.names = F)
