@@ -1,0 +1,12 @@
+# Requisição de serviço - Organização e digitação de listas de espécies e outras informações de unidades de conservação a partir dos planos de manejo
+
+## Justificativa
+
+No projeto **[inserir número e nome do projeto]**, implementamos uma ferramenta de software que compila rapidamente listas de espécies vegetais para centenas de unidades de conservação (UCs) a partir de dados já existentes, em especial dados de herbários e de florísticas. O próximo passo é aplicar essa ferramenta para criar e disponibilizar listas de espécies para todas as UCs do estado de São Paulo.
+
+Um dos maiores desafios é o cruzamento de dados de localidade, ou seja, identificar, para cada dado de ocorrência de uma espécie, se esse dado foi coletado dentro de alguma das mais dessas UCs.
+Para isso, buscamos os nomes das UCs nos campos de localidade dos dados de ocorrência, levando em conta possíveis abreviações e variações nominais. Nosso ponto de partida é a lista de UCs do Cadastro Nacional de Unidades de Conservação (CNUC), que lista 309 UCs total ou parcialmente dentro do estado, e fornece mapas georeferenciados para 287 delas.
+Porém, muitos dos dados de ocorrência usam nomes de locais que não estão no CNUC mas que ainda indicariam uma coleta dentro de uma UC, como nomes antigos ou alternativos de UCs (_eg_, "Parque do Estado", para o Parque Estadual das Fontes do Ipiranga) ou nomes de locais que estão contidos em UCs (_eg_, "Jardim Botânico de São Paulo", contido no PE Fontes do Ipiranga), ou nomes atualizados, em casos em que o nome presente no CNUC é um nome antigo (_eg_, consta no CNUC a "Estação Ecológica de Bauru", que foi renomeada "Estação Ecológica Sebastião Aleixo da Silva" em 1997).
+Para gerar listas confiáveis e completas, precisamos de uma tabela contendo, para cada UC, os nomes de locais que podem ser associados a ela com algum grau de confiança. Devido ao grande número de UCs, essa tabela pode chegar a conter milhares de nomes que precisam ser verificados um por um, e por isso será necessária a contratação desse serviço de terceiros.
+
+Além da identificação das localidades, outro desafio é a leitura de dados publicados em florísticas. Algumas espécies são raramente registradas em herbário, e por isso consideramos importante utilizar também dados publicados em planos de manejo e artigos científicos. Porém, para que esses dados possam ser lidos pelo software, é preciso que eles estejam digitados e formatados em uma planilha.
