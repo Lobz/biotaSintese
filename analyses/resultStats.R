@@ -30,12 +30,30 @@ selCats <- lapply(dtOrig, function(x) {
     x <- factor(x, levels=c("coord_original", "coord_gazet", "locality_exact", "locality_high", "locality_medium"))
     summary(x)
 })
+Nome.da.UC <- sapply(dtOrig, function(x) x$Nome_UC[1])
 selCats <- dplyr::bind_rows(selCats)
+selCats <- cbind(Nome.da.UC,selCats)
+summary(selCats)
+confLoc <- lapply(dtOrig, function(x) {
+    x <- x$confidenceLocality
+    x <- factor(x, levels=c("High", "Medium", "Low", "None"))
+    summary(x)
+})
+confLoc <- dplyr::bind_rows(confLoc)
+confLoc <- cbind(Nome.da.UC,confLoc)
+summary(confLoc)
+summ_ml <- read.csv("results/summary_multilist.csv")
+summary(summ_ml)
+
+m <- merge(summ_ml, confLoc, all=T)
+summary(m)
+m[is.na(m)] <- 0
+write.csv(m, "results/summary_multilist.csv", row.names=F)
+
 selCats$total <- rowSums(selCats)
 props <- 100*selCats/selCats$total
 
 summary(props)
-summary(selCats)
 
 summary(subset(props, selCats$total > 10))
 summary(subset(selCats, total > 10))

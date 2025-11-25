@@ -10,3 +10,5 @@ Porém, muitos dos dados de ocorrência usam nomes de locais que não estão no 
 Para gerar listas confiáveis e completas, precisamos de uma tabela contendo, para cada UC, os nomes de locais que podem ser associados a ela com algum grau de confiança. Devido ao grande número de UCs, essa tabela pode chegar a conter milhares de nomes que precisam ser verificados um por um, e por isso será necessária a contratação desse serviço de terceiros.
 
 Além da identificação das localidades, outro desafio é a leitura de dados publicados em florísticas. Algumas espécies são raramente registradas em herbário, e por isso consideramos importante utilizar também dados publicados em planos de manejo e artigos científicos. Porém, para que esses dados possam ser lidos pelo software, é preciso que eles estejam digitados e formatados em uma planilha.
+
+## Descrição das atividades
