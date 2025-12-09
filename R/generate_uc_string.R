@@ -57,6 +57,7 @@ uc_abbrevs <- data.frame(
 #' @details In addition to correcting common mistakes and coverting abbreviations to long form, this function also removes connectors between
 standardize_uc_name <- function(x) {
     x <- plantR:::squish(x)
+    x <- toupper(x)
     x <- sub("^AREA", "ÁREA", x)
     x <- sub(" AREA", "ÁREA", x)
     x <- sub("PATRIM.NIO", "PATRIMÔNIO", x)

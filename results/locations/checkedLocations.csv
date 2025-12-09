@@ -1,0 +1,23 @@
+Nome_UC,Municipio,Localidade,Relação,Confiança
+APA Parque e Fazenda do Carmo,São Paulo,Fazenda Nossa Senhora do Carmo,Igual,Ouro
+APA Parque e Fazenda do Carmo,QUALQUER,Parque Ecológico APA do Carmo,Igual,Ouro
+APA Parque e Fazenda do Carmo,São Paulo,Parque do Carmo,UC dentro da loc.,Prata
+APA Parque e Fazenda do Carmo,QUALQUER,APA do Carmo,Igual,Ouro
+APA Parque e Fazenda do Carmo,São Paulo,Itaquera,UC dentro da loc.,Bronze
+APA Parque e Fazenda do Carmo,São Paulo,Gleba do Pêssego,Loc. dentro da UC ,Ouro
+APA Barreiro Rico,Anhembi,Fazenda Barreiro Rico,Igual,Ouro
+APA Barreiro Rico,Botucatu,Fazenda Barreiro Rico,Igual,Ouro
+APA Barreiro Rico,Piracicaba,Fazenda Barreiro Rico,Igual,Ouro
+APA Barreiro Rico,São Pedro,Fazenda Barreiro Rico,Igual,Ouro
+APA Barreiro Rico,,Barreiro Rico,,
+APA Barreiro Rico,Anhembi,Fazenda Bacury,Igual,Ouro
+APA Barreiro Rico,,UNESP,Disjunto,Zero
+ESTAÇÃO ECOLÓGICA DE BAURU,QUALQUER,Sebastião Aleixo da Silva,Igual,Ouro
+ESTAÇÃO ECOLÓGICA DE BAURU,Bauru,Horto,Igual,Ouro
+ESTAÇÃO ECOLÓGICA DE BAURU,QUALQUER,Horto Florestal de Bauru,Igual,Ouro
+,,,Igual,Ouro
+,,,Igual,Ouro
+,,,Igual,Ouro
+,,,Igual,Ouro
+,,,Igual,Ouro
+,,,Igual,Ouro
