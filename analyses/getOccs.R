@@ -7,7 +7,7 @@ library(sf)
 
 # Data about UCs from CNUC
 ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
-ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC", "Municípios.Abrangidos"))
+ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC"))
 
 # Make a summary table
 ucs$NumRecords <- NA
@@ -26,39 +26,54 @@ ucs$Nome.da.UC <- standardize_uc_name(ucs$Nome.da.UC)
 ucs <- ucs[order(ucs$Nome.da.UC), ]
 
 # Lookup what are the names of UCs in plantR
-dt <- data.frame(country="BR", stateProvince="SP", municipality=ucs$Municípios.Abrangidos, locality=ucs$Nome.da.UC)
-dt$municipality <- gsub("\\(.*\\)", "", dt$municipality)
-dt <- formatLoc(dt)
-
-in_gazet <- subset(dt, resolution.gazetteer == "locality")
-in_gazet
-locs <- getAdmin(in_gazet)
-
-# Save gazetteer string to lookup cases treated by plantR
-ucs$loc.correct <- dt$loc.correct
-ucs$loc.correct[dt$resolution.gazetteer != "locality"] <- NA
+LT <- read.csv("results/locations/uc_locstrings.csv")
+LT[LT==""] <- NA
+loc1 <- aggregate(LT$loc.correct, list(Nome_UC = LT$uc_name), function(x) paste(x, collapse="|"))
+LT <- na.omit(LT)
+loc2 <- aggregate(LT$loc.extra, list(Nome_UC = LT$uc_name), function(x) paste(unique(x), collapse="|"))
+LT <- rbind(loc1, loc2)
+tail(LT)
+loc3 <- aggregate(LT$x, list(Nome_UC = LT$Nome_UC), function(x) paste(x, collapse="|"))
+rownames(loc3) <- loc3$Nome_UC
 
 # Pre-treated data from GBIF, REflora and JABOT
 load("data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
 
 # Which occs are associated with each UC
-occs_exact <- lapply(ucs$loc.correct, function(s) {
-    if(is.na(s)) return(FALSE)
-    grepl(s, saopaulo$loc.correct, fixed=T)
+occs_exact <- lapply(ucs$Nome.da.UC, function(s) {
+    if(!s %in% loc3$Nome_UC) return(FALSE)
+    grepl(loc3[s, "x"], saopaulo$loc.correct, perl=T)
 })
+
+# Read table of alternative names and locality names
+checkedLocations <- read.csv("results/locations/checkedLocations.csv")
+checkedLocations$Nome_UC <- toupper(standardize_uc_name(checkedLocations$Nome_UC))
+
+# add oficial names
+officialNames <- data.frame(Nome_UC = standardize_uc_name(ucs$Nome.da.UC), Municipio="QUALQUER", Localidade = ucs$Nome.da.UC, Relação = "Igual", Confiança = "Ouro")
+LT <- rbind(checkedLocations, officialNames)
+
+# Summarize alternative names
+LT <- aggregate(LT$Localidade, list(Nome_UC = LT$Nome_UC, Municipio = LT$Municipio, relationship = LT$Relação, confidenceLocality = LT$Confiança), function(x) paste(unique(x), collapse="|"))
+LT$Locality <- toupper(LT$x)
+LT$x <- NULL
+
+# Temporary
+LT <- subset(LT, Municipio == "QUALQUER")
+LT <- LT[ LT$Nome_UC %in% checkedLocations$Nome_UC,]
+ucs <- ucs[ ucs$Nome.da.UC %in% checkedLocations$Nome_UC, ]
+
 # Generate string for regex grepl in locality data
-uc_strings <- generate_uc_string(ucs$Nome.da.UC)
+LT$uc_strings <- generate_uc_string(LT$Locality)
 # Use regex to look for more occs
-occs_loc <- lapply(uc_strings, grepl, x = paste(saopaulo$municipality, saopaulo$locality), ignore.case = TRUE, perl = TRUE)
+occs_loc <- lapply(LT$uc_strings, grepl, x = paste(saopaulo$municipality, saopaulo$locality), ignore.case = TRU, perl = TRUE)
 occs_ucs <- pairwiseMap(occs_exact, occs_loc, FUN=function(x,y) {x|y})
-names(occs_ucs) <- ucs$Nome.da.UC
+names(occs_ucs) <- LT$Nome_UC
 save(occs_ucs, file="data/derived-data/occs_ucs.RData")
 
-ucs$Municípios.Abrangidos <- NULL
 ucs$loc.correct <- NULL
 
 # Select a subset of UCs (for testing)
-# ucs <- subset(ucs, !grepl("-",Municípios.Abrangidos))
 # ucs <- ucs[sample(1:nrow(ucs), 10), ]
 (sample_size = nrow(ucs))
 
@@ -70,7 +85,7 @@ valid_points <- st_as_sf(valid_coords, coords = c("decimalLongitude.new", "decim
 valid_points <- fixDatum(valid_points)
 
 # Shape data
-shapes <- st_read("data/raw-data/shp_cnuc_2025_08/cnuc_2025_08.shp")
+shapes <- st_read("data/raw-data/shp_cnuc_2025_03/cnuc_2025_03.shp")
 shapes <- subset(shapes, uf == "SÃO PAULO")
 shapes$nome_uc <- standardize_uc_name(shapes$nome_uc)
 shapes <- subset(shapes, nome_uc %in% ucs$Nome.da.UC)
@@ -90,6 +105,8 @@ intersecUCs$confidence <- ifelse(intersecUCs$prop > 98, "High",
                              ifelse(intersecUCs$status == "covered_buffer" | intersecUCs$prop > 80, "Medium", "Low"))
 intersecUCs$nome_uc <- standardize_uc_name(intersecUCs$nome_uc)
 intersecUCs$outra_uc <- standardize_uc_name(intersecUCs$outra_uc)
+
+intersecUCs <- subset(intersecUCs, outra_uc %in% ucs$Nome.da.UC)
 
 ucs$nome_file <- slug(ucs$Nome.da.UC)
 
@@ -124,6 +141,8 @@ try({
 
     # Exact UC name
     occs_uc_name <- occs_ucs[[Nome_UC]]
+    occs_plantr <- occs_loc[[Nome_UC]]
+    occs_string <- occs_exact[[Nome_UC]]
 
     # Join all filters
     occs_total <- occs_uc_name | occs_gps | occs_high | occs_medium
@@ -146,6 +165,7 @@ try({
     saopaulo$selectionCategory[occs_medium] <-  "locality_medium"
     saopaulo$selectionCategory[occs_high] <- "locality_high"
     saopaulo$selectionCategory[occs_uc_name] <- "locality_exact"
+    saopaulo$selectionCategory[occs_plantr] <- "plantr_exact"
 
     total <- saopaulo[occs_total,]
 

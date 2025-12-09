@@ -1,5 +1,18 @@
+devtools::load_all()
 # Let's see what's going on with those stats
-
+make_summary <- function(data, column, levels, UC = sapply(data, function(x) {
+    if("UC" %in% names(x)) x$UC[1]
+    else if("Nome_UC" %in% names(x)) x$Nome_UC[1]
+})) {
+    ret <- lapply(data, function(x) {
+        x <- x[,column]
+        x <- factor(x, levels = levels)
+        summary(x)
+    })
+    ret <- dplyr::bind_rows(ret)
+    ret <- cbind(UC, ret)
+    ret
+}
 
 modCat <- list.files("results/checklist", full.names = T)
 original <- list.files("results/allfields", full.names = T)
@@ -23,6 +36,10 @@ locs <- stringr::str_squish(locs)
 sort(table(locs))
 
 length(dtOrig)
+# proportion of entries listed in catalogoUCsBR
+catalogo <- make_summary(dataCat, column="Já.listada", levels=c("Sim", "Não"))
+tem_lista <- subset(catalogo, Sim>0)
+head(tem_lista)
 
 # proportion of gps vs text entries
 selCats <- lapply(dtOrig, function(x) {
@@ -30,12 +47,30 @@ selCats <- lapply(dtOrig, function(x) {
     x <- factor(x, levels=c("coord_original", "coord_gazet", "locality_exact", "locality_high", "locality_medium"))
     summary(x)
 })
+Nome.da.UC <- sapply(dtOrig, function(x) x$Nome_UC[1])
 selCats <- dplyr::bind_rows(selCats)
+selCats <- cbind(Nome.da.UC,selCats)
+summary(selCats)
+confLoc <- lapply(dtOrig, function(x) {
+    x <- x$confidenceLocality
+    x <- factor(x, levels=c("High", "Medium", "Low", "None"))
+    summary(x)
+})
+confLoc <- dplyr::bind_rows(confLoc)
+confLoc <- cbind(Nome.da.UC,confLoc)
+summary(confLoc)
+summ_ml <- read.csv("results/summary_multilist.csv")
+summary(summ_ml)
+
+m <- merge(summ_ml, confLoc, all=T)
+summary(m)
+m[is.na(m)] <- 0
+write.csv(m, "results/summary_multilist.csv", row.names=F)
+
 selCats$total <- rowSums(selCats)
 props <- 100*selCats/selCats$total
 
 summary(props)
-summary(selCats)
 
 summary(subset(props, selCats$total > 10))
 summary(subset(selCats, total > 10))
