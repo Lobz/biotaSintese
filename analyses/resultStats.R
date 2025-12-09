@@ -1,5 +1,18 @@
+devtools::load_all()
 # Let's see what's going on with those stats
-
+make_summary <- function(data, column, levels, UC = sapply(data, function(x) {
+    if("UC" %in% names(x)) x$UC[1]
+    else if("Nome_UC" %in% names(x)) x$Nome_UC[1]
+})) {
+    ret <- lapply(data, function(x) {
+        x <- x[,column]
+        x <- factor(x, levels = levels)
+        summary(x)
+    })
+    ret <- dplyr::bind_rows(ret)
+    ret <- cbind(UC, ret)
+    ret
+}
 
 modCat <- list.files("results/checklist", full.names = T)
 original <- list.files("results/allfields", full.names = T)
@@ -23,6 +36,10 @@ locs <- stringr::str_squish(locs)
 sort(table(locs))
 
 length(dtOrig)
+# proportion of entries listed in catalogoUCsBR
+catalogo <- make_summary(dataCat, column="Já.listada", levels=c("Sim", "Não"))
+tem_lista <- subset(catalogo, Sim>0)
+head(tem_lista)
 
 # proportion of gps vs text entries
 selCats <- lapply(dtOrig, function(x) {
