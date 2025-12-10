@@ -34,6 +34,9 @@ sample_size = nrow(ucs)
 done <- subset(done, !Nome.da.UC %in% ucs$Nome.da.UC)
 ucs$nome_file <- slug(ucs$Nome.da.UC)
 
+# Load information for brazilian flora
+bf <- load_florabr(data_dir = "data/raw-data")
+
 for(i in 1:sample_size){
 try({
 
@@ -87,7 +90,6 @@ try({
     ucs[i,]$NumNoMatch <- sum(unmatched)
 
     # Get info from  F&FBR
-    bf <- load_florabr(data_dir = "data/raw-data")
     ids <- substr(top$id, 5, nchar(top$id))
     matches <- match(ids, bf$id)
 

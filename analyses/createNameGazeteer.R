@@ -122,7 +122,7 @@ write.csv(TABS3, "results/locations/locationsTable.csv", row.names = F)
 
 locTable3 <- function(df, filter=""){
 
-    df <- validateDup(df)
+    # df <- validateDup(df)
     # Formating the locality information
     occs.fix <- fixLoc(df)
     # Creating locality strings used to query the gazetteer
@@ -211,10 +211,10 @@ locTable3 <- function(df, filter=""){
     LT_locality <- aggregate(DT$locality, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), comb.text)
     LT$locality <- LT_locality$x
     #lat
-    LT_tmp <- aggregate(DT$lat, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), mean, na.rm=T)
+    LT_tmp <- aggregate(as.numeric(DT$lat), list(loc = DT$loc.orig, loc.correct = DT$loc.correct), mean, na.rm=T)
     LT$meanLatitude <-LT_tmp$x
     #lon
-    LT_tmp <- aggregate(DT$lon, list(loc = DT$loc.orig, loc.correct = DT$loc.correct), mean, na.rm=T)
+    LT_tmp <- aggregate(as.numeric(DT$lon), list(loc = DT$loc.orig, loc.correct = DT$loc.correct), mean, na.rm=T)
     LT$meanLongitude <-LT_tmp$x
 
     LT_final <- LT[order(LT$Freq, decreasing = T),]

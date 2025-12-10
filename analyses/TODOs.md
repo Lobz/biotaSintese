@@ -1,5 +1,11 @@
 # TO DOs
 
+## Escrever pedido de verba
+- perfil da pessoa
+- tempo
+- custo
+- o que é o travbalhop
+
 ## Issues
 
 ### Gazetteer has duplicated loc.correct

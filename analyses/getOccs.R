@@ -37,13 +37,14 @@ loc3 <- aggregate(LT$x, list(Nome_UC = LT$Nome_UC), function(x) paste(x, collaps
 rownames(loc3) <- loc3$Nome_UC
 
 # Pre-treated data from GBIF, REflora and JABOT
-load("data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
+# load("data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
+load("data/derived-data/reflora_gbif_jabot_splink_saopaulo_deduped.RData")
 
 # Which occs are associated with each UC
-occs_exact <- lapply(ucs$Nome.da.UC, function(s) {
+occs_exact <- sapply(ucs$Nome.da.UC, function(s) {
     if(!s %in% loc3$Nome_UC) return(FALSE)
-    grepl(loc3[s, "x"], saopaulo$loc.correct, perl=T)
-})
+    grepl(loc3[s, "x"], sp_deduped$loc.correct, perl=T)
+}, USE.NAMES = TRUE, simplify = FALSE)
 
 # Read table of alternative names and locality names
 checkedLocations <- read.csv("results/locations/checkedLocations.csv")
@@ -60,16 +61,16 @@ LT$x <- NULL
 
 # Temporary
 LT <- subset(LT, Municipio == "QUALQUER")
-LT <- LT[ LT$Nome_UC %in% checkedLocations$Nome_UC,]
-ucs <- ucs[ ucs$Nome.da.UC %in% checkedLocations$Nome_UC, ]
+# LT <- LT[ LT$Nome_UC %in% checkedLocations$Nome_UC,]
+# ucs <- ucs[ ucs$Nome.da.UC %in% checkedLocations$Nome_UC, ]
 
 # Generate string for regex grepl in locality data
 LT$uc_strings <- generate_uc_string(LT$Locality)
 # Use regex to look for more occs
-occs_loc <- lapply(LT$uc_strings, grepl, x = paste(saopaulo$municipality, saopaulo$locality), ignore.case = TRU, perl = TRUE)
-occs_ucs <- pairwiseMap(occs_exact, occs_loc, FUN=function(x,y) {x|y})
-names(occs_ucs) <- LT$Nome_UC
-save(occs_ucs, file="data/derived-data/occs_ucs.RData")
+occs_loc <- lapply(LT$uc_strings, grepl, x = paste(sp_deduped$municipality, sp_deduped$locality), ignore.case = TRUE, perl = TRUE)
+names(occs_loc) <- LT$Nome_UC
+occs_ucs <- pairwiseMap(occs_exact[names(occs_loc)], occs_loc, FUN=function(x,y) {x|y})
+names(occs_ucs) <- names(occs_loc) <- LT$Nome_UC
 
 ucs$loc.correct <- NULL
 
@@ -78,7 +79,7 @@ ucs$loc.correct <- NULL
 (sample_size = nrow(ucs))
 
 # Data with valid coordinates: either original coordinates or locality
-valid_coords <- subset(saopaulo, origin.coord == "coord_original" | resolution.gazetteer == "locality")
+valid_coords <- subset(sp_deduped, origin.coord == "coord_original" | resolution.gazetteer == "locality")
 str(valid_coords)
 valid_points <- st_as_sf(valid_coords, coords = c("decimalLongitude.new", "decimalLatitude.new"))
 # Unify and convert datum to match SIRGAS 2000
@@ -121,7 +122,7 @@ try({
 
     # Which records are in the gps shp
     rcs_intersect <- valid_points$recordID[points_ucs[[Nome_UC]]]
-    occs_gps <- saopaulo$recordID %in% rcs_intersect
+    occs_gps <- sp_deduped$recordID %in% rcs_intersect
 
     # Generate string for regex grepl in locality data
     intersected <- subset(intersecUCs, nome_uc == Nome_UC)
@@ -156,18 +157,18 @@ try({
     }
 
     # What quality is the locality
-    saopaulo$confidenceLocality <- "Low" # GPS data
-    saopaulo$confidenceLocality[occs_medium] <- "Medium"
-    saopaulo$confidenceLocality[occs_uc_name | occs_high] <- "High"
+    sp_deduped$confidenceLocality <- "Low" # GPS data
+    sp_deduped$confidenceLocality[occs_medium] <- "Medium"
+    sp_deduped$confidenceLocality[occs_uc_name | occs_high] <- "High"
 
     # What criteria was used to select each record
-    saopaulo$selectionCategory <- saopaulo$origin.coord
-    saopaulo$selectionCategory[occs_medium] <-  "locality_medium"
-    saopaulo$selectionCategory[occs_high] <- "locality_high"
-    saopaulo$selectionCategory[occs_uc_name] <- "locality_exact"
-    saopaulo$selectionCategory[occs_plantr] <- "plantr_exact"
+    sp_deduped$selectionCategory <- sp_deduped$origin.coord
+    sp_deduped$selectionCategory[occs_medium] <-  "locality_medium"
+    sp_deduped$selectionCategory[occs_high] <- "locality_high"
+    sp_deduped$selectionCategory[occs_uc_name] <- "locality_exact"
+    sp_deduped$selectionCategory[occs_plantr] <- "plantr_exact"
 
-    total <- saopaulo[occs_total,]
+    total <- sp_deduped[occs_total,]
 
     total$Nome_UC <- Nome_UC
     save(total, file=paste0("results/total/",nome_file,".rda"))

@@ -83,6 +83,7 @@ munis_info <- datasets[datasets[,1]=="`read_municipality`",]
 munis_latest_year <- sub(".* ","",munis_info$years)
 munis <- geobr::read_municipality(year = munis_latest_year)
 munis[ ,c("code_state","abbrev_state","code_region","name_region")] <- NULL
+munis$area_muni <- st_area(munis)
 head(munis)
 
 # Subset to SP because I don't wanna be here all day

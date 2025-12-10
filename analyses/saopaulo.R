@@ -1,15 +1,17 @@
 devtools::load_all()
-library(geobr)
 library(plantR)
 library(parallel)
 
 load("data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
 
-saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer != "locality", function(x) {
-  x$municipality <- sub("[ ,\\.^]sta\\.","santa", x$municipality)
-  x$locality <- sub("[ ,\\.^]sta\\.","santa", x$locality)
-  x <- formatLoc(x)
-}, success_condition = function(x) grepl("santa", paste(x$locality.new, x$locality.scrap)))
+# get municipalities with unique name
+munis <- read.csv("results/locations/municipalityGazetteer.csv")
+gazet = rbind(plantR:::gazetteer, munis)
+
+saopaulo$municipality <- sub("([ ,\\.^])sta\\.","\\1santa", saopaulo$municipality, ignore.case = T)
+saopaulo$locality <- sub("([ ,\\.^])sta\\.","\\1santa", saopaulo$locality, ignore.case = T)
+saopaulo <- formatLoc(saopaulo, gazet = gazet)
+
 # gonna hand redo formatLoc
 # fixLoc is already done, thank you
 remove_spaces <- function(x) {
@@ -62,8 +64,6 @@ saopaulo$stateProvince.new <- remove_spaces(saopaulo$stateProvince.new)
 saopaulo$municipality.new <- remove_spaces(saopaulo$municipality.new)
 saopaulo$locality.new <- remove_spaces(saopaulo$locality.new)
 
-saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country",finLoc)
-
 saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer %in% c("no_info") & grepl("mog. mirim|campinas|sorocaba|peruibe|ubatuba|campos d. jordao|cananeia|cardoso|botucatu|moj. mirim|sao paulo",x$municipality.new), function(x) {
 
   x$country.new <- "brazil"
@@ -87,6 +87,8 @@ saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer %in% c("no_inf
   x$country.new <- "brazil"
   x <- finLoc(x)
 })
+
+saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country",finLoc,  gazet = gazet)
 
 # fix state name
 saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country", function(x) {
@@ -137,17 +139,6 @@ saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer %in% c("countr
   x$municipality.new<- remove_punct(x$municipality.new)
   x$municipality.new<- remove_spaces(x$municipality.new)
 
-  x <- finLoc(x)
-})
-
-# get municipalitys with unique name
-munis <- read.csv("results/locations/municipalityGazetteer.csv")
-gazet = rbind(plantR:::gazetteer, munis)
-
-saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country" & !is.na(x$municipality.new), function(x) {
-  # find state name in municipality name
-  # x$stateProvince.new <- munis$name_state_norm[match(x$municipality, munis$name_muni)]
-
   x <- finLoc(x, gazet = gazet)
 })
 
@@ -165,7 +156,7 @@ saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country" &
   x$stateProvince.new <- munis$stateProvince.new[match(muni, munis$municipality.new)]
   x$municipality.new <- muni
 
-  x <- finLoc(x)
+  x <- finLoc(x, gazet = gazet)
 })
 
 saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country" & !is.na(x$municipality.new), function(x) {
@@ -179,7 +170,7 @@ saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country" &
   x$municipality.new<- remove_spaces(x$municipality.new)
   x$stateProvince.new <- munis$name_state_norm[match(x$municipality.new, tolower(rmLatin(munis$name_muni)))]
 
-  x <- finLoc(x)
+  x <- finLoc(x, gazet = gazet)
 })
 
 # saopaulo1 <- tryAgain(saopaulo, function(x) {x$resolution.gazetteer == "country" & !is.na(x$locality.new) & !is.na(x$stateProvince.new)}, function(x) {
@@ -194,10 +185,8 @@ saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country" &
 # table(saopaulo$country.new, useNA="always")
 # sort(table(saopaulo$stateProvince.new, useNA="always"))
 
-locs <- getAdmin(saopaulo$loc.correct)
-names(locs)<-c("loc.correct.admin", "country.correct", "stateProvince.correct", "municipality.correct", "locality.correct", "source.loc")
-saopaulo[,names(locs)] <- NULL
-saopaulo <- cbind(saopaulo,locs)
+# get admin names
+saopaulo <- addAdmin(saopaulo)
 
 saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "state" & !is.na(x$stateProvince.correct), function(x) {
 
@@ -206,7 +195,7 @@ saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "state" & !
   x$country <- x$country.correct
   state <- x$stateProvince
   x$stateProvince <- x$stateProvince.correct
-  x <- formatLoc(x)
+  x <- formatLoc(x, gazet = gazet)
   # Return verbatim info to original
   x$stateProvince <- state
   x$country <- country
@@ -223,7 +212,7 @@ saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "county" & 
   x$stateProvince <- x$stateProvince.correct
   county <- x$municipality
   x$municipality <- x$municipality.correct
-  x <- formatLoc(x)
+  x <- formatLoc(x, gazet = gazet)
   # Return verbatim info to original
   x$country <- country
   x$stateProvince <- state
@@ -231,6 +220,8 @@ saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "county" & 
   print(table(x$resolution.gazetteer))
   x
 }, success_condition = function(x) x$resolution.gazetteer %in% c("locality"), label = "Using correct state and municipality name")
+
+saopaulo <- tryAgain(saopaulo, function(x) x$loc == "brazil_NA_sao paulo" & !is.na(x$locality.new), finLoc, function(x) x$resolution.gazetteer=="locality")
 
 saopaulo <- addAdmin(saopaulo)
 
@@ -263,28 +254,45 @@ saopaulo <- tryAgain(saopaulo, function(x) is.na(x$decimalLatitude.new), formatC
 saopaulo <- tryAgain(saopaulo, function(x) is.na(x$geo.check), validateCoord, high.map=map)
 tab(is.na(saopaulo$geo.check))
 table(saopaulo$geo.check, saopaulo$origin.coord)
-
+save.image()
 # substitute bad coords
-good_coords <- startsWith(saopaulo$geo.check, "ok_county") | startsWith(saopaulo$geo.check, "ok_locality")
-tab(good_coords)
-saopaulo$decimalLatitude.new[!good_coords] <- saopaulo$latitude.gazetteer[!good_coords]
-saopaulo$decimalLongitude.new[!good_coords] <- saopaulo$longitude.gazetteer[!good_coords]
-saopaulo$origin.coord[!good_coords] <- "coord_gazet"
+# good_coords <- startsWith(saopaulo$geo.check, "ok_county") | startsWith(saopaulo$geo.check, "ok_locality")
+# tab(good_coords)
+# saopaulo$decimalLatitude.new[!good_coords] <- saopaulo$latitude.gazetteer[!good_coords]
+# saopaulo$decimalLongitude.new[!good_coords] <- saopaulo$longitude.gazetteer[!good_coords]
+# saopaulo$origin.coord[!good_coords] <- "coord_gazet"
 
 
 saopaulo$recordID <- 1:nrow(saopaulo) # I need a unique ID for this
 
+x <- saopaulo
+y <- subset(saopaulo, recordID %in% x$recordID)
+
+table(x$resolution.gazetteer, y$resolution.gazetteer)
+i<-which(x$resolution.gazetteer=="county" & y$resolution.gazetteer=="locality")
+
+
 save(saopaulo,file="data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
 
-sp_deduped <- validateDup(saopaulo, noNumb = NA, noYear = NA, noName = NA, prop=1,
+loc.names <- c(loc.cols, paste0(loc.cols, ".new"), "longitude.gazetteer", "latitude.gazetteer")
+names(loc.names) <- loc.names
+loc.names <- c(loc.str = "loc.correct", res.gazet = "resolution.gazetteer", res.orig =
+    "resol.orig", loc.check = "loc.check", loc.names)
+my_valDup <- function(x) validateDup(x, noNumb = NA, noYear = NA, noName = NA, prop=1,
           tax.names = c(family = "family.new", species = "scientificName.new", tax.auth =
     "scientificNameAuthorship.new", det.name = "identifiedBy.new", det.year =
     "yearIdentified.new", tax.check = "tax.check", tax.rank = "taxon.rank", status =
     "scientificNameStatus", id = "id", name.full = "scientificNameFull", gen = "genus.new", sp = "species.new"),
   geo.names = c(lat = "decimalLatitude.new", lon = "decimalLongitude.new", org.coord =
     "origin.coord", prec.coord = "precision.coord", geo.check = "geo.check", datum = "geodeticDatum"),
-  loc.names = unique(c(loc.cols, loc.cols.plantR, loc.str = "loc.correct", res.gazet = "resolution.gazetteer", res.orig =
-    "resol.orig", loc.check = "loc.check")))
+  loc.names = loc.names, overwrite = T)
+
+test1 <- validateDup(saopaulo[50:100,]loc.names = c(loc.str = "loc.correct", res.gazet = "resolution.gazetteer", res.orig =
+    "resol.orig", loc.check = "loc.check"))
+test1 <- validateDup(saopaulo[60:68,])
+test2 <- validateDup(saopaulo[60:68,], overwrite = T)
+test3 <- validateDup(saopaulo[60:68,], overwrite = T, loc.names = loc.names)
+sp_deduped <- my_valDup(saopaulo)
 names(sp_deduped)
 save(sp_deduped,file="data/derived-data/reflora_gbif_jabot_splink_saopaulo_deduped.RData")
 
