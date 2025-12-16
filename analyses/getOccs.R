@@ -156,17 +156,17 @@ try({
         next
     }
 
-    # What quality is the locality
-    sp_deduped$confidenceLocality <- "Low" # GPS data
-    sp_deduped$confidenceLocality[occs_medium] <- "Medium"
-    sp_deduped$confidenceLocality[occs_uc_name | occs_high] <- "High"
-
     # What criteria was used to select each record
     sp_deduped$selectionCategory <- sp_deduped$origin.coord
     sp_deduped$selectionCategory[occs_medium] <-  "locality_medium"
     sp_deduped$selectionCategory[occs_high] <- "locality_high"
     sp_deduped$selectionCategory[occs_uc_name] <- "locality_exact"
     sp_deduped$selectionCategory[occs_plantr] <- "plantr_exact"
+
+    # What quality is the locality
+    sp_deduped$confidenceLocality <- "Low" # GPS data
+    sp_deduped$confidenceLocality[occs_medium] <- "Medium"
+    sp_deduped$confidenceLocality[occs_uc_name | occs_high] <- "High"
 
     total <- sp_deduped[occs_total,]
 
