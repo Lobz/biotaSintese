@@ -51,12 +51,13 @@ try({
     print(paste("Found",nrow(total),"records."))
     ucs[i,]$NumRecords <- nrow(total)
 
-    # Filter decent locality
-
     # Order occs
     total <- total[order(total$taxon.rank, total$tax.check, total$scientificName.new, as.numeric(total$year.new), as.numeric(total$yearIdentified.new), na.last=F, decreasing = T),]
 
     write.csv(total, paste0("results/total-treated/",nome_file,".csv"),  na="", row.names=FALSE)
+
+    # Filter decent locality
+    total <- subset(total, confidenceLocality %in% c("High", "Medium"))
 
     # Avoid taxons that are already represented by more detailed taxons
     total$tax.check <- factor(total$tax.check, levels = c("unknown", "low", "medium", "high"), ordered = T)
