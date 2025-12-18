@@ -56,8 +56,15 @@ try({
 
     write.csv(total, paste0("results/total-treated/",nome_file,".csv"),  na="", row.names=FALSE)
 
-    # Filter decent locality
-    total <- subset(total, confidenceLocality %in% c("High", "Medium"))
+    # Detail locality quality
+    total$confidenceLocality[total$selectionCategory == "coord_gazet"] <- "Medium" #todo: evaluate quality of gps polygon
+    gps_orig <- total$selectionCategory == "coord_orig"
+    total$confidenceLocality[gps_orig] <- "None"
+    good_coords <- startsWith(total$geo.check, "ok_county") | startsWith(total$geo.check, "ok_locality")
+    unsure_coords <- total$geo.check %in% c("sea", "shore")
+    total$confidenceLocality[gps_orig & good_coords] <- "Medium" #todo: evaluate quality of gps polygon
+    total$confidenceLocality[gps_orig & unsure_coords] <- "Low" #todo: evaluate quality of gps polygon
+    total$confidenceLocality <- factor(total$confidenceLocality, levels = c("None", "Low", "Medium", "High"), ordered = T)
 
     # Avoid taxons that are already represented by more detailed taxons
     total$tax.check <- factor(total$tax.check, levels = c("unknown", "low", "medium", "high"), ordered = T)

@@ -15,9 +15,15 @@ APA Barreiro Rico,,UNESP,Disjunto,Zero
 ESTAÇÃO ECOLÓGICA DE BAURU,QUALQUER,Sebastião Aleixo da Silva,Igual,Ouro
 ESTAÇÃO ECOLÓGICA DE BAURU,Bauru,Horto,Igual,Ouro
 ESTAÇÃO ECOLÓGICA DE BAURU,QUALQUER,Horto Florestal de Bauru,Igual,Ouro
-,,,Igual,Ouro
-,,,Igual,Ouro
-,,,Igual,Ouro
-,,,Igual,Ouro
-,,,Igual,Ouro
-,,,Igual,Ouro
+PE ilha do cardoso,QUALQUER,Ilha do Cardoso,Igual,Ouro
+PE ilha do cardoso,Cananéia,Marujá,Igual,Ouro
+PE Campos do Jordão,Campos do Jordão,Horto,Igual,Ouro
+PE Campos do Jordão,Campos do Jordão,,Igual,Ouro
+ÁREA DE PROTEÇÃO AMBIENTAL JUNDIAÍ,Jundiaí,Serra do Japi,Igual,Ouro
+ÁREA DE PROTEÇÃO AMBIENTAL JUNDIAÍ,Cabreúva,Serra do Japi,Disjunto,Ouro
+ÁREA DE PROTEÇÃO AMBIENTAL JUNDIAÍ,QUALQUER,Serra do Japi,Intersecção,Prata
+ESTAÇÃO ECOLÓGICA DE MOGI-GUAÇU,QUALQUER,Fazenda Campininha,UC dentro da loc.,Prata
+PARQUE ESTADUAL DAS FONTES DO IPIRANGA,São Paulo,Jardim Botânico de São Paulo,Loc. dentro da UC ,Ouro
+PARQUE ESTADUAL DAS FONTES DO IPIRANGA,São Paulo,Parque do Estado,Loc. dentro da UC ,Ouro
+ÁREA DE PROTEÇÃO AMBIENTAL QUILOMBOS DO MÉDIO RIBEIRA,QUALQUER,parque estadual jacupiranga,Loc. dentro da UC ,Ouro
+ESTAÇÃO ECOLÓGICA MARÍLIA,QUALQUER,Estação Experimental de Marília,Igual,Ouro

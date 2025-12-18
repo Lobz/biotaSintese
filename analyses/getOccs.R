@@ -60,7 +60,7 @@ LT$Locality <- toupper(LT$x)
 LT$x <- NULL
 
 # Temporary
-LT <- subset(LT, Municipio == "QUALQUER")
+LT <- subset(LT, Municipio == "QUALQUER" & confidenceLocality == "Ouro")
 # LT <- LT[ LT$Nome_UC %in% checkedLocations$Nome_UC,]
 # ucs <- ucs[ ucs$Nome.da.UC %in% checkedLocations$Nome_UC, ]
 

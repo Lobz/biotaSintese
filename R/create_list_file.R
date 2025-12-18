@@ -1,7 +1,7 @@
 
 top_records <- function(x, n = 1) {
     # Get best specimen/identification combo
-    x <- x[order(x$confidenceLocality == "High", x$tax.check, x$downloadedFrom=="Splink", as.numeric(x$year.new), as.numeric(x$yearIdentified.new), na.last=F, decreasing = T),]
+    x <- x[order(x$confidenceLocality, x$tax.check, x$downloadedFrom=="Splink", as.numeric(x$year.new), as.numeric(x$yearIdentified.new), na.last=F, decreasing = T),]
     x <- x[!duplicated(x$scientificName.new),]
     x
 }

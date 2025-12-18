@@ -21,7 +21,7 @@ locTable <- function(x) {
     if(nrow(x)==0) {
         return(NULL)
     }
-    x <- subset(x, confidenceLocality != "High")
+    x <- subset(x, !confidenceLocality %in% c("High", "Medium"))
     if(nrow(x)==0) {
         return(NULL)
     }
@@ -77,7 +77,7 @@ locTable2 <- function(x) {
     if(nrow(x)==0) {
         return(NULL)
     }
-    x <- subset(x, confidenceLocality != "High")
+    x <- subset(x, !confidenceLocality %in% c("High", "Medium"))
     if(nrow(x)==0) {
         return(NULL)
     }
@@ -112,10 +112,10 @@ x <- locTable2(dt[[4]])
 head(x)
 
 for(x in dt) LT <- locTable(x)
-tabs <- lapply(dt, locTable2)
+tabs <- lapply(dt, locTable)
 TABS <- dplyr::bind_rows(tabs)
 # write.csv(TABS, "results/locationsTable.csv", row.names = F)
-TABS2 <- read.csv("results/locationsTable.csv")
+TABS2 <- read.csv("results/locations/locationsTable.csv")
 
 TABS3 <- subset(TABS, Localidade %in% TABS2$Locality)
 write.csv(TABS3, "results/locations/locationsTable.csv", row.names = F)
