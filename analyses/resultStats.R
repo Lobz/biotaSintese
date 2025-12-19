@@ -24,6 +24,7 @@ dataCat <- lapply(modCat, read.csv, na.strings = c("NA","","s.n.","s.c.","s.a.")
 dtOrig <- lapply(original, read.csv, na.strings = c("NA",""), colClasses = "character")
 dtTreated <- lapply(tt, read.csv, na.strings = c("NA",""), colClasses = "character")
 names(dtOrig) <- nome_file
+Nome.da.UC <- sapply(dtOrig, function(x) x$Nome_UC[1])
 
 i <- 6
 i <- i+1
@@ -47,18 +48,10 @@ selCats <- lapply(dtOrig, function(x) {
     x <- factor(x, levels=c("coord_original", "coord_gazet", "locality_exact", "locality_high", "locality_medium"))
     summary(x)
 })
-Nome.da.UC <- sapply(dtOrig, function(x) x$Nome_UC[1])
 selCats <- dplyr::bind_rows(selCats)
 selCats <- cbind(Nome.da.UC,selCats)
 summary(selCats)
-confLoc <- lapply(dtOrig, function(x) {
-    x <- x$confidenceLocality
-    x <- factor(x, levels=c("High", "Medium", "Low", "None"))
-    summary(x)
-})
-confLoc <- dplyr::bind_rows(confLoc)
-confLoc <- cbind(Nome.da.UC,confLoc)
-summary(confLoc)
+confLoc <- make_summary(dtOrig, "confidenceLocality", levels=c("High", "Medium", "Low", "None"), UC=Nome.da.UC)
 summ_ml <- read.csv("results/summary_multilist.csv")
 summary(summ_ml)
 
