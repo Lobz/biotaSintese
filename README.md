@@ -4,12 +4,12 @@
 
 - [analyses/](analyses/) - scripts para tratamento dos dados
     - []
-- [data]
-- [data-input]
-- [data-tmp]
-- [plots]
-- [R]
-- [results]
+- [data](data)
+- [data-input](data-input)
+- [data-tmp](data-tmp)
+- [plots](plots)
+- [R](R)
+- [results](results)
 
 
 ## Como usar esta ferramenta:
