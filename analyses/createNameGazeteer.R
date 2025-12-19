@@ -117,7 +117,7 @@ TABS <- dplyr::bind_rows(tabs)
 # write.csv(TABS, "results/locationsTable.csv", row.names = F)
 TABS2 <- read.csv("results/locations/locationsTable.csv")
 
-TABS3 <- subset(TABS, Localidade %in% TABS2$Locality)
+TABS3 <- subset(TABS, Localidade %in% TABS2$Localidade)
 write.csv(TABS3, "results/locations/locationsTable.csv", row.names = F)
 
 locTable3 <- function(df, filter=""){
