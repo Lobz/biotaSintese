@@ -1,26 +1,21 @@
 devtools::load_all()
 
-# minFields <- c("collectionCode", "catalogNumber", "recordNumber", "recordedBy", "year", "country", "stateProvince", "county", "municipality", "decimalLatitude", "decimalLongitude", "identifiedBy", "dateIdentified", "typeStatus", "scientificName", "scientificNameAuthorship", "institutionCode")
-
-# user_colnames <- c("institutionCode", "collectionCode",
-#                               "catalogNumber",
-#                               "recordNumber", "recordedBy",
-#                               "year", "country", "stateProvince", "county",
-#                               "municipality", "locality",
-#                               "decimalLatitude", "decimalLongitude",
-#                               "identifiedBy", "dateIdentified",
-#                               "typeStatus", "family", "scientificName",
-#                               "scientificNameAuthorship")
-# setdiff(user_colnames, minFields)
-# d <- t(data.frame(minFields))
-# names(d) <- minFields
-# formatDwc(user_data=d) ## TODO open issue about this
-
-
 # Reflora data
-reflora_raw <- data.table::fread("../../BIOTA/REFLORA/REFLORA.csv")
-names(reflora_raw)
-reflora <- parseReflora(reflora_raw)
+reflora_files <- list.files("data-input/REFLORA", pattern = "*.csv", full.names = TRUE)
+print("Reading reflora files:")
+print(reflora_files)
+reflora_data_raw <- lapply(reflora_files, data.table::fread)
+print("Parsing reflora data...")
+reflora_data_parsed <- lapply(reflora_data_raw, parseReflora)
+reflora <- reflora_data_parsed[[1]]
+if(length(reflora_data_raw) > 1) {
+    print("Merging reflora databases...")
+    for(i in 2:length(reflora_data_raw)){
+        reflora <- merge(reflora, reflora_data_parsed[[i]], all=T)
+    }
+}
+
+print(paste("Found",nrow(reflora), "observations."))
 reflora$downloadedFrom <- "REFLORA"
 reflora <- as.data.frame(reflora)
 
@@ -40,4 +35,4 @@ reflora$month <- as.numeric(reflora$month)
 reflora$basisOfRecord <- "PRESERVED_SPECIMEN"
 reflora$basisOfRecord <- as.basisOfRecord(reflora$basisOfRecord)
 
-save(reflora,file="data/raw-data/reflora_all.RData")
+save(reflora,file="data-tmp/reflora_all.RData")
