@@ -26,6 +26,5 @@ vignettes/*.pdf
 *.knit.md
 # R Environment Variables
 .Renviron
-data/*
 .secrets
 results/total-treated/PE_SERRA_DO_MAR.csv
