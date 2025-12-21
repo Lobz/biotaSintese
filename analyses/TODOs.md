@@ -49,3 +49,6 @@ fix: use as.numeric
 - last update improved loc resolution for ~ 47k records (I had to redo all treatements so I don't have the exact number of cases where it resulted in worse resolution...)
 
 - Nome repetido
+
+- alguém que eu possa supervisionar
+- montar uma pasta que dê pra adicionar novos arquivos facilmente
