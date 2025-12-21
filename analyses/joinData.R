@@ -1,21 +1,21 @@
 devtools::load_all()
 library(plantR)
 
-load("data/raw-data/gbif_saopaulo_raw.RData")
+load("data-tmp/gbif_saopaulo_raw.RData")
 gbif$downloadedFrom <- "GBIF"
 goodNames <- names(gbif)
 gbif <- remove_fields(gbif)
-load("data/raw-data/reflora_all.RData")
+load("data-tmp/reflora_all.RData")
 reflora$downloadedFrom <- "Reflora"
 reflora <- consolidateCase(reflora, goodNames)
 goodNames <- union(goodNames, names(reflora))
 reflora <- remove_fields(reflora)
-load("data/derived-data/jabot_saopaulo.RData")
+load("data-tmp/jabot_saopaulo.RData")
 jabot$downloadedFrom <- "JABOT"
 jabot <- consolidateCase(jabot, goodNames)
 goodNames <- union(goodNames, names(jabot))
 jabot <- remove_fields(jabot)
-load("data/raw-data/spl_saopaulo.RData")
+load("data-tmp/spl_saopaulo.RData")
 splsaopaulo$downloadedFrom <- "Splink"
 splsaopaulo <- consolidateCase(splsaopaulo, goodNames)
 splsaopaulo <- remove_fields(splsaopaulo)
