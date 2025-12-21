@@ -5,7 +5,6 @@
 #' @author Mali Oz Salles and Pablo Melo
 #'
 #' @importFrom measurements conv_unit
-#' @importFrom stringr str_count
 #' @importFrom dplyr mutate
 #'
 #' @encoding UTF-8
@@ -17,41 +16,29 @@ parseReflora <- function(data) {
     print(paste0('n. colunas: ', ncol(data)))
 
     # Replace names with DWC names
+    english <- FALSE
     if(all(names_reflora$nome_reflora == names(data))) {
         names(data) <- names_reflora$nome_dwc
+    } else if(all(names_reflora$nome_reflora_eng == names(data))) {
+        names(data) <- names_reflora$nome_dwc
+        english <- TRUE
     } else {
-        stop("Names are not the expected standard!")
+        stop("Os nomes das colunas em um arquivo Reflora não estão no padrão esperado. Verififique o padrão esperado em reflora_fields.csv")
     }
 
-    # separa e transforma as coordeadas deg_min_sec em graus decimais
-    latitude <- gsub('?|\'|\"', '', data$verbatimLatitude)
-    longitude <- gsub('?|\'|\"', '', data$verbatimLongitude)
-
-    #latitude sul (-)
-    latitude<-ifelse(str_count(latitude,'S|s')>0,paste0('-',gsub('S|s','',latitude)),latitude)
-    #latitude norte
-    latitude<-ifelse(str_count(latitude,'N|n')>0,gsub('N|n','',latitude),latitude)
-
-    #longitude oeste (-)
-    longitude<-ifelse(str_count(longitude,'W|w')>0,paste0('-',gsub('W|w','',longitude)),longitude)
-    #latitude norte
-    longitude<-ifelse(str_count(longitude,'E|e')>0,gsub('E|e','',longitude),longitude)
-
-    longitude<-gsub('º','',longitude)
-    latitude<-gsub('º','',latitude)
-
-    latitude <- ifelse(latitude=='-0 0 0 ',"",latitude)
-    longitude <- ifelse(longitude=='-0 0 0 ',"",longitude)
-
-
-    # convert from decimal minutes to decimal degrees
-    decimalLatitude <- sapply(latitude, measurements::conv_unit, from = 'deg_min_sec', to = 'dec_deg')
-    decimalLongitude <- sapply(longitude, measurements::conv_unit, from = 'deg_min_sec', to = 'dec_deg')
-
-    data$taxonRank = factor(data$taxonRank,
-        levels = c('Forma','Variedade','Subespécie','Espécie','Gênero','Família','Ordem', 'Classe', 'Filo', 'Reino'),
-    labels = taxonRanks,
-    ordered=TRUE)
+    if(english) {
+        data$taxonRank[data$taxonRank=="Subfamily"] <- "Genus"
+        data$taxonRank = factor(data$taxonRank,
+            levels = c('Form','Variety','Subespecies','Species','Genus','Family','Order', 'Class', 'Philum', 'Kingdom'),
+            labels = taxonRanks,
+            ordered=TRUE)
+    } else {
+        data$taxonRank[data$taxonRank=="Subfamília"] <- "Gênero"
+        data$taxonRank = factor(data$taxonRank,
+            levels = c('Forma','Variedade','Subespécie','Espécie','Gênero','Família','Ordem', 'Classe', 'Filo', 'Reino'),
+            labels = taxonRanks,
+            ordered=TRUE)
+    }
 
     data <- data %>% dplyr::mutate(
         # source = 'reflora',
@@ -64,8 +51,8 @@ parseReflora <- function(data) {
         month = substr(dateCollected, 4, 5),
         day = substr(dateCollected, 1, 2),
 
-        decimalLatitude = decimalLatitude,
-        decimalLongitude = decimalLongitude,
+        decimalLatitude = verbatimLatitude,
+        decimalLongitude = verbatimLongitude,
         county = NA,
         institutionCode = collectionCode
     )
