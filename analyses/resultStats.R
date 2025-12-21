@@ -75,6 +75,12 @@ original[which(props$locality_high==max(props$locality_high))]
 original[which(props$locality_medium==max(props$locality_medium))]
 
 
+    # Add info about being new to catalogo
+    UC_catalogo <- subset(catalogoCompleto, grepl(Nome_UC, Unidade.Conservação, perl = T, ignore.case = T))
+    speciesCatalogo <- unique(UC_catalogo$scientificNameFull)
+    listed <- finalList$Táxon_completo %in% UC_catalogo$Táxon
+    finalList[,"Já listada"] <- ifelse(listed, "Sim", "Não")
+
 
 # Proportion of each taxon rank
 prop.gps <- lapply(dtOrig, function(x) {
