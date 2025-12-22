@@ -25,4 +25,4 @@ gbif$basisOfRecord <- as.basisOfRecord(gbif$basisOfRecord)
 
 gbif$downloadedFrom <- "GBIF"
 
-save(gbif, file="data-tmp/gbif_saopaulo_raw.RData")
+save(gbif, file="data-tmp/gbif.RData")

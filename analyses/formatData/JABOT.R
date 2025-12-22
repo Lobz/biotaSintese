@@ -1,3 +1,4 @@
+devtools::load_all()
 # Jabot data
 jabot_files <- list.files("data-input/JABOT", pattern = "*.csv", full.names = TRUE)
 jabot_data_raw <- lapply(jabot_files, read.csv, sep="|", na.strings = c("", "NA"))
@@ -11,7 +12,6 @@ if(length(jabot_data_raw) > 1) {
 
 print(paste("Found",nrow(jabot), "observations."))
 
-jabot <- read.csv("data-input/JABOT/Jabot_Geral_DarwinCore.csv", sep="|", na.strings=c("","NA"))
 jabot$county <- NA
 
 # Normalize taxon Rank
@@ -32,4 +32,4 @@ jabot$basisofrecord[jabot$basisofrecord=="Preserved Specimen"] <- "PRESERVED_SPE
 jabot$basisofrecord[jabot$basisofrecord=="Xiloteca"] <- "PRESERVED_SPECIMEN"
 jabot$basisofrecord <- as.basisOfRecord(jabot$verbatimBasisOfRecord)
 
-save(jabot,file="data/derived-data/jabot_saopaulo.RData")
+save(jabot,file="data-tmp/jabot_saopaulo.RData")
