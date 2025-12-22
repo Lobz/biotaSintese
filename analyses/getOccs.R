@@ -6,7 +6,8 @@ library(parallel)
 library(sf)
 
 # Data about UCs from CNUC
-ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
+print("Loading conservation units data...")
+ucs <- read.csv("data/cnuc_2025_03.csv", sep=";", dec=",")
 ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC"))
 
 # Make a summary table
@@ -38,6 +39,7 @@ rownames(loc3) <- loc3$Nome_UC
 
 # Pre-treated data from GBIF, REflora and JABOT
 # load("data-tmp/reflora_gbif_jabot_splink_saopaulo.RData")
+print("Loading occurrence data...")
 load("data-tmp/reflora_gbif_jabot_splink_saopaulo_deduped.RData")
 
 # Which occs are associated with each UC
@@ -60,17 +62,26 @@ LT$Locality <- toupper(LT$x)
 LT$x <- NULL
 
 # Temporary
-LT <- subset(LT, Municipio == "QUALQUER" & confidenceLocality == "Ouro")
-# LT <- LT[ LT$Nome_UC %in% checkedLocations$Nome_UC,]
-# ucs <- ucs[ ucs$Nome.da.UC %in% checkedLocations$Nome_UC, ]
+LT <- subset(LT, confidenceLocality == "Ouro")
 
 # Generate string for regex grepl in locality data
 LT$uc_strings <- generate_uc_string(LT$Locality)
 # Use regex to look for more occs
-occs_loc <- lapply(LT$uc_strings, grepl, x = paste(sp_deduped$municipality, sp_deduped$locality), ignore.case = TRUE, perl = TRUE)
-names(occs_loc) <- LT$Nome_UC
+occs_loc_mun <- pairwiseMap(LT$uc_strings, LT$Municipio, function(str, mun) {
+    if(mun=="QUALQUER") {
+        res <- grepl(str, x = paste(sp_deduped$municipality, sp_deduped$locality), ignore.case = TRUE, perl = TRUE)
+    } else {
+        in_mun <- which(sp_deduped$municipality.correct == mun)
+        res <- rep(FALSE, nrow(sp_deduped))
+        res[in_mun] <- grepl(str, x = paste(sp_deduped$municipality[in_mun], sp_deduped$locality[in_mun]), ignore.case = TRUE, perl = TRUE)
+    }
+    res
+}, simplify = FALSE)
+names(occs_loc_mun) <- LT$Nome_UC
+occs_loc <- sapply(unique(LT$Nome_UC), function(n) {Reduce("|", occs_loc_mun[n])}, simplify = FALSE, USE.NAMES = TRUE)
 occs_ucs <- pairwiseMap(occs_exact[names(occs_loc)], occs_loc, FUN=function(x,y) {x|y})
-names(occs_ucs) <- names(occs_loc) <- LT$Nome_UC
+names(occs_ucs) <- names(occs_loc)
+
 
 ucs$loc.correct <- NULL
 
@@ -79,27 +90,30 @@ ucs$loc.correct <- NULL
 (sample_size = nrow(ucs))
 
 # Data with valid coordinates: either original coordinates or locality
+print("Selecting and correcting valid georeferenced points...")
 valid_coords <- subset(sp_deduped, origin.coord == "coord_original" | resolution.gazetteer == "locality")
-str(valid_coords)
 valid_points <- st_as_sf(valid_coords, coords = c("decimalLongitude.new", "decimalLatitude.new"))
 # Unify and convert datum to match SIRGAS 2000
 valid_points <- fixDatum(valid_points)
 
 # Shape data
-shapes <- st_read("data/raw-data/shp_cnuc_2025_03/cnuc_2025_03.shp")
+print("Loading multipolygons...")
+shapes <- st_read("data/shp_cnuc_2025_03/cnuc_2025_03.shp")
 shapes <- subset(shapes, uf == "SÃO PAULO")
 shapes$nome_uc <- standardize_uc_name(shapes$nome_uc)
 shapes <- subset(shapes, nome_uc %in% ucs$Nome.da.UC)
 shapes <- shapes[order(shapes$nome_uc), ]
 
 # Intersect points with shapes
+print("Intersecting points and shapes...")
 points_ucs <- st_intersects(shapes, valid_points)
 names(points_ucs) <- shapes$nome_uc
 sapply(points_ucs, length)
-save(points_ucs, file="data-tmp/points_ucs.RData")
+# save(points_ucs, file="data-tmp/points_ucs.RData")
 # load("data-tmp/points_ucs.RData")
 
 # Get intersection table
+print("Reading intersection table...")
 intersecUCs <- read.csv("results/locations/intersecUCs.csv")
 # Attribute confidence based on intersections
 intersecUCs$confidence <- ifelse(intersecUCs$prop > 98, "High",
