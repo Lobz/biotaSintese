@@ -16,48 +16,6 @@ saopaulo <- formatLoc(saopaulo, gazet = gazet)
 
 # gonna hand redo formatLoc
 # fixLoc is already done, thank you
-remove_spaces <- function(x) {
-  x<- gsub(" +$","",x, perl=T)
-  x<- gsub("^ +","",x, perl=T)
-  x<- gsub("  +"," ",x, perl=T)
-  x<- gsub(" +\\.",".",x, perl=T)
-  x
-}
-
-remove_punct <- function(x) {
-  x<- gsub("\\(.*\\)","",x, perl=T)
-  x<- gsub("\\[.*\\]","",x, perl=T)
-  x<- gsub(",|\\?|\\.|\\/|\\[|\\]|\\(|\\)|&"," ",x, perl=T)
-  x
-}
-
-fix_sp <- function(x) {
-    x <- gsub("^s(.?.?o?| #227;o) paulo", "sao paulo", x, ignore.case=T)
-    gsub("(\\s|,|\\.|-)s(.?.?o?| #227;o) paulo", "\\1sao paulo", x, ignore.case=T)
-}
-
-finLoc <- function(x, ...) {
-  print(table(x$resolution.gazetteer))
-  # strLoc
-  locs <- strLoc(x)
-  locs$loc.string <- prepLoc(locs$loc.string) # priority string
-  if ("loc.string1" %in% names(locs))
-    locs$loc.string1 <- prepLoc(locs$loc.string1) # alternative string 1
-  if ("loc.string2" %in% names(locs))
-    locs$loc.string2 <- prepLoc(locs$loc.string2) # alternative string 2
-
-  # getLoc
-  locs <- getLoc(x = locs, ...)
-  colunas <- c("loc", "loc.correct", "latitude.gazetteer", "longitude.gazetteer", "resolution.gazetteer")
-  colunas <- colunas[colunas %in% names(locs)]
-  x[,colunas] <- NULL
-  x <- cbind.data.frame(x,
-                         locs[, colunas], stringsAsFactors = FALSE)
-  x[x==""] <- NA
-  print(table(x$resolution.gazetteer))
-  x
-}
-
 saopaulo$stateProvince.new <- fix_sp(saopaulo$stateProvince.new)
 saopaulo$municipality.new <- fix_sp(saopaulo$municipality.new)
 saopaulo$locality.new <- fix_sp(saopaulo$locality.new)
