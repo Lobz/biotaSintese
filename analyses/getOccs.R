@@ -37,8 +37,8 @@ loc3 <- aggregate(LT$x, list(Nome_UC = LT$Nome_UC), function(x) paste(x, collaps
 rownames(loc3) <- loc3$Nome_UC
 
 # Pre-treated data from GBIF, REflora and JABOT
-# load("data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
-load("data/derived-data/reflora_gbif_jabot_splink_saopaulo_deduped.RData")
+# load("data-tmp/reflora_gbif_jabot_splink_saopaulo.RData")
+load("data-tmp/reflora_gbif_jabot_splink_saopaulo_deduped.RData")
 
 # Which occs are associated with each UC
 occs_exact <- sapply(ucs$Nome.da.UC, function(s) {
@@ -96,8 +96,8 @@ shapes <- shapes[order(shapes$nome_uc), ]
 points_ucs <- st_intersects(shapes, valid_points)
 names(points_ucs) <- shapes$nome_uc
 sapply(points_ucs, length)
-save(points_ucs, file="data/derived-data/points_ucs.RData")
-# load("data/derived-data/points_ucs.RData")
+save(points_ucs, file="data-tmp/points_ucs.RData")
+# load("data-tmp/points_ucs.RData")
 
 # Get intersection table
 intersecUCs <- read.csv("results/locations/intersecUCs.csv")
