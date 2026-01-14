@@ -9,7 +9,7 @@ generate_uc_string <- function(x) {
     # interchangeable names
     short_long <- tolower(paste0("(",uc_abbrevs$short,"|",uc_abbrevs$long,")"))
     for(n in short_long){
-        s <- gsub(paste0("(^|\\s|-|\\.)",n,"(\\s|-|,)"),paste0(n,str_de),s,perl=T)
+        s <- gsub(paste0("(^|\\s|-|\\.|\\|)",n,"(\\s|-|,)"),paste0(n,str_de),s,perl=T)
     }
 
     # de/dos/da pode estar incorreto ou faltante
