@@ -7,7 +7,7 @@ library(sf)
 library(geobr)
 
 # Pre-treated data from GBIF, REflora and JABOT
-load("data/derived-data/reflora_gbif_jabot_splink_saopaulo.RData")
+load("data-tmp/reflora_gbif_jabot_splink_saopaulo.RData")
 saopaulo$recordID <- 1:nrow(saopaulo) # I need a unique ID for this
 
 # Data with valid coordinates: either original coordinates or locality
