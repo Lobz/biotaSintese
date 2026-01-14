@@ -6,9 +6,6 @@ library(florabr)
 # Flag for reruning all analysis
 rerun <- TRUE
 
-# Data from Catalogo
-load("data/raw-data/catalogoCompleto.RData")
-
 # Data from previous runs
 done <- read.csv("results/summary_multilist.csv")
 
@@ -35,7 +32,7 @@ done <- subset(done, !Nome.da.UC %in% ucs$Nome.da.UC)
 ucs$nome_file <- slug(ucs$Nome.da.UC)
 
 # Load information for brazilian flora
-bf <- load_florabr(data_dir = "data/raw-data")
+bf <- load_florabr(data_dir = "data-input")
 
 for(i in 1:sample_size){
 try({
@@ -107,12 +104,6 @@ try({
 
     # Generate output file
     finalList <- format_list(top, Nome_UC)
-
-    # Add info about being new to catalogo
-    UC_catalogo <- subset(catalogoCompleto, grepl(Nome_UC, Unidade.Conservação, perl = T, ignore.case = T))
-    speciesCatalogo <- unique(UC_catalogo$scientificNameFull)
-    listed <- finalList$Táxon_completo %in% UC_catalogo$Táxon
-    finalList[,"Já listada"] <- ifelse(listed, "Sim", "Não")
 
     write.csv(finalList, paste0("results/checklist/",nome_file,"_modeloCatalogo.csv"), na="", row.names=FALSE)
 })

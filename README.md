@@ -1,5 +1,10 @@
 # IntegraFlora
 
+## Como usar as listas de espécie
+
+As listas de espécies já geradas podem ser baixadas aqui: <incluir zip>
+Você pode ler ou baioxar listas individuais aqui:
+
 ## Estrutura de diretorios e conteúdo do repositório
 
 - [analyses/](analyses/) - scripts para tratamento dos dados
@@ -23,9 +28,13 @@
 ## Como usar esta ferramenta:
 
 1. Antes de começar, é preciso baixar os dados atualizados das bases de dados:
-- [GBIF](https://www.gbif.org/occurrence/search?taxon_key=6&occurrence_status=present)
-- [Reflora](https://reflora.jbrj.gov.br/reflora/herbarioVirtual/ConsultaPublicoHVUC/BemVindoConsultaPublicaHVConsultar.do?modoConsulta=LISTAGEM&quantidadeResultado=20)
-- [splink](https://specieslink.net/search/) (obs.: para baixar dados em grandes quantidades, será necessário criar uma conta)
-- [JABOT](https://jabot.jbrj.gov.br/v3/consulta.php)
+- [GBIF](https://www.gbif.org/occurrence/search?taxon_key=6&occurrence_status=present) - arquivos .zip
+- [Reflora](https://reflora.jbrj.gov.br/reflora/herbarioVirtual/ConsultaPublicoHVUC/BemVindoConsultaPublicaHVConsultar.do?modoConsulta=LISTAGEM&quantidadeResultado=20) - arquivos .csv
+- [splink](https://specieslink.net/search/) (obs.: para baixar dados em grandes quantidades, será necessário criar uma conta) - arquivos .txt
+- [JABOT](https://jabot.jbrj.gov.br/v3/consulta.php) - arquivos .csv
 
-Os dados devem ser salvos nas respectivas pastas dentro de [data-input/](data-input). No caso dos dados Reflora, por favor abra os arquivos e salve como csv na mesma pasta antes de prosseguir.
+Os dados devem ser salvos nas respectivas pastas dentro de [data-input/](data-input).
+No caso de mais de um arquivo serem salvos na mesma pasta, o script combinará os dados dos arquivos diferentes antes de iniciar o tratamento dos dados.
+No caso dos dados Reflora, por favor abra os arquivos e salve como csv na mesma pasta antes de prosseguir.
+
+2.
