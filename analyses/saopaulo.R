@@ -1,6 +1,6 @@
 devtools::load_all()
 library(plantR)
-library(parallel)
+# library(parallel)
 
 print("Loading data...")
 load("data-tmp/reflora_gbif_jabot_splink_saopaulo.RData")
@@ -12,6 +12,17 @@ gazet = rbind(plantR:::gazetteer, munis)
 
 saopaulo$municipality <- sub("([ ,\\.^])sta\\.","\\1santa", saopaulo$municipality, ignore.case = T)
 saopaulo$locality <- sub("([ ,\\.^])sta\\.","\\1santa", saopaulo$locality, ignore.case = T)
+
+# load complementary gazetteer
+print("Loading extra gazetteer...")
+extra_gazet <- read.csv("results/locations/locGazetteer.csv")
+extra_gazet <- subset(extra_gazet, (!loc %in% gazet$loc) & (loc.correct %in% gazet$loc.correct), select = c("loc", "loc.correct"))
+extra_gazet_filled <- merge(extra_gazet, gazet[!duplicated(gazet$loc.correct),c(1,3:6)], by="loc.correct", all=F)[,names(gazet)]
+str(extra_gazet_filled)
+
+gazet <- rbind(gazet, extra_gazet_filled)
+
+print("Formatting loc...")
 saopaulo <- formatLoc(saopaulo, gazet = gazet)
 
 # gonna hand redo formatLoc
@@ -28,7 +39,7 @@ print("Fixing country name...")
 saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer %in% c("no_info") & grepl("mog. mirim|campinas|sorocaba|peruibe|ubatuba|campos d. jordao|cananeia|cardoso|botucatu|moj. mirim|sao paulo",x$municipality.new), function(x) {
 
   x$country.new <- "brazil"
-  x <- finLoc(x)
+  x <- finLoc(x, gazet = gazet)
 })
 
 saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer %in% c("no_info") & grepl("mog. mirim|sorocaba|peruibe|ubatuba|campos d. jordao|cananeia|botucatu|moj. mirim|sao paulo",x$locality.new), function(x) {
@@ -72,7 +83,7 @@ saopaulo <- tryAgain(saopaulo, function(x) x$resolution.gazetteer == "country", 
 
   # x$municipality.new <- NA
 
-  x <- finLoc(x)
+  x <- finLoc(x, gazet = gazet)
 
 })
 
@@ -211,6 +222,12 @@ saopaulo <- formatCoord(saopaulo)
 # formatTax and validateTax
 print("Formatting taxonomy...")
 saopaulo <- getTaxonId(saopaulo)
+
+# Save unmatched taxons
+nf <- saopaulo[saopaulo$tax.notes == "not found", ]
+nf <- aggregate(nf$catalogNumber, list(family=nf$family, scientificName=nf$scientificName, scientificNameAuthorship=nf$scientificNameAuthorship), function(x) length(unique(x)))
+nf <- nf[order(nf$family, nf$scientificName),]
+write.csv(nf[nf$x>=10,], "results/taxons_not_found.csv", row.names=F)
 
 # validate
 print("Validating location info...")
