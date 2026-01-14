@@ -43,7 +43,7 @@ fix: use as.numeric
 - todo: decide what to do with barcode NA
 
 - try getLoc again after substituting \\s*,\\s* with _
-
+- Repensar o código para tratar cada arquivo separadamente/tratar arquivos menores, usar menos memória
 ### Notes
 
 - last update improved loc resolution for ~ 47k records (I had to redo all treatements so I don't have the exact number of cases where it resulted in worse resolution...)
