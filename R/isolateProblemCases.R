@@ -14,7 +14,7 @@ isolateProblemCases <- function(x, FUN, breaks = 10, parallel = FALSE, no_cores 
         cl <- makeCluster(no_cores)
         l_prob <- parSapply(makeCluster(no_cores), l_orig, function(x1) {
             tryCatch(
-                {FUN(x1); FALSE},
+                {FUN(x1, ...); FALSE},
                 error = function(e) {print(e); return(TRUE)}
             )
         })
@@ -22,7 +22,7 @@ isolateProblemCases <- function(x, FUN, breaks = 10, parallel = FALSE, no_cores 
     else {
         l_prob <- vapply(l_orig, function(x1) {
             tryCatch(
-                {FUN(x1); FALSE},
+                {FUN(x1, ...); FALSE},
                 error = function(e) {return(TRUE)}
             )
         }, TRUE)
