@@ -12,15 +12,6 @@ ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC"))
 
 # Make a summary table
 ucs$NumRecords <- NA
-ucs$NumTaxons <- NA
-ucs$NumSpecies <- NA
-ucs$NumGenus <- NA
-ucs$NumFamilies <- NA
-ucs$NumOuro <- NA
-ucs$NumPrata <- NA
-ucs$NumBronze <- NA
-ucs$NumLatao <- NA
-ucs$NumNoMatch <- NA
 
 # Standardize names and reorder
 ucs$Nome.da.UC <- standardize_uc_name(ucs$Nome.da.UC)
@@ -69,20 +60,22 @@ LT$uc_strings <- generate_uc_string(LT$Locality)
 # Use regex to look for more occs
 occs_loc_mun <- pairwiseMap(LT$uc_strings, LT$Municipio, function(str, mun) {
     if(mun=="QUALQUER") {
-        res <- grepl(str, x = paste(sp_deduped$municipality, sp_deduped$locality), ignore.case = TRUE, perl = TRUE)
+        res <- searchLoc(str, sp_deduped)
     } else {
         in_mun <- which(sp_deduped$municipality.correct == mun)
         res <- rep(FALSE, nrow(sp_deduped))
-        res[in_mun] <- grepl(str, x = paste(sp_deduped$municipality[in_mun], sp_deduped$locality[in_mun]), ignore.case = TRUE, perl = TRUE)
+        res[in_mun] <- searchLoc(str, sp_deduped[in_mun, ])
     }
     res
 }, simplify = FALSE)
 names(occs_loc_mun) <- LT$Nome_UC
+# Combine positive matches from different municipalities
 occs_loc <- sapply(unique(LT$Nome_UC), function(n) {Reduce("|", occs_loc_mun[n])}, simplify = FALSE, USE.NAMES = TRUE)
+# Combine matches from occs_exact and occs_loc
 occs_ucs <- pairwiseMap(occs_exact[names(occs_loc)], occs_loc, FUN=function(x,y) {x|y})
 names(occs_ucs) <- names(occs_loc)
 
-
+# Remove loc.correct column
 ucs$loc.correct <- NULL
 
 # Select a subset of UCs (for testing)
@@ -90,11 +83,15 @@ ucs$loc.correct <- NULL
 (sample_size = nrow(ucs))
 
 # Data with valid coordinates: either original coordinates or locality
-print("Selecting and correcting valid georeferenced points...")
-valid_coords <- subset(sp_deduped, origin.coord == "coord_original" | resolution.gazetteer == "locality")
-valid_points <- st_as_sf(valid_coords, coords = c("decimalLongitude.new", "decimalLatitude.new"))
-# Unify and convert datum to match SIRGAS 2000
-valid_points <- fixDatum(valid_points)
+print("Selecting and correcting valid georeferenced points (original coords) ...")
+coords_original <- subset(sp_deduped, origin.coord == "coord_original" |  resolution.gazetteer == "locality")
+coords_original <- st_as_sf(coords_original, coords = c("decimalLongitude.new", "decimalLatitude.new"))
+coords_original <- fixDatum(coords_original) # Unify and convert datum to match SIRGAS 2000
+print("Selecting and correcting valid georeferenced points (gazet coords) ...")
+coords_gazet <- subset(sp_deduped, resolution.gazetteer == "locality")
+coords_gazet <- st_as_sf(coords_gazet, coords = c("longitude.gazetteer", "latitude.gazetteer"))
+st_crs(coords_gazet) <- "EPSG:4674" # Assumes datum is SIRGAS 2000 (used by IBGE)
+
 
 # Shape data
 print("Loading multipolygons...")
@@ -106,11 +103,9 @@ shapes <- shapes[order(shapes$nome_uc), ]
 
 # Intersect points with shapes
 print("Intersecting points and shapes...")
-points_ucs <- st_intersects(shapes, valid_points)
-names(points_ucs) <- shapes$nome_uc
-sapply(points_ucs, length)
-# save(points_ucs, file="data-tmp/points_ucs.RData")
-# load("data-tmp/points_ucs.RData")
+points_ucs_original <- st_intersects(shapes, coords_original)
+points_ucs_gazet <- st_intersects(shapes, coords_gazet)
+names(points_ucs_original) <- names(points_ucs_gazet) <- shapes$nome_uc
 
 # Get intersection table
 print("Reading intersection table...")
@@ -135,8 +130,11 @@ try({
     nome_file <- uc_data$nome_file
 
     # Which records are in the gps shp
-    rcs_intersect <- valid_points$recordID[points_ucs[[Nome_UC]]]
-    occs_gps <- sp_deduped$recordID %in% rcs_intersect
+    rcs_intersect <- coords_original$recordID[points_ucs_original[[Nome_UC]]]
+    occs_gps_original <- sp_deduped$recordID %in% rcs_intersect
+    rcs_intersect <- coords_gazet$recordID[points_ucs_gazet[[Nome_UC]]]
+    occs_gps_gazet <- sp_deduped$recordID %in% rcs_intersect
+    occs_gps_both <- occs_gps_original & occs_gps_gazet
 
     # Generate string for regex grepl in locality data
     intersected <- subset(intersecUCs, nome_uc == Nome_UC)
@@ -160,7 +158,7 @@ try({
     occs_string <- occs_exact[[Nome_UC]]
 
     # Join all filters
-    occs_total <- occs_uc_name | occs_gps | occs_high | occs_medium
+    occs_total <- occs_uc_name | occs_gps_original | occs_gps_gazet | occs_high | occs_medium
     if(!any(occs_total)) {
         print("No records found for CU:")
         print(Nome_UC)
@@ -172,15 +170,16 @@ try({
 
     # What criteria was used to select each record
     sp_deduped$selectionCategory <- sp_deduped$origin.coord
+    sp_deduped$selectionCategory[occs_gps_both] <-  "coords_both"
     sp_deduped$selectionCategory[occs_medium] <-  "locality_medium"
     sp_deduped$selectionCategory[occs_high] <- "locality_high"
     sp_deduped$selectionCategory[occs_uc_name] <- "locality_exact"
     sp_deduped$selectionCategory[occs_plantr] <- "plantr_exact"
 
     # What quality is the locality
-    sp_deduped$confidenceLocality <- "Low" # GPS data
-    sp_deduped$confidenceLocality[occs_medium] <- "Medium"
-    sp_deduped$confidenceLocality[occs_uc_name | occs_high] <- "High"
+    sp_deduped$confidenceLocality <- "Low" # original GPS data
+    sp_deduped$confidenceLocality[occs_medium | occs_gps_gazet] <- "Medium"
+    sp_deduped$confidenceLocality[occs_uc_name | occs_high | occs_gps_both] <- "High"
 
     total <- sp_deduped[occs_total,]
 
