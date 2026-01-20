@@ -84,7 +84,7 @@ ucs$loc.correct <- NULL
 
 # Data with valid coordinates: either original coordinates or locality
 print("Selecting and correcting valid georeferenced points (original coords) ...")
-coords_original <- subset(sp_deduped, origin.coord == "coord_original" |  resolution.gazetteer == "locality")
+coords_original <- subset(sp_deduped, origin.coord == "coord_original")
 coords_original <- st_as_sf(coords_original, coords = c("decimalLongitude.new", "decimalLatitude.new"))
 coords_original <- fixDatum(coords_original) # Unify and convert datum to match SIRGAS 2000
 print("Selecting and correcting valid georeferenced points (gazet coords) ...")
