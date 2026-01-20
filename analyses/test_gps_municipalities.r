@@ -118,18 +118,18 @@ t$total <- t$total_gps + t$total_name - t$correct
 t <- subset(t, total_name > 0)
 summary(t)
 ts <- subset(t, total_name > 20)
-# Mean 67% and median 79%????
+# Mean 71% and median 80%????
 summary(t$correct/t$total_gps)
 summary(t$correct/t$total_name)
 boxplot(t$correct/t$total_gps)
 summary(ts$correct/ts$total_gps)
 plot(ts$correct/ts$total_gps ~ts$total_gps)
-# Mean 19% and median 8% actual wrong names
+# Mean 17% and median 7% actual wrong names
 summary(t$wrong_name/t$total_gps)
 summary(t$wrong_name/t$total_name)
 summary(t$name_not_av/t$total_gps)
 summary(t$wrong_name/t$total_name)
-# In total, 9.8% of gps locations are on the wrong municipality
+# In total, 8.4% of gps locations are on the wrong municipality
 sum(t$wrong_name)/sum(t$total_gps)
 
 # Top records
