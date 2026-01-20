@@ -26,15 +26,20 @@ dtTreated <- lapply(tt, read.csv, na.strings = c("NA",""), colClasses = "charact
 names(dtOrig) <- nome_file
 Nome.da.UC <- sapply(dtOrig, function(x) x$Nome_UC[1])
 
-i <- 6
-i <- i+1
-dt <- dtOrig[[i]]
-modCat[i]
-table(dt$municipality)
-sort(table(dt$locality))
-locs <- unlist(stringr::str_split(dt$locality,",|[.]|;|-"))
-locs <- stringr::str_squish(locs)
-sort(table(locs))
+# Number of UCs with at least one record found
+length(dtTreated)
+# Number of records in each list
+n_regs <- sapply(dtTreated, nrow)
+table(n_regs > 20)
+# Number of taxons in each list
+n_tax <- sapply(dtOrig, nrow)
+table(n_tax > 20)
+tranks <- make_summary(dtOrig, "taxon.rank", levels = taxonRanks)
+table(tranks$species > 20)
+hist(tranks$species, breaks=20)
+# Number of high quality taxons in each list
+confLoc <- make_summary(dtOrig, "confidenceLocality", levels=c("High", "Medium", "Low", "None"), UC=Nome.da.UC)
+confTax <- make_summary(dtOrig, "tax.check", levels=c("high", "medium", "low", "unknown"), UC=Nome.da.UC)
 
 length(dtOrig)
 # proportion of entries listed in catalogoUCsBR
@@ -51,7 +56,6 @@ selCats <- lapply(dtOrig, function(x) {
 selCats <- dplyr::bind_rows(selCats)
 selCats <- cbind(Nome.da.UC,selCats)
 summary(selCats)
-confLoc <- make_summary(dtOrig, "confidenceLocality", levels=c("High", "Medium", "Low", "None"), UC=Nome.da.UC)
 summ_ml <- read.csv("results/summary_multilist.csv")
 summary(summ_ml)
 

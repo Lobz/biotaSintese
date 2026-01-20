@@ -20,8 +20,10 @@ valid_points <- fixDatum(valid_points)
 
 # Get shapes for municipalities
 shapes <- read_municipality("SP", year = 2024)
+munis_plantR <- data.frame(country = "Brasil", stateProvince = "São Paulo", municipality = shapes$name_muni, locality = NA)
+munis_plantR <- plantR::formatLoc(munis_plantR)
 
-rownames(shapes) <- shapes$name_muni
+rownames(shapes) <- rownames(munis_plantR) <- shapes$name_muni
 
 # Get shape for São Paulo
 sp <- read_state("SP")
@@ -36,23 +38,24 @@ plotMun <- function(name, plot = TRUE, save = TRUE, refdf = saopaulo) {
     filtered_gps <- valid_points[gps_filter,]
     # othermuns <- unique(filtered_gps$municipality.correct)
     # plot(filtered_gps, add=T, col = "blue")
-    filtered_name <- refdf[which(tolower(refdf$municipality.correct)==tolower(name)),]
+    name_filter <- which(startsWith((refdf$loc.correct), munis_plantR[name, "loc.correct"]))
+    name_filter_gps <- which(startsWith((valid_points$loc.correct), munis_plantR[name, "loc.correct"]))
+    filtered_name <- refdf[name_filter,]
     if(nrow(filtered_name) == 0) {
         print(paste("Zero matches:", name))
         print(sort(table(filtered_gps$municipality.correct)) )
     }
-    name_filter <- which(tolower(valid_points$municipality.correct)==tolower(name))
 
     # Summary from GPS
     total_gps <- nrow(filtered_gps)
-    correct <- length(intersect(name_filter, gps_filter))
+    correct <- length(intersect(name_filter_gps, gps_filter))
     na <- sum(is.na(filtered_gps$municipality.correct))
     wrong <- total_gps - correct - na
     summ_gps <- c(total_gps=total_gps,correct=correct,wrong_name=wrong,name_not_av=na)
 
     # Summary from Name
     total_name <- nrow(filtered_name)
-    wrong <- length(name_filter) - correct
+    wrong <- length(name_filter_gps) - correct
     na <- total_name - correct - wrong
     summ_name <- c(total_name=total_name,correct=correct,wrong_gps=wrong,gps_not_av=na)
 
@@ -72,7 +75,7 @@ plotMun <- function(name, plot = TRUE, save = TRUE, refdf = saopaulo) {
         if(total_name > 0) {
             plot(sp$geom, main=name)
             plot(st_geometry(shapes[name,]), add=T)
-            plot(valid_points$geometry[name_filter], col=rgb(0,0,1,0.1), pch = 4, add=T)
+            plot(valid_points$geometry[name_filter_gps], col=rgb(0,0,1,0.1), pch = 4, add=T)
         }
         if(summ_gps["wrong_name"] > 0){
             barplot(sort(table(filtered_gps$municipality.correct[filtered_gps$municipality.correct != name]), decreasing = TRUE)[1:3], main="Top three wrong municipalities", las=1, horiz=T)
@@ -101,12 +104,13 @@ plotMun("Embu das Artes")
 plotMun("Campos do Jordão")
 plotMun("São Paulo")
 plotMun("Alfredo Marcondes")
+plotMun("São Luiz do Paraitinga")
 
 tabs <- lapply(rownames(shapes), function(x) try(plotMun(x, plot=T)))
 tabls <- sapply(tabs, function(x) if(class(x) == "integer") FALSE else TRUE)
 tabs <- do.call(rbind, tabs)
 rownames(tabs) <- rownames(shapes)
-write.csv(tabs, "results/test_gps_municipalitites.csv")
+write.csv(tabs, "results/locations/test_gps_municipalitites.csv")
 tabs <- read.csv("results/test_gps_municipalitites.csv")
 
 t <- as.data.frame(tabs)
@@ -141,3 +145,5 @@ subset(t, correct_perc > .99)
 subset(t, correct_perc < .001)
 subset(t, total == 0)
 subset(t, total_name == 0)
+
+problem_munis <- c("guara", "sao paulo", "ribeira")
