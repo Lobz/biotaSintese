@@ -1,19 +1,5 @@
 devtools::load_all()
 # Let's see what's going on with those stats
-make_summary <- function(data, column, levels, UC = sapply(data, function(x) {
-    if("UC" %in% names(x)) x$UC[1]
-    else if("Nome_UC" %in% names(x)) x$Nome_UC[1]
-})) {
-    ret <- lapply(data, function(x) {
-        x <- x[,column]
-        x <- factor(x, levels = levels)
-        summary(x)
-    })
-    ret <- dplyr::bind_rows(ret)
-    ret <- cbind(UC, ret)
-    ret
-}
-
 modCat <- list.files("results/checklist", full.names = T)
 original <- list.files("results/allfields", full.names = T)
 tt <- list.files("results/total-treated", full.names = T)

@@ -3,25 +3,14 @@ library(plantR) # used for reading and cleaning occurrence data
 library(stringr)
 library(florabr)
 
-# Flag for reruning all analysis
-rerun <- TRUE
-
 # Data from previous runs
 done <- read.csv("results/summary_multilist.csv")
 
 # Select for treating: one or more records
 has_records <- done$NumRecords > 0
 
-# Select units for which this treatement was not done
-untreated <- is.na(done$NumTaxons)
-if (rerun) {
-    to_treat <- has_records
-} else {
-    to_treat <- has_records & untreated
-}
-
 # Apply selection
-ucs <- done[to_treat, ]
+ucs <- done[has_records, ]
 
 # Select a subset of UCs (for testing)
 # ucs <- ucs[sample(1:nrow(ucs), 10), ]
@@ -31,8 +20,20 @@ sample_size = nrow(ucs)
 done <- subset(done, !Nome.da.UC %in% ucs$Nome.da.UC)
 ucs$nome_file <- slug(ucs$Nome.da.UC)
 
+# Space for summary
+ucs$NumTaxons <- NA
+ucs$NumSpecies <- NA
+ucs$NumGenus <- NA
+ucs$NumFamilies <- NA
+ucs$NumOuro <- NA
+ucs$NumPrata <- NA
+ucs$NumBronze <- NA
+ucs$NumLatao <- NA
+ucs$NumNoMatch <- NA
+
 # Load information for brazilian flora
-bf <- load_florabr(data_dir = "data-input")
+# bf <- get_florabr(output_dir = "data-tmp")
+bf <- load_florabr(data_dir = "data-tmp")
 
 for(i in 1:sample_size){
 try({
@@ -113,6 +114,6 @@ ucs$nome_file <- NULL
 # Save summary
 total <- dplyr::bind_rows(done, ucs)
 total <- total[order(total$Nome.da.UC),]
-write.csv(total, "results/summary_multilist.csv", row.names=FALSE)
+write.csv(total, "results/summary_treatOccs.csv", row.names=FALSE)
 summary(total==0)
 summary(total<20)
