@@ -55,7 +55,7 @@ try({
     write.csv(total, paste0("results/total-treated/",nome_file,".csv"),  na="", row.names=FALSE)
 
     # Detail locality quality
-    total$confidenceLocality[total$selectionCategory == "coord_gazet"] <- "Medium" #todo: evaluate quality of gps polygon
+    total$confidenceLocality[total$selectionCategory == "coords_gazet"] <- "Medium" #todo: evaluate quality of gps polygon
     gps_orig <- total$selectionCategory == "coord_orig"
     total$confidenceLocality[gps_orig] <- "None"
     good_coords <- startsWith(total$geo.check, "ok_county") | startsWith(total$geo.check, "ok_locality")

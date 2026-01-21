@@ -11,7 +11,7 @@ load("data-tmp/reflora_gbif_jabot_splink_saopaulo.RData")
 saopaulo$recordID <- 1:nrow(saopaulo) # I need a unique ID for this
 
 # Data with valid coordinates: either original coordinates or locality
-valid_coords <- subset(saopaulo, origin.coord == "coord_original" | resolution.gazetteer == "locality" & !is.na(decimalLongitude.new))
+valid_coords <- subset(saopaulo, origin.coord == "coords_original" | resolution.gazetteer == "locality" & !is.na(decimalLongitude.new))
 valid_coords <- subset(valid_coords,  !is.na(as.numeric(decimalLongitude.new)))
 table(valid_coords$geo.check)
 valid_points <- st_as_sf(valid_coords, coords = c("decimalLongitude.new", "decimalLatitude.new"))

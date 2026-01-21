@@ -23,6 +23,10 @@ str(extra_gazet_filled)
 gazet <- rbind(gazet, extra_gazet_filled)
 
 print("Formatting loc...")
+saopaulo$country <- remove_spaces(saopaulo$country)
+saopaulo$stateProvince <- remove_spaces(saopaulo$stateProvince)
+saopaulo$municipality <- remove_spaces(saopaulo$municipality)
+saopaulo$locality <- remove_spaces(saopaulo$locality)
 saopaulo <- formatLoc(saopaulo, gazet = gazet)
 
 # gonna hand redo formatLoc
@@ -247,7 +251,7 @@ table(saopaulo$geo.check, saopaulo$origin.coord)
 # tab(good_coords)
 # saopaulo$decimalLatitude.new[!good_coords] <- saopaulo$latitude.gazetteer[!good_coords]
 # saopaulo$decimalLongitude.new[!good_coords] <- saopaulo$longitude.gazetteer[!good_coords]
-# saopaulo$origin.coord[!good_coords] <- "coord_gazet"
+# saopaulo$origin.coord[!good_coords] <- "coords_gazet"
 
 
 saopaulo$recordID <- 1:nrow(saopaulo) # I need a unique ID for this

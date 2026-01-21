@@ -162,8 +162,8 @@ locTable3 <- function(df, filter=""){
     locs.subs$municipality <- ifelse(is.na(adm$NAME_2), plantR:::squish(rmLatin(tolower(df$municipality))), adm$NAME_2)
     locs.subs$locality <- plantR:::squish(rmLatin(tolower(df$locality)))
 
-    locs.subs$lat <- ifelse(df$origin.coord=="coord_original",df$decimalLatitude.new,NA)
-    locs.subs$lon <- ifelse(df$origin.coord=="coord_original",df$decimalLongitude.new,NA)
+    locs.subs$lat <- ifelse(df$origin.coord=="coords_original",df$decimalLatitude.new,NA)
+    locs.subs$lon <- ifelse(df$origin.coord=="coords_original",df$decimalLongitude.new,NA)
     locs.subs$source <- df$downloadedFrom
 
     locs.fixed <- subset(locs.subs, !is.na(loc.orig))

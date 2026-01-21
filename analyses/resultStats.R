@@ -36,7 +36,7 @@ head(tem_lista)
 # proportion of gps vs text entries
 selCats <- lapply(dtOrig, function(x) {
     x <- x$selectionCategory
-    x <- factor(x, levels=c("coord_original", "coord_gazet", "locality_exact", "locality_high", "locality_medium"))
+    x <- factor(x, levels=c("coords_original", "coords_gazet", "locality_exact", "intersect_high", "intersect_medium"))
     summary(x)
 })
 selCats <- dplyr::bind_rows(selCats)
@@ -61,8 +61,8 @@ summary(subset(selCats, total > 10))
 colSums(selCats)
 100*colSums(selCats)/sum(selCats$total)
 
-original[which(props$locality_high==max(props$locality_high))]
-original[which(props$locality_medium==max(props$locality_medium))]
+original[which(props$intersect_high==max(props$intersect_high))]
+original[which(props$intersect_medium==max(props$intersect_medium))]
 
 
     # Add info about being new to catalogo
