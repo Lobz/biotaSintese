@@ -265,7 +265,14 @@ names(loc.names) <- loc.names
 loc.names <- c(loc.str = "loc.correct", res.gazet = "resolution.gazetteer", res.orig =
     "resol.orig", loc.check = "loc.check", loc.names)
 my_valDup <- function(x) validateDup(x, noNumb = NA, noYear = NA, noName = NA, prop=1,
-          tax.names = c(family = "family.new", species = "scientificName.new", tax.auth =
+  comb.fields = list(
+    c("family", "col.last.name", "col.number", "col.loc"),
+    c("family", "col.last.name", "col.number", "col.year"),
+    # c("family", "col.year", "col.number", "col.loc"),
+    c("species", "col.last.name", "col.number", "col.year"),
+    c("species", "col.last.name", "col.number", "col.loc"),
+    c("col.year", "col.last.name", "col.number", "col.loc")),
+  tax.names = c(family = "family.new", species = "scientificName.new", tax.auth =
     "scientificNameAuthorship.new", det.name = "identifiedBy.new", det.year =
     "yearIdentified.new", tax.check = "tax.check", tax.rank = "taxon.rank", status =
     "scientificNameStatus", id = "id", name.full = "scientificNameFull", gen = "genus.new", sp = "species.new"),
