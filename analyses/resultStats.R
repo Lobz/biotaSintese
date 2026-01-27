@@ -1,8 +1,12 @@
 devtools::load_all()
 # Let's see what's going on with those stats
-modCat <- list.files("results/checklist", full.names = T)
-original <- list.files("results/allfields", full.names = T)
-tt <- list.files("results/total-treated", full.names = T)
+summ_ml <- read.csv("results/summary_multilist.csv")
+summary(summ_ml)
+summ_ml$type <- gsub("_.*","", slug(summ_ml$Nome.da.UC))
+
+modCat <- list.files("results/checklist", "*.csv", full.names = T)
+original <- list.files("results/allfields", "*.csv", full.names = T)
+tt <- list.files("results/total-treated", "*.csv", full.names = T)
 nome_file <- sub(".*/","",original)
 nome_file <- sub(".csv","",nome_file)
 
@@ -12,16 +16,33 @@ dtTreated <- lapply(tt, read.csv, na.strings = c("NA",""), colClasses = "charact
 names(dtOrig) <- nome_file
 Nome.da.UC <- sapply(dtOrig, function(x) x$Nome_UC[1])
 
+# Type of UC
+type <- gsub("_.*","",nome_file)
+table(type)
+
+
 # Number of UCs with at least one record found
 length(dtTreated)
 # Number of records in each list
 n_regs <- sapply(dtTreated, nrow)
-table(n_regs > 20)
+new_summ <- data.frame(Nome.da.UC, type, NumRecords = n_regs)
+summ <- merge(summ_ml, new_summ, all=T)
+summary(summ)
+
+table(summ$NumRecords > 0, summ$type)
+table(summ$NumRecords > 20, summ$type)
+table(summ$NumRecords > 100, summ$type)
+table(summ$NumRecords > 1000, summ$type)
+table(summ$NumRecords > 10000, summ$type)
+
+hist(log(summ$NumRecords[summ$NumRecords>0 & summ$NumRecords < 300000]), xlab= "Número de registros (log)", ylab = "Frequência", breaks=20, main = "Distribuição do número de registros")
+plot(summ$NumRecords ~summ$type)
 # Number of taxons in each list
 n_tax <- sapply(dtOrig, nrow)
 table(n_tax > 20)
-tranks <- make_summary(dtOrig, "taxon.rank", levels = taxonRanks)
-table(tranks$species > 20)
+tranks <- make_summary(dtOrig, "taxon.rank", levels = taxonRanks, Nome.da.UC)
+table(tranks$species > 100)
+table(tranks$species > 1000)
 hist(tranks$species, breaks=20)
 # Number of high quality taxons in each list
 confLoc <- make_summary(dtOrig, "confidenceLocality", levels=c("High", "Medium", "Low", "None"), UC=Nome.da.UC)
@@ -42,8 +63,6 @@ selCats <- lapply(dtOrig, function(x) {
 selCats <- dplyr::bind_rows(selCats)
 selCats <- cbind(Nome.da.UC,selCats)
 summary(selCats)
-summ_ml <- read.csv("results/summary_multilist.csv")
-summary(summ_ml)
 
 m <- merge(summ_ml, confLoc, all=T)
 summary(m)
