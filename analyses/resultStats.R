@@ -1,42 +1,42 @@
 devtools::load_all()
 # Let's see what's going on with those stats
-summ_ml <- read.csv("results/summary_multilist.csv")
-summary(summ_ml)
-summ_ml$type <- gsub("_.*","", slug(summ_ml$Nome.da.UC))
+summ <- read.csv("results/summary_treatOccs.csv")
+# Type of UC
+summ$type <- factor(gsub("_.*","", slug(summ_ml$Nome.da.UC)))
+summary(summ)
 
+# Open data
 modCat <- list.files("results/checklist", "*.csv", full.names = T)
 original <- list.files("results/allfields", "*.csv", full.names = T)
 tt <- list.files("results/total-treated", "*.csv", full.names = T)
 nome_file <- sub(".*/","",original)
 nome_file <- sub(".csv","",nome_file)
 
-dataCat <- lapply(modCat, read.csv, na.strings = c("NA","","s.n.","s.c.","s.a."), colClasses = "character")
+dtCat <- lapply(modCat, read.csv, na.strings = c("NA","","s.n.","s.c.","s.a."), colClasses = "character")
 dtOrig <- lapply(original, read.csv, na.strings = c("NA",""), colClasses = "character")
 dtTreated <- lapply(tt, read.csv, na.strings = c("NA",""), colClasses = "character")
-names(dtOrig) <- nome_file
+names(dtOrig) <- names(dtCat) <- names(dtTreated) <- nome_file
 Nome.da.UC <- sapply(dtOrig, function(x) x$Nome_UC[1])
-
-# Type of UC
-type <- gsub("_.*","",nome_file)
-table(type)
-
 
 # Number of UCs with at least one record found
 length(dtTreated)
 # Number of records in each list
-n_regs <- sapply(dtTreated, nrow)
-new_summ <- data.frame(Nome.da.UC, type, NumRecords = n_regs)
-summ <- merge(summ_ml, new_summ, all=T)
-summary(summ)
+hist(summ$NumRecords[summ$NumRecords>0 & summ$NumRecords < 300000], xlab= "Número de registros", ylab = "Frequência", breaks=20, main = "Distribuição do número de registros")
+hist(log(summ$NumRecords[summ$NumRecords>0 & summ$NumRecords < 300000]), xlab= "Número de registros (log)", ylab = "Frequência", breaks=20, main = "Distribuição do número de registros")
 
+# Number of records vc type
+table(summ$type)
 table(summ$NumRecords > 0, summ$type)
 table(summ$NumRecords > 20, summ$type)
 table(summ$NumRecords > 100, summ$type)
 table(summ$NumRecords > 1000, summ$type)
 table(summ$NumRecords > 10000, summ$type)
 
-hist(log(summ$NumRecords[summ$NumRecords>0 & summ$NumRecords < 300000]), xlab= "Número de registros (log)", ylab = "Frequência", breaks=20, main = "Distribuição do número de registros")
-plot(summ$NumRecords ~summ$type)
+boxplot(NumRecords ~ factor(type), data = subset(summ, NumRecords > 0 & type %in% c("APA", "ARIE","EEC", "PE", "PNM", "RPPN")), log="y", xlab = "Tipo de UC", ylab = "Número de registros", main = "Número de registros por tipo de UC")
+savePlot("plots/numRecords_log.png")
+boxplot(NumRecords ~ factor(type), data = subset(summ, type %in% c("APA", "ARIE","EEC", "PE", "PNM", "RPPN")), xlab = "Tipo de UC", ylab = "Número de registros", main = "Número de registros por tipo de UC")
+savePlot("plots/NumRecords.png")
+
 # Number of taxons in each list
 n_tax <- sapply(dtOrig, nrow)
 table(n_tax > 20)
@@ -50,7 +50,7 @@ confTax <- make_summary(dtOrig, "tax.check", levels=c("high", "medium", "low", "
 
 length(dtOrig)
 # proportion of entries listed in catalogoUCsBR
-catalogo <- make_summary(dataCat, column="Já.listada", levels=c("Sim", "Não"))
+catalogo <- make_summary(dtCat, column="Já.listada", levels=c("Sim", "Não"))
 tem_lista <- subset(catalogo, Sim>0)
 head(tem_lista)
 
