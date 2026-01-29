@@ -33,6 +33,7 @@ points_muns <- st_intersects(shapes, valid_points)
 names(points_muns) <- shapes$name_muni
 sapply(points_muns, length)
 
+
 plotMun <- function(name, plot = TRUE, save = TRUE, refdf = saopaulo) {
     gps_filter <- points_muns[[name]]
     filtered_gps <- valid_points[gps_filter,]
@@ -111,7 +112,7 @@ tabls <- sapply(tabs, function(x) if(class(x) == "integer") FALSE else TRUE)
 tabs <- do.call(rbind, tabs)
 rownames(tabs) <- rownames(shapes)
 write.csv(tabs, "results/locations/test_gps_municipalitites.csv")
-tabs <- read.csv("results/test_gps_municipalitites.csv")
+tabs <- read.csv("results/locations/test_gps_municipalitites.csv")
 
 t <- as.data.frame(tabs)
 t$total <- t$total_gps + t$total_name - t$correct
@@ -147,3 +148,15 @@ subset(t, total == 0)
 subset(t, total_name == 0)
 
 problem_munis <- c("guara", "sao paulo", "ribeira")
+
+# Plot number of points per muni
+names(tabs)[1]<-"name_muni"
+shapes <- merge(shapes, tabs)
+shapes$total <- shapes$total_gps + shapes$total_name - shapes$correct
+dim(shapes)
+plot(shapes[, "correct"], main = "Número de registros por município")
+savePlot("plots/municipio_registros.png")
+shapes$total_log <- log10(shapes$total)
+shapes$correct_log <- log10(shapes$correct+1)
+plot(shapes[, "correct_log"], main = "Número de registros por município (log)")
+savePlot("plots/municipio_registros_log.png")
