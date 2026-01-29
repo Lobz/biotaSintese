@@ -8,10 +8,10 @@
 standardize_uc_name <- function(x) {
     x <- plantR:::squish(x)
     x <- toupper(x)
-    x <- sub("^AREA", "ÁREA", x)
-    x <- sub(" AREA", "ÁREA", x)
+    x <- sub("^AREA", "ÁREA", x, fixed = T)
+    x <- sub(" AREA", "ÁREA", x, fixed = T)
     x <- sub("PATRIM.NIO", "PATRIMÔNIO", x)
-    x <- sub("REFUGIO", "REFÚGIO", x)
+    x <- sub("REFUGIO", "REFÚGIO", x, fixed = T)
     x <- sub("PATRIMÔNIO NATURA ", "PATRIMÔNIO NATURAL ", x, fixed = T)
     x <- sub(" AGUAS", " ÁGUAS", x, fixed = T)
     x <- sub("SITIO", "SÍTIO", x, fixed = T)
