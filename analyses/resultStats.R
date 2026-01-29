@@ -1,9 +1,32 @@
 devtools::load_all()
+
 # Let's see what's going on with those stats
 summ <- read.csv("results/summary_treatOccs.csv")
+# Load UC data
+ucs <- read.csv("data/cnuc_2025_03.csv", sep=";", dec=",")
+ucs <- subset(ucs, grepl("SP|SAO PAULO", UF))
+# ucs <- read.csv("data-input/UCs.csv")
+
+# Standardize names and reorder
+ucs$Nome.da.UC <- standardize_uc_name(ucs$Nome.da.UC)
+ucs <- ucs[order(ucs$Nome.da.UC), ]
+ucs$area <- as.numeric(gsub("\\.","",ucs$Área.Ato.Legal.de.Criação))
+ucs <- merge(ucs, summ)
+ucs <- ucs[ !grepl("PARAÍSO", ucs$Nome.da.UC),]
 # Type of UC
-summ$type <- factor(gsub("_.*","", slug(summ_ml$Nome.da.UC)))
-summary(summ)
+ucs$type <- factor(gsub("_.*","", slug(ucs$Nome.da.UC)))
+
+# shapes
+shapes <- sf::st_read("data/shp_cnuc_2025_03/cnuc_2025_03.shp")
+shapes <- subset(shapes, uf == "SÃO PAULO")
+shapes$nome_uc <- standardize_uc_name(shapes$nome_uc)
+shapes <- subset(shapes, nome_uc %in% ucs$Nome.da.UC)
+shapes <- shapes[order(shapes$nome_uc), ]
+shapes$Nome.da.UC <- shapes$nome_uc
+shapes <- merge(shapes, ucs)
+
+ucs$hasGeom <- ucs$Nome.da.UC %in% shapes$nome_uc
+ucs$UC <- ucs$Nome.da.UC
 
 # Open data
 modCat <- list.files("results/checklist", "*.csv", full.names = T)
@@ -22,31 +45,75 @@ Nome.da.UC <- sapply(dtOrig, function(x) x$Nome_UC[1])
 length(dtTreated)
 # Number of records in each list
 hist(summ$NumRecords[summ$NumRecords>0 & summ$NumRecords < 300000], xlab= "Número de registros", ylab = "Frequência", breaks=20, main = "Distribuição do número de registros")
-hist(log(summ$NumRecords[summ$NumRecords>0 & summ$NumRecords < 300000]), xlab= "Número de registros (log)", ylab = "Frequência", breaks=20, main = "Distribuição do número de registros")
+savePlot("plots/NumRecords_hist.png")
+hist(log10(summ$NumRecords[summ$NumRecords>0 & summ$NumRecords < 300000]), xlab= "Número de registros (log)", ylab = "Frequência", breaks=20, main = "Distribuição do número de registros")
+savePlot("plots/NumRecords_hist_log.png")
 
 # Number of records vc type
-table(summ$type)
-table(summ$NumRecords > 0, summ$type)
-table(summ$NumRecords > 20, summ$type)
-table(summ$NumRecords > 100, summ$type)
-table(summ$NumRecords > 1000, summ$type)
-table(summ$NumRecords > 10000, summ$type)
+summary(ucs)
+table(ucs$type)
+table(ucs$NumRecords > 0, ucs$type)
+table(ucs$NumRecords > 20, ucs$type)
+table(ucs$NumRecords > 20)
+table(ucs$NumRecords > 100, ucs$type)
+table(ucs$NumRecords > 100)
+table(ucs$NumRecords > 1000, ucs$type)
+table(ucs$NumRecords > 10000, ucs$type)
 
-boxplot(NumRecords ~ factor(type), data = subset(summ, NumRecords > 0 & type %in% c("APA", "ARIE","EEC", "PE", "PNM", "RPPN")), log="y", xlab = "Tipo de UC", ylab = "Número de registros", main = "Número de registros por tipo de UC")
+boxplot(NumRecords ~ factor(type), data = subset(ucs, NumRecords > 0 & type %in% c("APA", "ARIE","EEC", "PE", "PNM", "RPPN")), log="y", xlab = "Tipo de UC", ylab = "Número de registros", main = "Número de registros por tipo de UC")
 savePlot("plots/numRecords_log.png")
-boxplot(NumRecords ~ factor(type), data = subset(summ, type %in% c("APA", "ARIE","EEC", "PE", "PNM", "RPPN")), xlab = "Tipo de UC", ylab = "Número de registros", main = "Número de registros por tipo de UC")
+boxplot(NumRecords ~ factor(type), data = subset(ucs, type %in% c("APA", "ARIE","EEC", "PE", "PNM", "RPPN")), xlab = "Tipo de UC", ylab = "Número de registros", main = "Número de registros por tipo de UC")
 savePlot("plots/NumRecords.png")
 
+ucs[order(ucs$NumRecords),]
+
+# NumRecords vs Area
+anova(lm(ucs$NumRecords ~ ucs$area + ucs$type + ucs$hasGeom))
+anova(lm(ucs$NumSpecies ~ ucs$area + ucs$type + ucs$hasGeom))
+lm(ucs$area ~ ucs$type)
+
 # Number of taxons in each list
-n_tax <- sapply(dtOrig, nrow)
-table(n_tax > 20)
 tranks <- make_summary(dtOrig, "taxon.rank", levels = taxonRanks, Nome.da.UC)
 table(tranks$species > 100)
 table(tranks$species > 1000)
 hist(tranks$species, breaks=20)
+
+# Number of species
+hist(ucs$NumSpecies, breaks = 20)
+hist(log(ucs$NumSpecies), breaks = 20)
+
+boxplot(NumSpecies ~ factor(type), data = subset(ucs, NumSpecies > 0 & type %in% c("APA", "ARIE","EEC", "PE", "PNM", "RPPN")), log="y", xlab = "Tipo de UC", ylab = "Número de espécies", main = "Número de espécies por tipo de UC")
+savePlot("plots/numSpecies_log.png")
+boxplot(NumSpecies ~ factor(type), data = subset(ucs, type %in% c("APA", "ARIE","EEC", "PE", "PNM", "RPPN")), xlab = "Tipo de UC", ylab = "Número de espécies", main = "Número de espécies por tipo de UC")
+savePlot("plots/NumSpecies.png")
+
+plot(NumSpecies ~ area, data = subset(ucs, NumRecords > 0))
+plot(NumSpecies ~ NumRecords, data = subset(ucs, NumRecords > 0), xlab = "Número de registros", ylab = "Número de espécies", main = "Relação entre número de registros e de espécies")
+savePlot("plots/registros_especies.png")
+
 # Number of high quality taxons in each list
-confLoc <- make_summary(dtOrig, "confidenceLocality", levels=c("High", "Medium", "Low", "None"), UC=Nome.da.UC)
-confTax <- make_summary(dtOrig, "tax.check", levels=c("high", "medium", "low", "unknown"), UC=Nome.da.UC)
+confLoc <- make_summary(dtTreated, "confidenceLocality", levels=c("High", "Medium", "Low", "None"), UC=Nome.da.UC)
+ucs <- merge(ucs, confLoc, all=T)
+confTax <- make_summary(dtTreated, "tax.check", levels=c("high", "medium", "low", "unknown"), UC=Nome.da.UC)
+ucs <- merge(ucs, confTax, all=T)
+originLoc <- make_summary(dtTreated, "selectionCategory", levels=c("coords_original", "coords_gazet", "coords_both", "locality_exact", "intersect_high", "intersect_medium", "plantr_exact"), UC=Nome.da.UC)
+ucs <- merge(ucs, originLoc, all=T)
+
+summary(ucs[,c("High", "Medium", "Low", "None")]/ucs$NumRecords)
+summary(ucs[,c("high", "medium", "low", "unknown")]/ucs$NumRecords)
+summary(ucs[,c("coords_original", "coords_gazet", "coords_both", "locality_exact", "intersect_high", "intersect_medium", "plantr_exact")]/ucs$NumRecords)
+
+confLoc <- make_summary(dtCat, "ConfiançaLoc", levels=c("High", "Medium", "Low", "None"), labels = c("HighF", "MediumF", "LowF", "NoneF"), UC=Nome.da.UC)
+ucs <- merge(ucs, confLoc, all=T)
+confTax <- make_summary(dtCat, "ConfiançaID", levels=c("Ouro", "Prata", "Bronze", "Latão"), UC=Nome.da.UC)
+ucs <- merge(ucs, confTax, all=T)
+
+TamanhoLista <- sapply(dtCat, nrow)
+ucs <- merge(ucs, data.frame(Nome.da.UC, TamanhoLista))
+
+summary(ucs[,c("HighF", "MediumF", "LowF", "NoneF")]/ucs$TamanhoLista)
+summary(ucs[,c("Ouro", "Prata", "Bronze", "Latão")]/ucs$TamanhoLista)
+
 
 length(dtOrig)
 # proportion of entries listed in catalogoUCsBR
@@ -57,7 +124,7 @@ head(tem_lista)
 # proportion of gps vs text entries
 selCats <- lapply(dtOrig, function(x) {
     x <- x$selectionCategory
-    x <- factor(x, levels=c("coords_original", "coords_gazet", "locality_exact", "intersect_high", "intersect_medium"))
+    x <- factor(x)
     summary(x)
 })
 selCats <- dplyr::bind_rows(selCats)

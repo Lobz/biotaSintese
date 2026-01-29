@@ -22,7 +22,7 @@ format_list <- function(x, UC) {
         Número_da_Coleta = x$recordNumber,
         Origem_FFBr = x$origin,
         ConfiançaID = factor(x$tax.check, levels=c("unknown", "low", "medium", "high"), labels=c("Latão", "Bronze", "Prata", "Ouro")),
-        ConfiançaLoc = x$confidenceLocality,
+        ConfiançaLoc = factor(x$confidenceLocality, levels=c("None", "Low", "Medium", "High"), labels=c("Latão", "Bronze", "Prata", "Ouro")),
         Imagens = x$associatedMedia,
         Localidade = x$locality
     )
