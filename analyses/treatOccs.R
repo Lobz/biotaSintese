@@ -51,10 +51,6 @@ try({
 
     # Order occs
     total <- total[order(total$taxon.rank, total$tax.check, total$scientificName.new, as.numeric(total$year.new), as.numeric(total$yearIdentified.new), na.last=F, decreasing = T),]
-# using the World Flora Online
-total <- getTaxonId(total, complete = F, db = temp.env$wfoNames)
-# using the World Checklist of Vascular Plants
-total <- getTaxonId(total, complete = F, db = temp.env$wcvpNames)
 
     write.csv(total, paste0("results/total-treated/",nome_file,".csv"),  na="", row.names=FALSE)
 
