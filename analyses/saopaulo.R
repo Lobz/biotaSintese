@@ -227,6 +227,16 @@ saopaulo <- formatCoord(saopaulo)
 print("Formatting taxonomy...")
 saopaulo <- getTaxonId(saopaulo)
 
+# We'll try getting extra taxons with wfo
+# loading the WFO and WCVP backbones into a temporary environment
+temp.env <- new.env(parent = emptyenv())
+data(list = c("wfoNames", "wcvpNames"), package = "plantRdata",
+     envir = temp.env)
+# using the World Flora Online
+saopaulo <- getTaxonId(saopaulo, db = temp.env$wfoNames)
+# using the World Checklist of Vascular Plants
+saopaulo <- getTaxonId(saopaulo, db = temp.env$wcvpNames)
+
 # Save unmatched taxons
 nf <- saopaulo[saopaulo$tax.notes == "not found", ]
 nf <- aggregate(nf$catalogNumber, list(family=nf$family, scientificName=nf$scientificName, scientificNameAuthorship=nf$scientificNameAuthorship), function(x) length(unique(x)))

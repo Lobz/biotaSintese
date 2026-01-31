@@ -1,5 +1,11 @@
 
-getTaxonId <- function(total) {
+# Which records have not been matched?
+not_found <- function(x) {
+    x$tax.notes == "not found" | grepl("not resolved|+1",x$tax.notes)
+}
+found <- function(x) !not_found(x)
+
+getTaxonId <- function(total, complete = TRUE, ...) {
     # Fix some issues with taxonomy:
 
     # Some records don't have scientificName for some reason
@@ -20,21 +26,16 @@ getTaxonId <- function(total) {
     noName <- is.na(total$scientificName)
     table(noName)
 
-    # Which records have not been matched?
-    not_found <- function(x) {
-        x$tax.notes == "not found" | grepl("not resolved|+1",x$tax.notes)
-    }
-    found <- function(x) !not_found(x)
-
     # Match scientificName to oficial F&FBR backbone
     if("tax.notes" %in% names(total)) {
-        total <- tryAgain(total, not_found, formatTax, label = "Default formatTax")
+        total <- tryAgain(total, not_found, formatTax, label = "Default formatTax", ...)
     } else {
-        total <- formatTax(total)
+        total <- formatTax(total, ...)
     }
 
+    if (complete) {
     # Try again with verbatim
-    total <- tryAgain(total, not_found, formatTax, tax.name = "verbatimScientificName", label = "Verbatim")
+    total <- tryAgain(total, not_found, formatTax, tax.name = "verbatimScientificName", label = "Verbatim", ...)
 
     # we're gonna try again without author (see issue #170 in plantR)
     # total <- tryAgain(total, not_found, formatTax, use.authors = F)
@@ -48,87 +49,87 @@ getTaxonId <- function(total) {
         condition = function(x) {
             not_found(x) & pairwiseMap(x$scientificNameAuthorship, x$scientificName, grepl, fixed = T)
             },
-        FUN = function(x) {
+        FUN = function(x, ...) {
             x$scientificName <- plantR:::squish(pairwiseMap(x$scientificNameAuthorship, x$scientificName, function(x,y) sub(x, "", y, fixed = T)))
             x$scientificName <- sub(", \\d+","",x$scientificName)
-            x <- formatTax(x)
+            x <- formatTax(x, ...)
             x
         },
         success_condition = found,
-        label = "Removed auth 1"))
+        label = "Removed auth 1", ...))
     try(
     total <- tryAgain(total,
         condition = function(x) {
             not_found(x) & pairwiseMap(x$scientificNameAuthorship, x$scientificName, grepl, fixed = T)
             },
-        FUN = function(x) {
+        FUN = function(x, ...) {
             x$scientificName <- plantR:::squish(pairwiseMap(x$scientificNameAuthorship, x$scientificName, function(x,y) sub(x, "", y, fixed = T)))
             x$scientificName <- sub(", \\d+","",x$scientificName)
-            x <- formatTax(x)
+            x <- formatTax(x, ...)
             x
         },
         success_condition = found,
-        label = "Removed auth 2")
+        label = "Removed auth 2", ...)
     )
 
     # Isolate authorship
     total[not_found(total),] <- isolateAuthorship(total[not_found(total),], overwrite.authorship = FALSE)
 
     # we're gonna try again without author (see issue #170 in plantR)
-    total <- tryAgain(total, not_found, formatTax, label = "Isolated")
+    total <- tryAgain(total, not_found, formatTax, label = "Isolated", ...)
 
     # Isolate authorship
-    total <- tryAgain(total, not_found, function(x) {formatTax(isolateAuthorship(x))}, label = "Isolate 2")
+    total <- tryAgain(total, not_found, function(x, ...) {formatTax(isolateAuthorship(x), ...)}, label = "Isolate 2", ...)
 
     # What's still unmatched? Genus rank
-    total <- tryAgain(total, condition = function(x) not_found(x) & x$taxonRank=="genus", FUN = formatTax, tax.name = "genus", label = "Genus")
+    total <- tryAgain(total, condition = function(x) not_found(x) & x$taxonRank=="genus", FUN = formatTax, tax.name = "genus", label = "Genus", ...)
 
     # What's still unmatched? Vars and subspecies
     total <- tryAgain(total,
         condition = function(x) not_found(x) & grepl("\\w+ \\w+ \\w", x$scientificName),
-        FUN = function(x) {
+        FUN = function(x, ...) {
             saved <- x$scientificName
             x$scientificName <- sub("(\\w+ \\w+ )", "\\1 var. ", x$scientificName)
-            x <- formatTax(x)
+            x <- formatTax(x, ...)
             x$scientificName <- saved
             x
         },
         success_condition = found,
-        label = "Var.")
+        label = "Var.", ...)
     total <- tryAgain(total,
         condition = function(x) not_found(x) & grepl("\\w+ \\w+ \\w", x$scientificName),
-        FUN = function(x) {
+        FUN = function(x, ...) {
             saved <- x$scientificName
             x$scientificName <- sub("(\\w+ \\w+ )", "\\1 subsp. ", x$scientificName)
-            x <- formatTax(x)
+            x <- formatTax(x, ...)
             x$scientificName <- saved
             x
         },
         success_condition = found,
-        label = "Subsp.")
+        label = "Subsp.", ...)
     total <- tryAgain(total,
         condition = function(x) not_found(x) & grepl("\\w+ \\w+ \\w", x$scientificName),
-        FUN = function(x) {
+        FUN = function(x, ...) {
             saved <- x$scientificName
             x$scientificName <- sub("(\\w+ \\w+ )", "\\1 f. ", x$scientificName)
-            x <- formatTax(x)
+            x <- formatTax(x, ...)
             x$scientificName <- saved
             x
         },
         success_condition = found,
-        label = "F.")
+        label = "F.", ...)
 
     total <- tryAgain(total,
         condition = function(x) not_found(x) & grepl("\\w+ \\w+ \\w", x$scientificName),
-        FUN = function(x) {
+        FUN = function(x, ...) {
             saved <- x$scientificName
             x$scientificName <- sub("(\\w+ \\w+ )", "\\1 form ", x$scientificName)
-            x <- formatTax(x)
+            x <- formatTax(x, ...)
             x$scientificName <- saved
             x
         },
         success_condition = found,
-        label = "F.")
+        label = "F.", ...)
 
     # What's still unmatched? Try again with less rigor?
     # total <- tryAgain(total, function(x) x$tax.notes == "not found", formatTax, sug.dist=0.8 )
@@ -136,15 +137,33 @@ getTaxonId <- function(total) {
     # Finally, if something is still unmatched, give up and match higher taxon rank
     total <- tryAgain(total,
         condition = function(x) {not_found(x) & grepl("\\w+ \\w+ \\w", x$scientificName)},
-        FUN = function(x) {
+        FUN = function(x, ...) {
             saved <- x$scientificName
             x$scientificName <- sub("(^\\w+ \\w+).*", "\\1", x$scientificName)
-            x <- formatTax(x)
+            x <- formatTax(x, ...)
             x$scientificName <- saved
             x
         },
         success_condition = found,
-        label = "Remove infra")
+        label = "Remove infra", ...)
+    }
+
+    # Finally, match taxons from other dbs to bfo
+    total <- tryAgain(total,
+        condition = function(x) {found(x) & !startsWith(x$id, "bfo")},
+        FUN = function(x) {
+            saved <- x$scientificName
+            saved2 <- x$scientificNameAuthorship
+            x$scientificName <- x$scientificName.new
+            x$scientificNameAuthorship <- x$scientificNameAuthorship.new
+            x <- formatTax(x)
+            x$scientificName <- saved
+            x$scientificNameAuthorship <- saved2
+            x
+        },
+        success_condition = function(x) {found(x) & startsWith(x$id, "bfo")},
+        label = "Match back to BFO")
+
 
     # validate taxonomist
     total <- validateTax(total, generalist = T)

@@ -51,18 +51,21 @@ try({
 
     # Order occs
     total <- total[order(total$taxon.rank, total$tax.check, total$scientificName.new, as.numeric(total$year.new), as.numeric(total$yearIdentified.new), na.last=F, decreasing = T),]
+# using the World Flora Online
+total <- getTaxonId(total, complete = F, db = temp.env$wfoNames)
+# using the World Checklist of Vascular Plants
+total <- getTaxonId(total, complete = F, db = temp.env$wcvpNames)
 
     write.csv(total, paste0("results/total-treated/",nome_file,".csv"),  na="", row.names=FALSE)
 
-    # Detail locality quality
-    total$confidenceLocality[total$selectionCategory == "coords_gazet"] <- "Medium" #todo: evaluate quality of gps polygon
-    gps_orig <- total$selectionCategory == "coord_orig"
-    total$confidenceLocality[gps_orig] <- "None"
-    good_coords <- startsWith(total$geo.check, "ok_county") | startsWith(total$geo.check, "ok_locality")
-    unsure_coords <- total$geo.check %in% c("sea", "shore")
-    total$confidenceLocality[gps_orig & good_coords] <- "Medium" #todo: evaluate quality of gps polygon
-    total$confidenceLocality[gps_orig & unsure_coords] <- "Low" #todo: evaluate quality of gps polygon
-    total$confidenceLocality <- factor(total$confidenceLocality, levels = c("None", "Low", "Medium", "High"), ordered = T)
+    # # Detail locality quality
+    # gps_orig <- total$selectionCategory == "coord_orig"
+    # total$confidenceLocality[gps_orig] <- "None"
+    # good_coords <- startsWith(total$geo.check, "ok_county") | startsWith(total$geo.check, "ok_locality")
+    # unsure_coords <- total$geo.check %in% c("sea", "shore")
+    # total$confidenceLocality[gps_orig & good_coords] <- "Medium" #todo: evaluate quality of gps polygon
+    # total$confidenceLocality[gps_orig & unsure_coords] <- "Low" #todo: evaluate quality of gps polygon
+    # total$confidenceLocality <- factor(total$confidenceLocality, levels = c("None", "Low", "Medium", "High"), ordered = T)
 
     # Avoid taxons that are already represented by more detailed taxons
     total$tax.check <- factor(total$tax.check, levels = c("unknown", "low", "medium", "high"), ordered = T)
@@ -82,7 +85,7 @@ try({
 
     # Remove unmatched?
     unmatched <- is.na(top$id)
-    top <- subset(top, !unmatched)
+    # top <- subset(top, !unmatched)
 
     print(paste("Found",nrow(top),"taxons."))
     ucs[i,]$NumTaxons <- nrow(top)

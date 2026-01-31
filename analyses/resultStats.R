@@ -1,4 +1,5 @@
 devtools::load_all()
+library(geobr)
 
 # Let's see what's going on with those stats
 summ <- read.csv("results/summary_treatOccs.csv")
@@ -23,17 +24,18 @@ shapes$nome_uc <- standardize_uc_name(shapes$nome_uc)
 shapes <- subset(shapes, nome_uc %in% ucs$Nome.da.UC)
 shapes <- shapes[order(shapes$nome_uc), ]
 shapes$Nome.da.UC <- shapes$nome_uc
-shapes <- merge(shapes, ucs)
 
 ucs$hasGeom <- ucs$Nome.da.UC %in% shapes$nome_uc
 ucs$UC <- ucs$Nome.da.UC
 
 # Open data
 modCat <- list.files("results/checklist", "*.csv", full.names = T)
+nome_file_c <- sub(".*/","",modCat)
+nome_file_c <- sub("_modeloCatalogo.csv","",nome_file_c)
 original <- list.files("results/allfields", "*.csv", full.names = T)
 tt <- list.files("results/total-treated", "*.csv", full.names = T)
-nome_file <- sub(".*/","",original)
-nome_file <- sub(".csv","",nome_file)
+nome_file_o <- sub(".*/","",original)
+nome_file_o <- sub(".csv","",nome_file_o)
 
 dtCat <- lapply(modCat, read.csv, na.strings = c("NA","","s.n.","s.c.","s.a."), colClasses = "character")
 dtOrig <- lapply(original, read.csv, na.strings = c("NA",""), colClasses = "character")
@@ -103,17 +105,26 @@ summary(ucs[,c("High", "Medium", "Low", "None")]/ucs$NumRecords)
 summary(ucs[,c("high", "medium", "low", "unknown")]/ucs$NumRecords)
 summary(ucs[,c("coords_original", "coords_gazet", "coords_both", "locality_exact", "intersect_high", "intersect_medium", "plantr_exact")]/ucs$NumRecords)
 
-confLoc <- make_summary(dtCat, "ConfiançaLoc", levels=c("High", "Medium", "Low", "None"), labels = c("HighF", "MediumF", "LowF", "NoneF"), UC=Nome.da.UC)
+confLoc <- make_summary(dtOrig, "confidenceLocality", levels=c("High", "Medium", "Low", "None"), labels = c("HighF", "MediumF", "LowF", "NoneF"), UC=Nome.da.UC)
 ucs <- merge(ucs, confLoc, all=T)
-confTax <- make_summary(dtCat, "ConfiançaID", levels=c("Ouro", "Prata", "Bronze", "Latão"), UC=Nome.da.UC)
+confTax <- make_summary(dtOrig, "tax.check", levels=c("high", "medium", "low", "unknown"), labels = c("Ouro", "Prata", "Bronze", "Latão"), UC=Nome.da.UC)
 ucs <- merge(ucs, confTax, all=T)
+originLoc <- make_summary(dtOrig, "selectionCategory", levels=c("coords_original", "coords_gazet", "coords_both", "locality_exact", "intersect_high", "intersect_medium", "plantr_exact"),  labels=c("coords_originalF", "coords_gazetF", "coords_bothF", "locality_exactF", "intersect_highF", "intersect_mediumF", "plantr_exactF"), UC=Nome.da.UC)
+ucs <- merge(ucs, originLoc, all=T)
 
-TamanhoLista <- sapply(dtCat, nrow)
-ucs <- merge(ucs, data.frame(Nome.da.UC, TamanhoLista))
+TamanhoLista <- sapply(dtOrig, nrow)
+ucs <- merge(ucs, data.frame(Nome.da.UC, TamanhoLista), all=T)
 
 summary(ucs[,c("HighF", "MediumF", "LowF", "NoneF")]/ucs$TamanhoLista)
 summary(ucs[,c("Ouro", "Prata", "Bronze", "Latão")]/ucs$TamanhoLista)
+summary(ucs[,c("coords_originalF", "coords_gazetF", "coords_bothF", "locality_exactF", "intersect_highF", "intersect_mediumF", "plantr_exactF")]/ucs$TamanhoLista)
 
+# Draw map
+# Get shape for São Paulo
+sp <- read_state("SP")
+uc_shapes <- merge(shapes, ucs)
+plot(sp$geom, add=T)
+plot(uc_shapes[,"NumRecords"], main = "Número de registros por UC")
 
 length(dtOrig)
 # proportion of entries listed in catalogoUCsBR
