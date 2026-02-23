@@ -15,6 +15,7 @@ Imports:
     florabr,
     geobr,
     parallel,
+    bit64,
     measurements
 Suggests:
     rmarkdown,
