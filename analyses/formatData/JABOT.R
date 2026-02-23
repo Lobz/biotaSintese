@@ -27,9 +27,17 @@ jabot$taxonRank <- factor(jabot$taxonRank,
 
 # Normalize basisOfRecord
 table(jabot$basisofrecord, useNA="always")
-jabot$verbatimBasisOfRecord <- jabot$basisofrecord
-jabot$basisofrecord[jabot$basisofrecord=="Preserved Specimen"] <- "PRESERVED_SPECIMEN"
-jabot$basisofrecord[jabot$basisofrecord=="Xiloteca"] <- "PRESERVED_SPECIMEN"
-jabot$basisofrecord <- as.basisOfRecord(jabot$verbatimBasisOfRecord)
+if("basisofrecord" %in% names(jabot)) {
+    jabot$verbatimBasisOfRecord <- jabot$basisofrecord
+    jabot$basisofrecord[jabot$basisofrecord=="Preserved Specimen"] <- "PRESERVED_SPECIMEN"
+    jabot$basisofrecord[jabot$basisofrecord=="Xiloteca"] <- "PRESERVED_SPECIMEN"
+    jabot$basisofrecord <- as.basisOfRecord(jabot$verbatimBasisOfRecord)
+} else {
+    jabot$basisOfRecord <- NA
+}
 
-save(jabot,file="data-tmp/jabot_saopaulo.RData")
+if("scientifcname" %in% names(jabot)) {
+    jabot$scientificName <- jabot$scientifcname
+}
+
+save(jabot,file="data-tmp/jabot.RData")
