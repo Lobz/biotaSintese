@@ -81,17 +81,6 @@ ucs$loc.correct <- NULL
 # ucs <- ucs[sample(1:nrow(ucs), 10), ]
 (sample_size = nrow(ucs))
 
-# Data with valid coordinates: either original coordinates or locality
-print("Selecting and correcting valid georeferenced points (original coords) ...")
-coords_original <- subset(sp_deduped, origin.coord == "coords_original")
-coords_original <- st_as_sf(coords_original, coords = c("decimalLongitude.new", "decimalLatitude.new"))
-coords_original <- fixDatum(coords_original) # Unify and convert datum to match SIRGAS 2000
-print("Selecting and correcting valid georeferenced points (gazet coords) ...")
-coords_gazet <- subset(sp_deduped, resolution.gazetteer == "locality")
-coords_gazet <- st_as_sf(coords_gazet, coords = c("longitude.gazetteer", "latitude.gazetteer"))
-st_crs(coords_gazet) <- "EPSG:4674" # Assumes datum is SIRGAS 2000 (used by IBGE)
-
-
 # Shape data
 print("Loading multipolygons...")
 shapes <- st_read("data/shp_cnuc_2025_03/cnuc_2025_03.shp")
@@ -100,11 +89,31 @@ shapes$nome_uc <- standardize_uc_name(shapes$nome_uc)
 shapes <- subset(shapes, nome_uc %in% ucs$Nome.da.UC)
 shapes <- shapes[order(shapes$nome_uc), ]
 
-# Intersect points with shapes
-print("Intersecting points and shapes...")
-points_ucs_original <- st_intersects(shapes, coords_original)
-points_ucs_gazet <- st_intersects(shapes, coords_gazet)
-names(points_ucs_original) <- names(points_ucs_gazet) <- shapes$nome_uc
+# Data with valid coordinates: either original coordinates or locality
+print("Selecting and correcting valid georeferenced points (original coords) ...")
+coords_original <- subset(sp_deduped, origin.coord == "coords_original")
+if(nrow(coords_original) > 0) {
+    coords_original <- st_as_sf(coords_original, coords = c("decimalLongitude.new", "decimalLatitude.new"))
+    coords_original <- fixDatum(coords_original) # Unify and convert datum to match SIRGAS 2000
+    print("Intersecting points and shapes (original coords) ...")
+    points_ucs_original <- st_intersects(shapes, coords_original)
+    names(points_ucs_original) <- shapes$nome_uc
+} else {
+    points_ucs_original <- as.list(rep(FALSE, nrow(shapes)))
+}
+
+print("Selecting and correcting valid georeferenced points (gazet coords) ...")
+coords_gazet <- subset(sp_deduped, resolution.gazetteer == "locality")
+if(nrow(coords_gazet) > 0) {
+    coords_gazet <- st_as_sf(coords_gazet, coords = c("longitude.gazetteer", "latitude.gazetteer"))
+    st_crs(coords_gazet) <- "EPSG:4674" # Assumes datum is SIRGAS 2000 (used by IBGE)
+    print("Intersecting points and shapes (gazet coords) ...")
+    points_ucs_gazet <- st_intersects(shapes, coords_gazet)
+    names(points_ucs_gazet) <- shapes$nome_uc
+} else {
+    points_ucs_gazet <- FALSE
+}
+
 
 # Get intersection table
 print("Reading intersection table...")

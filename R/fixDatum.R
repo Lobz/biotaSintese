@@ -2,7 +2,7 @@
 #'
 #' Unifies all datum for a data.frame of sf points. Datum information must be in a column "geodeticDatum"
 #'
-#' @param x A data.frame of sf points
+#' @param x A non-empty data.frame of sf points
 #' @param convert.to Desired datum. Values will be passed to function sf::st_crs(). Defaults to SIRGAS 2000 (EPSG:4674).
 #' @param na What datum do you assume NA or unkown values to be. Defaults to SIRGAS 2000 (EPSG:4674).
 #'
