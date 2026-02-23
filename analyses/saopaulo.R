@@ -274,7 +274,7 @@ loc.names <- c(loc.cols, paste0(loc.cols, ".new"), "longitude.gazetteer", "latit
 names(loc.names) <- loc.names
 loc.names <- c(loc.str = "loc.correct", res.gazet = "resolution.gazetteer", res.orig =
     "resol.orig", loc.check = "loc.check", loc.names)
-my_valDup <- function(x) validateDup(x, noNumb = NA, noYear = NA, noName = NA, prop=1,
+my_valDup <- function(x) validateDup(x, noNumb = NA, noYear = NA, noName = NA, prop=0.25,
   comb.fields = list(
     c("family", "col.last.name", "col.number", "col.loc"),
     c("family", "col.last.name", "col.number", "col.year"),
@@ -288,7 +288,7 @@ my_valDup <- function(x) validateDup(x, noNumb = NA, noYear = NA, noName = NA, p
     "scientificNameStatus", id = "id", name.full = "scientificNameFull", gen = "genus.new", sp = "species.new"),
   geo.names = c(lat = "decimalLatitude.new", lon = "decimalLongitude.new", org.coord =
     "origin.coord", prec.coord = "precision.coord", geo.check = "geo.check", datum = "geodeticDatum"),
-  loc.names = loc.names, overwrite = T)
+  loc.names = loc.names, ignore.miss = T)
 
 sp_deduped <- my_valDup(saopaulo)
 

@@ -40,7 +40,7 @@ nome_file_o <- sub(".csv","",nome_file_o)
 dtCat <- lapply(modCat, read.csv, na.strings = c("NA","","s.n.","s.c.","s.a."), colClasses = "character")
 dtOrig <- lapply(original, read.csv, na.strings = c("NA",""), colClasses = "character")
 dtTreated <- lapply(tt, read.csv, na.strings = c("NA",""), colClasses = "character")
-names(dtOrig) <- names(dtCat) <- names(dtTreated) <- nome_file
+names(dtOrig) <- names(dtCat) <- names(dtTreated) <- nome_file_o
 Nome.da.UC <- sapply(dtOrig, function(x) x$Nome_UC[1])
 
 # Number of UCs with at least one record found
@@ -73,12 +73,6 @@ ucs[order(ucs$NumRecords),]
 anova(lm(ucs$NumRecords ~ ucs$area + ucs$type + ucs$hasGeom))
 anova(lm(ucs$NumSpecies ~ ucs$area + ucs$type + ucs$hasGeom))
 lm(ucs$area ~ ucs$type)
-
-# Number of taxons in each list
-tranks <- make_summary(dtOrig, "taxon.rank", levels = taxonRanks, Nome.da.UC)
-table(tranks$species > 100)
-table(tranks$species > 1000)
-hist(tranks$species, breaks=20)
 
 # Number of species
 hist(ucs$NumSpecies, breaks = 20)
@@ -116,15 +110,27 @@ TamanhoLista <- sapply(dtOrig, nrow)
 ucs <- merge(ucs, data.frame(Nome.da.UC, TamanhoLista), all=T)
 
 summary(ucs[,c("HighF", "MediumF", "LowF", "NoneF")]/ucs$TamanhoLista)
+summary(ucs[ucs$NumRecords>1000,c("HighF", "MediumF", "LowF", "NoneF")]/ucs$TamanhoLista[ucs$NumRecords>1000])
+(ucs[c(126,145),c("HighF", "MediumF", "LowF", "NoneF")]/ucs$TamanhoLista[c(126,145)])
+x <- (colSums(ucs[,c("Ouro", "Prata", "Bronze", "Latão")], na.rm = T))
+x/sum(x)
+summary(ucs[ucs$NumRecords>0,c("Ouro", "Prata", "Bronze", "Latão")])
 summary(ucs[,c("Ouro", "Prata", "Bronze", "Latão")]/ucs$TamanhoLista)
+summary(ucs[ucs$NumRecords>1000,c("Ouro", "Prata", "Bronze", "Latão")]/ucs$TamanhoLista[ucs$NumRecords>1000])
+(ucs[c(126,145),c("Ouro", "Prata", "Bronze", "Latão")]/ucs$TamanhoLista[c(126,145)])
 summary(ucs[,c("coords_originalF", "coords_gazetF", "coords_bothF", "locality_exactF", "intersect_highF", "intersect_mediumF", "plantr_exactF")]/ucs$TamanhoLista)
 
 # Draw map
 # Get shape for São Paulo
-sp <- read_state("SP")
+geobr::list_geobr()
+sp <- geobr::read_state("SP", year=2020)
+plot(sf::st_geometry(sp))
+savePlot("plots/sp.png")
 uc_shapes <- merge(shapes, ucs)
-plot(sp$geom, add=T)
 plot(uc_shapes[,"NumRecords"], main = "Número de registros por UC")
+savePlot("plots/numRegistros_mapa.png")
+plot(uc_shapes[,"NumOuro"], main = "Número de registros Ouro por UC")
+savePlot("plots/numRegistrosOuro_mapa.png")
 
 length(dtOrig)
 # proportion of entries listed in catalogoUCsBR

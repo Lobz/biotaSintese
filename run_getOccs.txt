@@ -1,0 +1,18 @@
+[1] "Loading conservation units data..."
+                                                   Nome_UC
+46                            RESERVA BIOLÓGICA MOGI-GUAÇU
+47 RESERVA PARTICULAR DO PATRIMÔNIO NATURAL RIO DOS PILÕES
+48                             ESTAÇÃO ECOLÓGICA ITIRAPINA
+49                         PARQUE ESTADUAL ILHA DO CARDOSO
+50                          PARQUE ESTADUAL PORTO FERREIRA
+51                            PARQUE ESTADUAL SERRA DO MAR
+                                                                                                                    x
+46                                                                       brazil_sao paulo_mogi guacu_rebio mogi guacu
+47                                                                      brazil_sao paulo_santa isabel_rppn rio piloes
+48                                                             brazil_sao paulo_itirapina_estacao ecologica itirapina
+49                                                                             brazil_sao paulo_cananeia_ilha cardoso
+50                                                     brazil_sao paulo_porto ferreira_parque estadual porto ferreira
+51 brazil_sao paulo_caraguatatuba_parque estadual serra mar|brazil_sao paulo_ubatuba_pe serra mar (nucleo picinguaba)
+[1] "Loading occurrence data..."
+[1] 309
+[1] "Selecting and correcting valid georeferenced points (original coords) ..."
