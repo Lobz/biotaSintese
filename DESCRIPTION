@@ -2,7 +2,7 @@ Package: biotaSintese
 Title: Build species list for any conservation unit in Brazil
 Version: 1.0.0
 Authors@R: c(person("Mali Oz", "Salles", email = "malicsalles@gmail.com", role = c("aut", "cre")))
-Description: Template to build R packages with GitHub actions and CI/CD, tests, codecov and documentation.
+Description: Tool to create species lists for conservation units in Brazil, from data found in GBIF, SpeciesLink, Reflora and Jabot
 Depends: R (>= 4.10)
 Encoding: UTF-8
 LazyData: true
@@ -21,7 +21,7 @@ Suggests:
     testthat (>= 3.0.0),
     knitr
 Remotes:
-	LimaRAF/plantR@dev
+	LimaRAF/plantR
 VignetteBuilder:
     knitr
 Config/testthat/edition: 3

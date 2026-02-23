@@ -5,10 +5,21 @@
 As listas de espécies já geradas podem ser baixadas aqui: <incluir zip>
 Você pode ler ou baioxar listas individuais aqui:
 
+## Resumo do workflow da ferramenta
+
+A ferramenta IntegraFlora consiste em um pacote R e uma coleção de scripts que devem ser executados sequencialmente, assim como scripts para construção dos arquivos auxiliares de entrada. Para usar a ferramenta para gerar novas listas de espécie, o usuário precisa baixar os dados de ocorrência de espécies da área desejada (eg, do estado de São Paulo) das fontes de dados, e salvar os arquivos nas pastas especificadas no README. Os arquivos auxiliares (de descrição das UCs) estão inclusos no repositório, mas também podem ser atualizados pelo usuário.
+
+Nos primeiros scripts, em [analyses/formatData/](analyses/formatData/), os dados de ocorrência das diferentes fontes são padronizados, garantindo que os nomes das colunas estejam no padrão DarwinCore e que colunas com os mesmos nomes estejam no mesmo padrão de formatação. Em seguida, no script [analyses/joinData.R](analyses/joinData.R), os dados são consolidados em uma única tabela e formatados com auxílio do pacote plantR. Nessa etapa, os nomes de coletores e identificadores são padronizados, assim como datas, números de coleta e códigos institucionais. Além disso, no script [analyses/saopaulo.R](analyses/saopaulo.R), fazemos o tratamento e correção dos campos de localidade, a atribuição e checagem de coordenadas geográficas, a correção dos nomes científicos, e a atribuição de um valor de confiança da identificação, baseada na especialização do identificador.
+
+Com os dados tratados e checados, é aplicado o algoritmo de detecção de duplicatas, baseado em combinações de sobrenome do coletor, ano de coleta, local de coleta, família ou espécie, e número de coleta. A detecção de duplicatas reduz drasticamente o volume de dados ao remover as duplicatas virtuais (mesmo registro de herbário, baixado de bancos de dados diferentes), e ajuda a completar dados faltantes ou corrigir identificações pouco confiáveis.
+
+A partir daqui, temos uma tabela de ocorrências, que filtramos para conter apenas ocorrências do estado de São Paulo. No script [analyses/getOccs.R](analyses/getOccs.R), essas ocorrências serão filtradas por seus campos de município, localidade e coordenadas geográficas para gerar arquivos separados para cada UC, contendo todas as ocorrências associadas àquela UC, com diferentes graus de confiança de acordo com a origem da associação (mais detalhes abaixo). Por fim, no script [analyses/treatOccs.R](analyses/treatOccs.R), são selecionadas as ocorrências com maior grau de confiança para cada táxon, e essas são organizadas em listas de espécie ordenadas por família e nome científico.
+
+
 ## Estrutura de diretorios e conteúdo do repositório
 
 - [analyses/](analyses/) - scripts para tratamento dos dados
-    - []
+    - [formatData](analyses/formatData/) - scripts de padronização dos dados de cada fonte
 - [data](data) - dados usados pela ferramenta, informações sobre bases de dados e localidades
 - [data-input](data-input) - dados brutos baixados dos Herbários Virtuais
     - [GBIF](data-input/GBIF) - arquivos baixados do [GBIF](https://www.gbif.org/occurrence/search?taxon_key=6&occurrence_status=present)
@@ -37,4 +48,16 @@ Os dados devem ser salvos nas respectivas pastas dentro de [data-input/](data-in
 No caso de mais de um arquivo serem salvos na mesma pasta, o script combinará os dados dos arquivos diferentes antes de iniciar o tratamento dos dados.
 No caso dos dados Reflora, por favor abra os arquivos e salve como csv na mesma pasta antes de prosseguir.
 
-2.
+2. Execute os scripts da pasta [analyses/formatData/](analyses/formatData/) e os script [analyses/joinData.R](analyses/joinData.R).
+
+3. Execute o script [analyses/saopaulo.R](analyses/saopaulo.R). Esse script pode consumir muita memória e processamento, dependendo do número de registros. Por isso, garanta que os recursos de seu computador estejam disponíveis. Antes dessa etapa, você pode opcionalmente adicionar sinônimos de localidades no arquivo [results/locations/locGazetteer.csv](results/locations/locGazetteer.csv).
+
+4. Opcionalmente, adicione nomes alternativos de localidades na [tabela de nomes alternativos](results/locations/checkedLocations.csv).
+
+5. Execute os scripts [analyses/getOccs.R](analyses/getOccs.R) e [analyses/treatOccs.R](analyses/treatOccs.R).
+
+6. Você pode produzir algumas estatísticas e figuras a partir dos seus resultados usando o script [analyses/resultStats.R](analyses/resultStats.R).
+
+## Apoio
+
+Esta ferramenta foi financiada pela FAPESP como parte do projeto 2024/07747-9 - "Aprimoramento e integração de bases de dados geoespaciais sobre a flora paulista", filiado ao Biota Síntese.
