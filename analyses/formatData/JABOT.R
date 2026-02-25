@@ -6,6 +6,9 @@ jabot <- jabot_data_raw[[1]]
 if(length(jabot_data_raw) > 1) {
     print("Merging JABOT databases...")
     for(i in 2:length(jabot_data_raw)){
+        # fix name typo
+        names(jabot_data_raw[[i]])[names(jabot_data_raw[[i]])=="scientifcname"] <- "scientificName"
+        #merge
         jabot <- merge(jabot, jabot_data_raw[[i]], all=T)
     }
 }
@@ -26,7 +29,6 @@ jabot$taxonRank <- factor(jabot$taxonRank,
     ordered = TRUE)
 
 # Normalize basisOfRecord
-table(jabot$basisofrecord, useNA="always")
 if("basisofrecord" %in% names(jabot)) {
     jabot$verbatimBasisOfRecord <- jabot$basisofrecord
     jabot$basisofrecord[jabot$basisofrecord=="Preserved Specimen"] <- "PRESERVED_SPECIMEN"
@@ -34,10 +36,6 @@ if("basisofrecord" %in% names(jabot)) {
     jabot$basisofrecord <- as.basisOfRecord(jabot$verbatimBasisOfRecord)
 } else {
     jabot$basisOfRecord <- NA
-}
-
-if("scientifcname" %in% names(jabot)) {
-    jabot$scientificName <- jabot$scientifcname
 }
 
 save(jabot,file="data-tmp/jabot.RData")
