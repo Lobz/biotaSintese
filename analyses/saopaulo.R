@@ -247,6 +247,12 @@ write.csv(nf[nf$x>=10,], "results/taxons_not_found.csv", row.names=F)
 print("Validating location info...")
 saopaulo <- validateLoc(saopaulo)
 
+print("Validating identification info...")
+# validate taxonomist
+saopaulo <- validateTax(saopaulo, generalist = T)
+saopaulo$tax.check <- factor(saopaulo$tax.check, levels = c("unknown", "low", "medium", "high"), ordered = T)
+
+
 print("Validating geolocation info...")
 map <- latamMap$brazil
 map <- subset(map, NAME_1 == "sao paulo")

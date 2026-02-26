@@ -165,10 +165,6 @@ getTaxonId <- function(total, complete = TRUE, ...) {
         label = "Match back to BFO")
 
 
-    # validate taxonomist
-    total <- validateTax(total, generalist = T)
-    total$tax.check <- factor(total$tax.check, levels = c("unknown", "low", "medium", "high"), ordered = T)
-
     # fix missing taxon rank
     total$taxon.rank <- as.taxon.rank(total$taxon.rank)
     table((total$taxon.rank), useNA = "always")
