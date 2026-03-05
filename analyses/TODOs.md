@@ -52,3 +52,11 @@ fix: use as.numeric
 
 - alguém que eu possa supervisionar
 - montar uma pasta que dê pra adicionar novos arquivos facilmente
+- mandar e-mail com demandas
+- cruzar dados sobre ucs: data de criação, área, acesso, alojamento, infraestrutura, prox instituição de pesquisa
+- montar tabela de UCs para revisão
+- revisar a lista de shapes, taxonomistas
+- dois produtos: ferramenta e publicação sobre padrões de resultados
+- adicionar no README: critérios de confiança, critério de seleção do melhor registro
+- listas de florísticas?
+- conversar com thaty sobre listas de planos de manejo
