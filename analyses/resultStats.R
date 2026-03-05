@@ -38,9 +38,10 @@ nome_file_o <- sub(".*/","",original)
 nome_file_o <- sub(".csv","",nome_file_o)
 
 dtCat <- lapply(modCat, read.csv, na.strings = c("NA","","s.n.","s.c.","s.a."), colClasses = "character")
+names(dtCat) <- nome_file_c
 dtOrig <- lapply(original, read.csv, na.strings = c("NA",""), colClasses = "character")
 dtTreated <- lapply(tt, read.csv, na.strings = c("NA",""), colClasses = "character")
-names(dtOrig) <- names(dtCat) <- names(dtTreated) <- nome_file_o
+names(dtOrig)<- names(dtTreated) <- nome_file_o
 Nome.da.UC <- sapply(dtOrig, function(x) x$Nome_UC[1])
 
 # Number of UCs with at least one record found
@@ -110,7 +111,14 @@ TamanhoLista <- sapply(dtOrig, nrow)
 ucs <- merge(ucs, data.frame(Nome.da.UC, TamanhoLista), all=T)
 
 summary(ucs[,c("HighF", "MediumF", "LowF", "NoneF")]/ucs$TamanhoLista)
+summary(ucs[ucs$NumRecords>100,c("HighF", "MediumF", "LowF", "NoneF")]/ucs$TamanhoLista[ucs$NumRecords>100])
 summary(ucs[ucs$NumRecords>1000,c("HighF", "MediumF", "LowF", "NoneF")]/ucs$TamanhoLista[ucs$NumRecords>1000])
+ucs$propGold <- ucs$Ouro/ucs$TamanhoLista
+summary(ucs$propGold[ucs$NumRecords>10])
+ucs$cat_size <- factor(ifelse(ucs$NumRecords>1000, ">1000", ifelse(ucs$NumRecords>100, "100-1000", "<100")), levels=c("<100", "100-1000", ">1000"), ordered=T)
+boxplot(ucs$propGold~ucs$cat_size, main="Proporção de táxons com grau Ouro", xlab="Número de registros totais", ylab="Proporção de táxons com grau Ouro de confiança na identificação")
+savePlot("propGoldtax.png")
+
 (ucs[c(126,145),c("HighF", "MediumF", "LowF", "NoneF")]/ucs$TamanhoLista[c(126,145)])
 x <- (colSums(ucs[,c("Ouro", "Prata", "Bronze", "Latão")], na.rm = T))
 x/sum(x)
