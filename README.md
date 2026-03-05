@@ -58,6 +58,35 @@ No caso dos dados Reflora, por favor abra os arquivos e salve como csv na mesma 
 
 6. Você pode produzir algumas estatísticas e figuras a partir dos seus resultados usando o script [analyses/resultStats.R](analyses/resultStats.R).
 
+7. Os resultados podem ser encontrados na pasta [results/checklist](results/checklist/).
+
+## Critério de Confiança e critério de seleção para lista
+
+A partir dos totais de registros associados a cada UC, as listas finais são produzidas selecionando-se um registro para representar cada espécie, variedade, forma ou subspécie, além de um registro para representar cada gênero ou família não representado por registros com identificações mais precisas.
+Esses representantes são selecionados de acordo com os critérios de confiança em localidade e identificação, na escala "Ouro">"Prata">"Bronze">"Latão", e em caso de empate, na presença de informação de barcode e em quão recente foi a coleta.
+
+O critério de confiança em localização se baseia em qual foi o método de seleção utilizado, de acordo com a seguinte tabela:
+
+| Categoria        | Fonte da seleção                                                        | Grau de confiança |
+| ---------------- | ----------------------------------------------------------------------- | ----------------- |
+| locality_exact   | Busca pelos nomes da UC usando expressões regulares nos campos textuais | Ouro |
+| plantr_exact     | Identificador de localidade plantR idêntico ao da UC em algum município | Ouro |
+| intersect_high   | Registros encontrados pelos dois métodos anteriores em UCs com mais de 98% de sua área dentro da UC alvo | Ouro |
+| intersect_medium | Registros encontrados pelos dois métodos anteriores em UCs com mais de 80% de sua área dentro da UC alvo | Prata |
+| coords_original  | Coordenadas originais do registro | Bronze |
+| coords_gazet     | Coordenadas da localidade, obtidas do gazeteiro | Prata |
+| coords_both      | Ambas as coordenadas originais e da localidade | Ouro |
+
+O critério de confiança na identificação depende da especialização do identificador ou do coletor, usando os valores da coluna `tax_check` produzida pela função `validateTax` do pacote plantR:
+
+| tax_check | Significado                                         | Grau de confiança |
+| --------- | --------------------------------------------------- | ----------------- |
+| high      | Identificador é taxonomista especialista da família | Ouro              |
+| medium    | Identificador é taxonomista generalista             | Prata             |
+| low       | Identificador não é nem especialista nem generalista| Bronze            |
+| unkown    | Identificador não está listado                      | Latão             |
+
+
 ## Apoio
 
 Esta ferramenta foi financiada pela FAPESP como parte do projeto 2024/07747-9 - "Aprimoramento e integração de bases de dados geoespaciais sobre a flora paulista", filiado ao Biota Síntese.
