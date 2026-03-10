@@ -5,12 +5,9 @@ library(plantR) # used foi reading and cleaning occurrence data
 UC_de_interesse <- "JORDÃO"
 # UC_de_interesse <- "PORTO FERREIRA"
 
-ucs <- read.csv("data/raw-data/cnuc_2025_03.csv", sep=";", dec=",")
+ucs <- read.csv("data-input/Locations/info/cnuc_2025_03.csv", sep=";", dec=",")
 str(ucs)
 ucs$Nome.da.UC <- standardize_uc_name(ucs$Nome.da.UC)
-uc_data <- subset(ucs, grepl(UC_de_interesse, Nome.da.UC, ignore.case=T))
-Nome_UC <- uc_data$Nome.da.UC
-nome_file <- gsub(" ","",tolower(rmLatin(Nome_UC)))
 
 ucs_icmbio <- read.csv("data/raw-data/DadosGeoestatisticos_UCs_21jul2025.csv")
 str(ucs_icmbio)

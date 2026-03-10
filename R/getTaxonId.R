@@ -5,12 +5,28 @@ not_found <- function(x) {
 }
 found <- function(x) !not_found(x)
 
-getTaxonId <- function(total, complete = TRUE, ...) {
+#' getTaxonId
+#'
+#' Try to get taxon ID using many different strategies
+#'
+#' @param total A data.frame containing identification information with columns "scientificName", "scientificNameAuthorship", "genus"
+#' @param complete Run all possible strategies? If false, will run a default formatTax. Defaults to TRUE
+#' @param rm.miss Remove data with no identification info? Defaults to FALSE
+getTaxonId <- function(total, complete = TRUE, rm.miss = FALSE, na.values = c("Indeterminado", "INDETERMINADA", "ndeterminado", "Indet", "INDET.", "sp.", "Plantae"), ...) {
     # Fix some issues with taxonomy:
+
+    # Remove indeterminate markers
+    invalid <- total$scientificName %in% na.values
+    total$scientificName[invalid] <- NA
 
     # Some records don't have scientificName for some reason
     noName <- is.na(total$scientificName)
     table(noName)
+    # if verbatim is present, use that
+    if("verbatimScientificName" %in% names(total)) {
+        total$scientificName[noName] <- total$verbatimScientificName[noName]
+        noName <- is.na(total$scientificName)
+    }
     # if species is present, use that
     if("species" %in% names(total)) {
         total$scientificName[noName] <- total$species[noName]
@@ -25,6 +41,17 @@ getTaxonId <- function(total, complete = TRUE, ...) {
     total$scientificName[noName] <- total$family[noName]
     noName <- is.na(total$scientificName)
     table(noName)
+    # Remove indeterminate markers
+    invalid <- total$scientificName %in% na.values
+    total$scientificName[invalid] <- NA
+    noName <- is.na(total$scientificName)
+    table(noName)
+
+
+    # Remove records with no identification?
+    if(rm.miss) {
+        total <- subset(total, !is.na(scientificName))
+    }
 
     # Match scientificName to oficial F&FBR backbone
     if("tax.notes" %in% names(total)) {
@@ -35,7 +62,7 @@ getTaxonId <- function(total, complete = TRUE, ...) {
 
     if (complete) {
     # Try again with verbatim
-    total <- tryAgain(total, not_found, formatTax, tax.name = "verbatimScientificName", label = "Verbatim", ...)
+    total <- tryAgain(total, function(x) not_found(x) & x$scientificName != x$verbatimScientificName, formatTax, tax.name = "verbatimScientificName", label = "Verbatim", ...)
 
     # we're gonna try again without author (see issue #170 in plantR)
     # total <- tryAgain(total, not_found, formatTax, use.authors = F)
@@ -56,20 +83,7 @@ getTaxonId <- function(total, complete = TRUE, ...) {
             x
         },
         success_condition = found,
-        label = "Removed auth 1", ...))
-    try(
-    total <- tryAgain(total,
-        condition = function(x) {
-            not_found(x) & pairwiseMap(x$scientificNameAuthorship, x$scientificName, grepl, fixed = T)
-            },
-        FUN = function(x, ...) {
-            x$scientificName <- plantR:::squish(pairwiseMap(x$scientificNameAuthorship, x$scientificName, function(x,y) sub(x, "", y, fixed = T)))
-            x$scientificName <- sub(", \\d+","",x$scientificName)
-            x <- formatTax(x, ...)
-            x
-        },
-        success_condition = found,
-        label = "Removed auth 2", ...)
+        label = "Removed auth", ...)
     )
 
     # Isolate authorship
@@ -156,7 +170,7 @@ getTaxonId <- function(total, complete = TRUE, ...) {
             saved2 <- x$scientificNameAuthorship
             x$scientificName <- x$scientificName.new
             x$scientificNameAuthorship <- x$scientificNameAuthorship.new
-            x <- formatTax(x)
+            x <- formatTax(x, sug.dist=1.0)
             x$scientificName <- saved
             x$scientificNameAuthorship <- saved2
             x
