@@ -1,7 +1,7 @@
 devtools::load_all()
 
 # Reflora data
-reflora_files <- list.files("data-input/REFLORA", pattern = "*.csv", full.names = TRUE)
+reflora_files <- list.files("data-input/Occurrences/REFLORA", pattern = "*.csv", full.names = TRUE)
 print("Reading reflora files:")
 print(reflora_files)
 reflora_data_raw <- lapply(reflora_files, data.table::fread)
