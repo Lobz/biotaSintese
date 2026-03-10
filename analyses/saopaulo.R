@@ -229,17 +229,15 @@ saopaulo <- getTaxonId(saopaulo)
 
 # We'll try getting extra taxons with wfo
 # loading the WFO and WCVP backbones into a temporary environment
-temp.env <- new.env(parent = emptyenv())
-data(list = c("wfoNames", "wcvpNames"), package = "plantRdata",
-     envir = temp.env)
+data(list = c("wfoNames", "wcvpNames"), package = "plantRdata")
 # using the World Flora Online
-saopaulo <- getTaxonId(saopaulo, db = temp.env$wfoNames)
+saopaulo <- tryAgain(saopaulo, not_found, getTaxonId, db = wfoNames)
 # using the World Checklist of Vascular Plants
-saopaulo <- getTaxonId(saopaulo, db = temp.env$wcvpNames)
+saopaulo <- tryAgain(saopaulo, not_found, getTaxonId, db = wcvpNames)
 
 # Save unmatched taxons
-nf <- saopaulo[saopaulo$tax.notes == "not found", ]
-nf <- aggregate(nf$catalogNumber, list(family=nf$family, scientificName=nf$scientificName, scientificNameAuthorship=nf$scientificNameAuthorship), function(x) length(unique(x)))
+nf <- saopaulo[saopaulo$tax.notes == "not found" | !startsWith(saopaulo$id, "bfo"), ]
+nf <- aggregate(nf$catalogNumber, list(family=nf$family, scientificName=nf$scientificName, scientificNameAuthorship=nf$scientificNameAuthorship, id=nf$id), function(x) length(unique(x)))
 nf <- nf[order(nf$family, nf$scientificName),]
 write.csv(nf[nf$x>=10,], "results/taxons_not_found.csv", row.names=F)
 
