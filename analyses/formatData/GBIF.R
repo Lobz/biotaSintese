@@ -2,7 +2,7 @@ devtools::load_all()
 library(plantR) # used foi reading and cleaning occurrence data
 
 # GBIF data
-gbif_files <- list.files("data-input/GBIF", pattern = "*.zip", full.names = TRUE)
+gbif_files <- list.files("data-input/Occurrences/GBIF", pattern = "*.zip", full.names = TRUE)
 print("Reading gbif files:")
 print(gbif_files)
 gbif_data_raw <- lapply(gbif_files, readData, quote = "", na.strings = c("", "NA"))

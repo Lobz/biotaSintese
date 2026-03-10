@@ -1,6 +1,6 @@
 devtools::load_all()
 # splink data
-splink_files <- list.files("data-input/splink", pattern = "*.txt$", full.names = TRUE)
+splink_files <- list.files("data-input/Occurrences/splink", pattern = "*.txt$", full.names = TRUE)
 print("Reading splink files:")
 print(splink_files)
 splink_data_raw <- lapply(splink_files, read.csv, sep="\t", na.strings = c("", "NA"), quote = "")

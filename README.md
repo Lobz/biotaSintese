@@ -22,10 +22,10 @@ A partir daqui, temos uma tabela de ocorrências, que filtramos para conter apen
     - [formatData](analyses/formatData/) - scripts de padronização dos dados de cada fonte
 - [data](data) - dados usados pela ferramenta, informações sobre bases de dados e localidades
 - [data-input](data-input) - dados brutos baixados dos Herbários Virtuais
-    - [GBIF](data-input/GBIF) - arquivos baixados do [GBIF](https://www.gbif.org/occurrence/search?taxon_key=6&occurrence_status=present)
-    - [JABOT](data-input/JABOT) - arquivos baixados do [JABOT](https://jabot.jbrj.gov.br/v3/consulta.php)
-    - [Reflora](data-input/Reflora) - arquivos baixados do [Reflora](https://reflora.jbrj.gov.br/reflora/herbarioVirtual/ConsultaPublicoHVUC/BemVindoConsultaPublicaHVConsultar.do?modoConsulta=LISTAGEM&quantidadeResultado=20)
-    - [splink](data-input/splink) - arquivos baixados do [splink](https://specieslink.net/search/)
+    - [GBIF](data-input/Occurrences/GBIF) - arquivos baixados do [GBIF](https://www.gbif.org/occurrence/search?taxon_key=6&occurrence_status=present)
+    - [JABOT](data-input/Occurrences/JABOT) - arquivos baixados do [JABOT](https://jabot.jbrj.gov.br/v3/consulta.php)
+    - [Reflora](data-input/Occurrences/Reflora) - arquivos baixados do [Reflora](https://reflora.jbrj.gov.br/reflora/herbarioVirtual/ConsultaPublicoHVUC/BemVindoConsultaPublicaHVConsultar.do?modoConsulta=LISTAGEM&quantidadeResultado=20)
+    - [splink](data-input/Occurrences/splink) - arquivos baixados do [splink](https://specieslink.net/search/)
 - [data-tmp](data-tmp) - arquivos intermediários criados por esta ferramenta
 - [plots](plots) - figuras
 - [R](R) - funções usadas pelos scripts
@@ -44,7 +44,7 @@ A partir daqui, temos uma tabela de ocorrências, que filtramos para conter apen
 - [splink](https://specieslink.net/search/) (obs.: para baixar dados em grandes quantidades, será necessário criar uma conta) - arquivos .txt
 - [JABOT](https://jabot.jbrj.gov.br/v3/consulta.php) - arquivos .csv
 
-Os dados devem ser salvos nas respectivas pastas dentro de [data-input/](data-input).
+Os dados devem ser salvos nas respectivas pastas dentro de [data-input/Occurrences/](data-input).
 No caso de mais de um arquivo serem salvos na mesma pasta, o script combinará os dados dos arquivos diferentes antes de iniciar o tratamento dos dados.
 No caso dos dados Reflora, por favor abra os arquivos e salve como csv na mesma pasta antes de prosseguir.
 
