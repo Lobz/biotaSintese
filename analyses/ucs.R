@@ -41,6 +41,7 @@ fix_name_dt <- function(x) {
 
 ucs_if_list <- (lapply(dt, fix_name_dt))
 ucs_if <- dplyr::bind_rows(ucs_if_list)
+write.csv(ucs_if,"data-input/Locations/info/UCs_IF.csv", row.names=F)
 
 sort(table(ucs$Órgão.Gestor))
 ucs_cnuc_if <- subset(ucs, Órgão.Gestor=="FUNDAÇÃO PARA CONSERVAÇÃO E A PRODUÇÃO FLORESTAL DO ESTADO DE SÃO PAULO - SP")
