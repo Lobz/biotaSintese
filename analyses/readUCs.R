@@ -90,3 +90,6 @@ for(i in 2:length(info_data_list)) {
 }
 nrow(dt)
 tab(dt$source)
+
+dt <- dt[order(dt$name),]
+write.csv(dt, "data-input/Locations/info/Summary.csv", row.names=F)

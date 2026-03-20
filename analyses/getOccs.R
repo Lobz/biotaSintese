@@ -7,7 +7,7 @@ library(sf)
 
 # Data about UCs from CNUC
 print("Loading conservation units data...")
-ucs <- read.csv("data/cnuc_2025_03.csv", sep=";", dec=",")
+ucs <- read.csv("data-input/Locations/info/cnuc_2025_03.csv", sep=";", dec=",")
 ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC"))
 # ucs <- read.csv("data-input/UCs.csv")
 
@@ -83,7 +83,7 @@ ucs$loc.correct <- NULL
 
 # Shape data
 print("Loading multipolygons...")
-shapes <- st_read("data/shp_cnuc_2025_03/cnuc_2025_03.shp")
+shapes <- st_read("data-input/Locations/shapes/cnuc_2025_08.shp")
 shapes <- subset(shapes, uf == "SÃO PAULO")
 shapes$nome_uc <- standardize_uc_name(shapes$nome_uc)
 shapes <- subset(shapes, nome_uc %in% ucs$Nome.da.UC)
