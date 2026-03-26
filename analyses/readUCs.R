@@ -56,7 +56,7 @@ merge_info <- function(A, B) {
     B <- B[!repB,]
     # detect similar entries
     strA <- paste0("^",generate_uc_string(A$name),"$")
-    matchA <- sapply(strA, function(s) {any(grepl(s, x=B$name, ignore.case=T))})
+    matchA <- sapply(strA, function(s) {any(grepl(s, x=rmLatin(B$name), ignore.case=T))})
     if(any(matchA)) {
         # add positively matched to result
         r <- rbind(r, A[matchA,])
@@ -64,12 +64,12 @@ merge_info <- function(A, B) {
         A <- A[!matchA,]
 
         # remove repeated from the other set
-        whichA <- sapply(strA[matchA], grep, x=B$name, ignore.case=T)
+        whichA <- sapply(strA[matchA], grep, x=rmLatin(B$name), ignore.case=T)
         B <- B[-whichA,]
     }
     # detect similar entries (converse)
     strB <- paste0("^",generate_uc_string(B$name),"$")
-    matchB <- sapply(strB, function(s) {any(grepl(s, x=A$name, ignore.case=T))})
+    matchB <- sapply(strB, function(s) {any(grepl(s, x=rmLatin(A$name), ignore.case=T))})
     if(any(matchB)) {
         # add positively matched to result
         r <- rbind(r, B[matchB,])
@@ -77,7 +77,7 @@ merge_info <- function(A, B) {
         B <- B[!matchB,]
 
         # remove repeated from the other set
-        whichB <- sapply(strB[matchB], grep, x=A$name, ignore.case=T)
+        whichB <- sapply(strB[matchB], grep, x=rmLatin(A$name), ignore.case=T)
         A <- A[-whichB,]
     }
     r <- rbind(r, A, B)

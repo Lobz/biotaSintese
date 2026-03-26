@@ -7,16 +7,20 @@ library(sf)
 
 # Data about UCs from CNUC
 print("Loading conservation units data...")
-ucs <- read.csv("data-input/Locations/info/cnuc_2025_03.csv", sep=";", dec=",")
-ucs <- subset(ucs, grepl("SP|SAO PAULO", UF), select = c("Nome.da.UC"))
+ucs <- read.csv("data-input/Locations/info/Summary.csv")
+ucs <- subset(ucs, grepl("SP|SAO PAULO|São Paulo", stateProvince), select = c("name"))
 # ucs <- read.csv("data-input/UCs.csv")
 
 # Make a summary table
 ucs$NumRecords <- NA
+ucs$NumOuro <- NA
+ucs$NumPrata <- NA
+ucs$NumBronze <- NA
 
 # Standardize names and reorder
-ucs$Nome.da.UC <- standardize_uc_name(ucs$Nome.da.UC)
-ucs <- ucs[order(ucs$Nome.da.UC), ]
+ucs$name <- standardize_uc_name(ucs$name)
+ucs$slug <- slug(ucs$name)
+ucs <- ucs[order(ucs$name), ]
 
 # Lookup what are the names of UCs in plantR
 LT <- read.csv("results/locations/uc_locstrings.csv")
@@ -27,21 +31,21 @@ loc2 <- aggregate(LT$loc.extra, list(Nome_UC = LT$uc_name), function(x) paste(un
 LT <- rbind(loc1, loc2)
 tail(LT)
 loc3 <- aggregate(LT$x, list(Nome_UC = LT$Nome_UC), function(x) paste(x, collapse="|"))
-rownames(loc3) <- loc3$Nome_UC
+rownames(loc3) <- slug(loc3$Nome_UC)
 
 # Read table of alternative names and locality names
 checkedLocations <- read.csv("results/locations/checkedLocations.csv")
-checkedLocations$Nome_UC <- toupper(standardize_uc_name(checkedLocations$Nome_UC))
-checkedLocations <- subset(checkedLocations, Nome_UC %in% ucs$Nome.da.UC)
+checkedLocations$slug <- toupper(slug(standardize_uc_name(checkedLocations$Nome_UC)))
+checkedLocations <- subset(checkedLocations, slug %in% ucs$slug)
 
 # add oficial names
-officialNames <- data.frame(Nome_UC = standardize_uc_name(ucs$Nome.da.UC), Municipio="QUALQUER", Localidade = ucs$Nome.da.UC, Relação = "Igual", Confiança = "Ouro")
+officialNames <- data.frame(Nome_UC = standardize_uc_name(ucs$name), Municipio="QUALQUER", Localidade = ucs$name, Relação = "Igual", Confiança = "Ouro", slug = ucs$slug)
 LT <- rbind(checkedLocations, officialNames)
 
 # Generate string for regex grepl in locality data
 LT$uc_strings <- paste0("(",generate_uc_string(LT$Localidade),")")
 # Summarize alternative names
-LT <- aggregate(LT$uc_strings, list(Nome_UC = LT$Nome_UC, Municipio = LT$Municipio, relationship = LT$Relação, confidenceLocality = LT$Confiança), function(x) paste(unique(x), collapse="|"))
+LT <- aggregate(LT$uc_strings, list(slug = LT$slug, Municipio = LT$Municipio, relationship = LT$Relação, confidenceLocality = LT$Confiança), function(x) paste(unique(x), collapse="|"))
 
 # Temporary
 LT <- subset(LT, confidenceLocality == "Ouro")
@@ -52,8 +56,8 @@ print("Loading occurrence data...")
 load("data-tmp/reflora_gbif_jabot_splink_saopaulo_deduped.RData")
 
 # Which occs are associated with each UC
-occs_plantr <- sapply(ucs$Nome.da.UC, function(s) {
-    if(!s %in% loc3$Nome_UC) return(FALSE)
+occs_plantr <- sapply(ucs$slug, function(s) {
+    if(!s %in% loc3$slug) return(FALSE)
     grepl(loc3[s, "x"], sp_deduped$loc.correct, perl=T)
 }, USE.NAMES = TRUE, simplify = FALSE)
 
@@ -69,7 +73,7 @@ occs_string_mun <- pairwiseMap(LT$x, LT$Municipio, function(str, mun) {
     res
 }, simplify = FALSE)
 # Combine positive matches from different municipalities
-occs_string <- sapply(unique(LT$Nome_UC), function(n) {Reduce("|", occs_string_mun[LT$Nome_UC==n])}, simplify = FALSE, USE.NAMES = TRUE)
+occs_string <- sapply(unique(LT$slug), function(n) {Reduce("|", occs_string_mun[LT$slug==n])}, simplify = FALSE, USE.NAMES = TRUE)
 # Combine matches from occs_plantr and occs_string
 occs_locality <- pairwiseMap(occs_plantr[names(occs_string)], occs_string, FUN=function(x,y) {x|y})
 names(occs_locality) <- names(occs_string)
@@ -85,9 +89,9 @@ ucs$loc.correct <- NULL
 print("Loading multipolygons...")
 shapes <- st_read("data-input/Locations/shapes/cnuc_2025_08.shp")
 shapes <- subset(shapes, uf == "SÃO PAULO")
-shapes$nome_uc <- standardize_uc_name(shapes$nome_uc)
-shapes <- subset(shapes, nome_uc %in% ucs$Nome.da.UC)
-shapes <- shapes[order(shapes$nome_uc), ]
+shapes$slug <- slug(standardize_uc_name(shapes$nome_uc))
+shapes <- subset(shapes, slug %in% ucs$slug)
+shapes <- shapes[order(shapes$slug), ]
 
 # Data with valid coordinates: either original coordinates or locality
 print("Selecting and correcting valid georeferenced points (original coords) ...")
@@ -97,7 +101,7 @@ if(nrow(coords_original) > 0) {
     coords_original <- fixDatum(coords_original) # Unify and convert datum to match SIRGAS 2000
     print("Intersecting points and shapes (original coords) ...")
     points_ucs_original <- st_intersects(shapes, coords_original)
-    names(points_ucs_original) <- shapes$nome_uc
+    names(points_ucs_original) <- shapes$slug
 } else {
     points_ucs_original <- as.list(rep(FALSE, nrow(shapes)))
 }
@@ -109,7 +113,7 @@ if(nrow(coords_gazet) > 0) {
     st_crs(coords_gazet) <- "EPSG:4674" # Assumes datum is SIRGAS 2000 (used by IBGE)
     print("Intersecting points and shapes (gazet coords) ...")
     points_ucs_gazet <- st_intersects(shapes, coords_gazet)
-    names(points_ucs_gazet) <- shapes$nome_uc
+    names(points_ucs_gazet) <- shapes$slug
 } else {
     points_ucs_gazet <- FALSE
 }
@@ -121,38 +125,37 @@ intersecUCs <- read.csv("results/locations/intersecUCs.csv")
 # Attribute confidence based on intersections
 intersecUCs$confidence <- ifelse(intersecUCs$prop > 98, "High",
                              ifelse(intersecUCs$status == "covered_buffer" | intersecUCs$prop > 80, "Medium", "Low"))
-intersecUCs$nome_uc <- standardize_uc_name(intersecUCs$nome_uc)
-intersecUCs$outra_uc <- standardize_uc_name(intersecUCs$outra_uc)
+intersecUCs$slug <- slug(standardize_uc_name(intersecUCs$nome_uc))
+intersecUCs$slug2 <- slug(standardize_uc_name(intersecUCs$outra_uc))
 
-intersecUCs <- subset(intersecUCs, outra_uc %in% ucs$Nome.da.UC)
+intersecUCs <- subset(intersecUCs, slug2 %in% ucs$slug)
 
-ucs$nome_file <- slug(ucs$Nome.da.UC)
-
+ucs$nome_file <- ucs$slug
 for(i in 1:sample_size){
 try({
 
     uc_data <- ucs[i,]
     print("Getting data for UC:")
     print(uc_data[1])
-    Nome_UC <- uc_data$Nome.da.UC
+    UC <- uc_data$slug
     nome_file <- uc_data$nome_file
 
     # Which records are in the gps shp
-    rcs_intersect <- coords_original$recordID[points_ucs_original[[Nome_UC]]]
+    rcs_intersect <- coords_original$recordID[points_ucs_original[[UC]]]
     gps_original <- sp_deduped$recordID %in% rcs_intersect
-    rcs_intersect <- coords_gazet$recordID[points_ucs_gazet[[Nome_UC]]]
+    rcs_intersect <- coords_gazet$recordID[points_ucs_gazet[[UC]]]
     gps_gazet <- sp_deduped$recordID %in% rcs_intersect
     gps_both <- gps_original & gps_gazet
 
     # Generate string for regex grepl in locality data
-    intersected <- subset(intersecUCs, nome_uc == Nome_UC)
+    intersected <- subset(intersecUCs, slug == UC)
     high <- intersected$outra_uc[intersected$confidence=="High"]
     medium <- intersected$outra_uc[intersected$confidence=="Medium"]
 
     # Exact UC name
-    occs_uc_name <- occs_locality[[Nome_UC]]
-    locality_exact <- occs_string[[Nome_UC]]
-    plantr_exact <- occs_plantr[[Nome_UC]]
+    occs_uc_name <- occs_locality[[UC]]
+    locality_exact <- occs_string[[UC]]
+    plantr_exact <- occs_plantr[[UC]]
 
     intersect_high <- Reduce('|', occs_locality[high])
     intersect_medium <- Reduce('|', occs_locality[medium])
@@ -169,7 +172,7 @@ try({
     occs_total <- occs_uc_name | gps_original | gps_gazet | intersect_high | intersect_medium
     if(!any(occs_total)) {
         print("No records found for CU:")
-        print(Nome_UC)
+        print(UC)
 
         ucs[i,2:ncol(ucs)] <- 0
 
@@ -193,15 +196,21 @@ try({
 
     total <- sp_deduped[occs_total,]
 
-    total$Nome_UC <- Nome_UC
+    total$Nome_UC <- uc_data$name
     save(total, file=paste0("results/total/",nome_file,".rda"))
 
     print(paste("Found",nrow(total),"records."))
     ucs[i,]$NumRecords <- nrow(total)
+
+    ucs[i,]$NumOuro <- sum(total$confidenceLocality=="High")
+    ucs[i,]$NumPrata <- sum(total$confidenceLocality=="Medium")
+    ucs[i,]$NumBronze <- sum(total$confidenceLocality=="Low")
+
 })
 }
 
 ucs$nome_file <- NULL
+ucs$slug <- NULL
 
 # Save summary
 write.csv(ucs, "results/summary_multilist.csv", row.names=FALSE)
