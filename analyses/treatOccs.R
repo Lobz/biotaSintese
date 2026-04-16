@@ -17,8 +17,8 @@ ucs <- done[has_records, ]
 sample_size = nrow(ucs)
 
 # If using sample, I want to remove sample from done
-done <- subset(done, !Nome.da.UC %in% ucs$Nome.da.UC)
-ucs$nome_file <- slug(ucs$Nome.da.UC)
+done <- subset(done, !name %in% ucs$name)
+ucs$nome_file <- slug(ucs$name)
 
 # Space for summary
 ucs$NumTaxons <- NA
@@ -39,7 +39,7 @@ for(i in 1:sample_size){
 try({
 
     uc_data <- ucs[i,]
-    Nome_UC <- uc_data$Nome.da.UC
+    Nome_UC <- uc_data$name
     print("Getting data for UC:")
     print(Nome_UC)
     nome_file <- uc_data$nome_file
@@ -75,44 +75,47 @@ try({
 
     final <- dplyr::bind_rows(subspecies, species, genus, family)
 
-    # Get best records for each taxon
-    top <- top_records(final, n = 1)
-    write.csv(top, paste0("results/allfields/",nome_file,".csv"), na="", row.names=FALSE)
-
-    # Remove unmatched?
-    unmatched <- is.na(top$id)
-    # top <- subset(top, !unmatched)
-
-    print(paste("Found",nrow(top),"taxons."))
-    ucs[i,]$NumTaxons <- nrow(top)
-    ucs[i,]$NumSpecies <- length(unique(top$species.new))
-    ucs[i,]$NumGenus <- length(unique(top$genus.new))
-    ucs[i,]$NumFamilies <- length(unique(top$family.new))
-    ucs[i,]$NumOuro <- sum(top$tax.check == "high")
-    ucs[i,]$NumPrata <- sum(top$tax.check == "medium")
-    ucs[i,]$NumBronze <- sum(top$tax.check == "low")
-    ucs[i,]$NumLatao <- sum(top$tax.check == "unknown")
-    ucs[i,]$NumNoMatch <- sum(unmatched)
-
     # Get info from  F&FBR
-    ids <- substr(top$id, 5, nchar(top$id))
+    ids <- substr(final$id, 5, nchar(final$id))
     matches <- match(ids, bf$id)
 
     # Extract origin and group information
-    top$origin <-bf$origin[matches]
-    top$group <-bf$group[matches]
+    final$origin <-bf$origin[matches]
+    final$group <-bf$group[matches]
 
     # Generate output file
-    finalList <- format_list(top, Nome_UC)
+    finalList <- format_list(final, Nome_UC)
 
-    write.csv(finalList, paste0("results/checklist/",nome_file,"_modeloCatalogo.csv"), na="", row.names=FALSE)
+    # Separate unmatched taxons
+    unmatched <- subset(finalList, is.na(Origem_FFBr))
+    matched <- subset(finalList, !is.na(Origem_FFBr))
+
+    # Get best records for each taxon
+    tops <- top_records(matched)
+    top <- tops[[1]]
+    bottom <- tops[[2]]
+
+    print(paste("Found",nrow(top),"taxons."))
+    ucs[i,]$NumTaxons <- nrow(top)
+    ucs[i,]$NumSpecies <- length(unique(paste(top$Gênero, top$Espécie)))
+    ucs[i,]$NumGenus <- length(unique(top$Gênero))
+    ucs[i,]$NumFamilies <- length(unique(top$Família))
+    ucs[i,]$NumOuro <- sum(top$ConfiançaID == "Ouro")
+    ucs[i,]$NumPrata <- sum(top$ConfiançaID == "Prata")
+    ucs[i,]$NumBronze <- sum(top$ConfiançaID == "Bronze")
+    ucs[i,]$NumLatao <- sum(top$ConfiançaID == "Latão")
+    ucs[i,]$NumNoMatch <- nrow(unmatched)
+
+    write.csv(top, paste0("results/checklist/",nome_file,"_modeloCatalogo.csv"), na="", row.names=FALSE)
+    write.csv(bottom, paste0("results/checklist/",nome_file,"_extra.csv"), na="", row.names=FALSE)
+    write.csv(unmatched, paste0("results/checklist/",nome_file,"_nomesInvalidos.csv"), na="", row.names=FALSE)
 })
 }
 ucs$nome_file <- NULL
 
 # Save summary
 total <- dplyr::bind_rows(done, ucs)
-total <- total[order(total$Nome.da.UC),]
+total <- total[order(total$name),]
 write.csv(total, "results/summary_treatOccs.csv", row.names=FALSE)
 summary(total==0)
 summary(total<20)
