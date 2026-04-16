@@ -30,3 +30,4 @@ vignettes/*.pdf
 results/total-treated/PE_SERRA_DO_MAR.csv
 
 *.pdf
+*.xml
