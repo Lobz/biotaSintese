@@ -19,14 +19,8 @@ jabot$county <- NA
 
 # Normalize taxon Rank
 jabot$verbatimTaxonRank <- jabot$taxonRank
-# jabot$taxonRank[jabot$taxonRank=="f."] <- NA # these are unreliable, can be form, genus or family
-jabot$taxonRank[grepl(" form.",jabot$scientificName)] <- "f."
-jabot$taxonRank[jabot$taxonRank=="Infr."] <- NA # these are unreliable, and I couldn't figure out what this is supposed to mean
-jabot$taxonRank <- factor(jabot$taxonRank,
-    levels = c("f.", "var.", "subsp.", "sp.", "gen.", "fam.",
-                "o", "c", "p", "k"), # these don't actually exist
-    labels = taxonRanks,
-    ordered = TRUE)
+jabot$taxonRank[grepl(" form.",jabot$scientificName)] <- "form"
+jabot$taxonRank <- normalizeTaxonRank(jabot$taxonRank)
 
 # Normalize basisOfRecord
 if("basisofrecord" %in% names(jabot)) {

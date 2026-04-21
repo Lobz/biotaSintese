@@ -5,6 +5,7 @@ taxonRanks <- c("form", "variety", "subspecies", "species", "genus", "family",
 taxonRankSubstitutions <- c(
     "Infr." = NA,
     "f." = "form",
+    "form." = "form",
     "ssp." = "subspecies",
     "subsp." = "subspecies",
     "var." = "variety",
