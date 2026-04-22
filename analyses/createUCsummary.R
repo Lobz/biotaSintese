@@ -19,6 +19,7 @@ column_or_value <- function(x, dt) {
 # Read data according to file descriptions
 info_data_list <- lapply(1:nrow(info_files), function(i) {
     tryCatch({
+        print(paste("Reading ", filenames[i], "..."))
         dt_raw <- as.data.frame(data.table::fread(filenames[i], sep = info_files$sep[i], dec = info_files$dec[i], na.strings = c("", "NA")))
         dt <- data.frame(
             name = standardize_uc_name(column_or_value(info_files$nome_uc[i], dt_raw)),
@@ -84,8 +85,10 @@ merge_info <- function(A, B) {
     return(r)
 }
 
+print("Mergung info...")
 dt <- info_data_list[[1]]
 for(i in 2:length(info_data_list)) {
+    print(paste("Merging", filenames[i], "..."))
     dt <- merge_info(dt, info_data_list[[i]])
 }
 nrow(dt)

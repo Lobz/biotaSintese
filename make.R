@@ -10,6 +10,12 @@ source("analyses/formatData/splink.R")
 source("analyses/joinData.R")
 # Treat data with plantR
 source("analyses/saopaulo.R")
+
+# Prepare list of Locations
+source("analyses/createUCsummary.R")
+# Make gazetteer
+source("analyses/createUCgazetteer.R")
+
 # Filter occs for each UC
 source("analyses/getOccs.R")
 # Generate checklists
