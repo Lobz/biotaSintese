@@ -5,24 +5,16 @@ library(plantR) # used foi reading and cleaning occurrence data
 gbif_files <- list.files("data-input/Occurrences/GBIF", pattern = "*.zip", full.names = TRUE)
 print("Reading gbif files:")
 print(gbif_files)
-gbif_data_raw <- lapply(gbif_files, readData, quote = "", na.strings = c("", "NA"))
+gbif_data_raw <- lapply(gbif_files, readGBIF)
 gbif <- gbif_data_raw[[1]]
 if(length(gbif_data_raw) > 1) {
     print("Merging GBIF databases...")
     for(i in 2:length(gbif_data_raw)){
-        gbif$occurrence <- merge(gbif$occurrence, gbif_data_raw[[i]]$occurrence, all=T)
-        gbif$citations <- merge(gbif$citations, gbif_data_raw[[i]]$citations, all=T)
+        gbif<- merge(gbif, gbif_data_raw[[i]], all=T)
     }
 }
-print(paste("Found",nrow(gbif$occurrence), "observations and", nrow(gbif$citations), "citations."))
+print(paste("Found",nrow(gbif), "observations"))
 
-write.csv(gbif$citations, "data-tmp/gbif-citations.csv")
-gbif <- gbif$occurrence
-
-gbif$taxonRank <- as.taxon.rank(tolower(gbif$taxonRank))
-gbif$verbatimBasisOfRecord <- gbif$basisOfRecord
-gbif$basisOfRecord <- as.basisOfRecord(gbif$basisOfRecord)
-
-gbif$downloadedFrom <- "GBIF"
+gbif <- formatGBIF(gbif)
 
 save(gbif, file="data-tmp/gbif.RData")

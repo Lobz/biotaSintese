@@ -14,19 +14,6 @@ if(length(splink_data_raw) > 1) {
 
 print(paste("Found",nrow(splink), "observations."))
 
-# Normalize taxonRank and basisOfRecord
-table(splink$basisofrecord, useNA="always")
-splink$verbatimbasisofrecord <- splink$basisofrecord
-splink$basisofrecord <- sub("([a-z])([A-Z])", "\\1_\\2", splink$basisofrecord)
-splink$basisofrecord[which(startsWith(splink$basisofrecord, "Machine"))] <- "MACHINE_OBSERVATION"
-splink$basisofrecord[which(startsWith(splink$basisofrecord, "Preserved"))] <- "PRESERVED_SPECIMEN"
-splink$basisofrecord[which(startsWith(splink$basisofrecord, "Xil"))] <- "PRESERVED_SPECIMEN"
-splink$basisofrecord[splink$basisofrecord=="Carpo"] <- "PRESERVED_SPECIMEN"
-splink$basisofrecord <- toupper(splink$basisofrecord)
-splink$basisofrecord <- as.basisOfRecord(splink$basisofrecord)
-
-splink$recordedBy <- splink$collector
-splink$recordNumber <- splink$fieldnumber
-splink$scientificNameAuthorship <- splink$scientificnameauthor
+splink <- formatSpLink(splink)
 save(splink, file="data-tmp/splink.RData")
 # todo: decide what to do with barcode NA

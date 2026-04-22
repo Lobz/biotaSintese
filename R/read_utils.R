@@ -1,10 +1,3 @@
-#' read.gbif
-#'
-#' Save some options to read properly from GBIF
-#'
-#' @param file Filename to pass to read.csv
-#' @return data.frame
-#' @export
 
 read.gbif <- function(file, ...) {
     read.csv(file = file, sep = "\t", quote = NULL, ...)
@@ -560,4 +553,4 @@ desired_fields <- union(plantR_fields, extra_mine)
 #'
 #' @param x A data frame
 #' @param desiredFields A list of names, ideally contained in names(x)
-selectDesiredFields <- function(x, desiredFields = desired_fields) x[,intersect(x, desiredFields)]
+selectDesiredFields <- function(x, desiredFields = desired_fields) x[,intersect(names(x), desiredFields)]

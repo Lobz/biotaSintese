@@ -1,0 +1,183 @@
+#' readGBIF
+#'
+#' Save some options to read properly from GBIF
+#'
+#' @param file Filename to pass to readOccurrence or readData
+#' @importFrom plantR readData
+#' @return data.frame
+#' @export
+readGBIF <- function(file, ...) {
+    if(endsWith(file, ".zip")) {
+        readData(file, quote = "", na.strings = c("", "NA"), output = c("occurrence", "verbatim"), ...)
+    } else {
+        readOccurrence(file = file, sep = "\t", quote = NULL, ...)
+    }
+}
+
+#' readJabot
+#'
+#' Save some options to read properly from Jabot
+#'
+#' @param file Filename to pass to readOccurrence
+#' @return data.frame
+#' @export
+readJabot <- function(file, ...) {
+    readOccurrence(file, sep="|", ...)
+}
+
+#' readeReflora
+#'
+#' Save some options to read properly from Reflora
+#'
+#' @param file Filename to pass to readOccurrence
+#' @return data.frame
+#' @export
+readReflora <- function(file, ...) {
+    readOccurrence(file, ...)
+}
+
+#' readSpLink
+#'
+#' Save some options to read properly from SpeciesLink
+#'
+#' @param file Filename to pass to readOccurrence
+#' @return data.frame
+#' @export
+readSpLink <- function(file, ...) {
+    readOccurrence(file, sep = "\t", quote = NULL, ...)
+}
+
+#' Read darwin core data
+#'
+#' Basic funtion to read data
+#'
+#' @examples
+#'
+#' x <- readOccurrence("data-input/Occurrences/OtherSources/example.csv")
+readOccurrence <- function(file, ...) {
+    as.data.frame(data.table::fread(file, na.strings = c("", "NA"), ...))
+}
+
+#' Specific formatting for GBIF data
+#'
+#' @param gbif A data.frame (output from readGBIF)
+formatGBIF <- function(gbif) {
+    gbif$taxonRank <- normalizeTaxonRank(tolower(gbif$taxonRank))
+    gbif$verbatimBasisOfRecord <- gbif$basisOfRecord
+    gbif$basisOfRecord <- as.basisOfRecord(gbif$basisOfRecord)
+
+    gbif$downloadedFrom <- "GBIF"
+
+    gbif <- plantR::formatDwc(gbif_data = gbif)
+
+    gbif <- selectDesiredFields(gbif)
+    gbif
+}
+
+#' Specific formatting for Jabot data
+#'
+#' @param x A data.frame (output from readJabot)
+#' @output A data.frame formatted with formatDwc
+formatJabot <- function(x) {
+    # Fix names
+    x <- consolidateCase(x)
+    names(x)[names(x)=="scientifcname"] <- "scientificName"
+    x$county <- NA
+
+    # Normalize taxon Rank
+    x$verbatimTaxonRank <- x$taxonRank
+    x$taxonRank[grepl(" form.",x$scientificName)] <- "form"
+    x$taxonRank <- normalizeTaxonRank(x$taxonRank)
+
+    # Normalize basisOfRecord
+    if("basisofrecord" %in% names(x)) {
+        x$verbatimBasisOfRecord <- x$basisofrecord
+        x$basisofrecord[x$basisofrecord=="Preserved Specimen"] <- "PRESERVED_SPECIMEN"
+        x$basisofrecord[x$basisofrecord=="Xiloteca"] <- "PRESERVED_SPECIMEN"
+        x$basisofrecord <- as.basisOfRecord(x$verbatimBasisOfRecord)
+    } else {
+        x$basisOfRecord <- NA
+    }
+
+    x$downloadedFrom <- "JABOT"
+    x <- plantR::formatDwc(user_data = x)
+    x <- selectDesiredFields(x)
+    x
+}
+
+#' Specific formatting for Reflora data
+#'
+#' @param x A data.frame (output from readReflora)
+#' @output A data.frame formatted with formatDwc
+formatReflora <- function(x) {
+    x <- parseReflora(x)
+    # Fix names
+    x <- consolidateCase(x)
+
+    # fix year data
+    x$year <- sub("^.*/","", x$year)
+    year <- x$year
+    correct <- nchar(year)==4
+    incomplete <- nchar(year)==2
+    date <- nchar(year)==6
+
+    year[date] <- getYear(as.Date(year[date], "%d%m%y"))
+    year[incomplete] <- ifelse(as.integer(year[incomplete]) > 25, paste0("19", year[incomplete]), year[incomplete])
+    x$year <- as.numeric(year)
+
+    x$month <- as.numeric(x$month)
+
+    x$basisOfRecord <- "PRESERVED_SPECIMEN"
+    x$basisOfRecord <- as.basisOfRecord(x$basisOfRecord)
+
+    x$downloadedFrom <- "REFLORA"
+    x <- plantR::formatDwc(user_data = x)
+    x <- selectDesiredFields(x)
+    x$taxonRank <- normalizeTaxonRank(x$taxonRank)
+    x
+}
+
+#' Specific formatting for SpLink data
+#'
+#' @param x A data.frame (output from readSpLink)
+#' @output A data.frame formatted with formatDwc
+formatSpLink <- function(x) {
+    # Normalize basisOfRecord
+    table(x$basisofrecord, useNA="always")
+    x$verbatimbasisofrecord <- x$basisofrecord
+    x$basisofrecord <- sub("([a-z])([A-Z])", "\\1_\\2", x$basisofrecord)
+    x$basisofrecord[which(startsWith(x$basisofrecord, "Machine"))] <- "MACHINE_OBSERVATION"
+    x$basisofrecord[which(startsWith(x$basisofrecord, "Preserved"))] <- "PRESERVED_SPECIMEN"
+    x$basisofrecord[which(startsWith(x$basisofrecord, "Xil"))] <- "PRESERVED_SPECIMEN"
+    x$basisofrecord[x$basisofrecord=="Carpo"] <- "PRESERVED_SPECIMEN"
+    x$basisofrecord <- toupper(x$basisofrecord)
+    x$basisofrecord <- as.basisOfRecord(x$basisofrecord)
+
+    # Fix names
+    x <- consolidateCase(x)
+
+    x$downloadedFrom <- "splink"
+    x <- plantR::formatDwc(splink_data = x)
+    x <- selectDesiredFields(x)
+    x$taxonRank <- normalizeTaxonRank(x$taxonRank)
+    x
+}
+
+#' Generic formatting for darwinCore data
+#'
+#' @param x A data.frame (output from readOccurrence)
+#' @output A data.frame formatted with formatDwc
+formatOccurrence <- function(x) {
+    # Fix names
+    x <- consolidateCase(x)
+
+    # Normalize basisOfRecord
+    x$verbatimBasisOfRecord <- x$basisOfRecord
+    x$basisOfRecord <- toupper(x$basisOfRecord)
+    x$basisOfRecord <- as.basisOfRecord(x$basisOfRecord)
+
+    x <- plantR::formatDwc(user_data = x)
+    x <- selectDesiredFields(x)
+    x$taxonRank <- normalizeTaxonRank(x$taxonRank)
+    x
+}
