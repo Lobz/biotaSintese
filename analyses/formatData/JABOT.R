@@ -1,17 +1,13 @@
-devtools::load_all()
+require(integraFlora)
+require(plantR)
 
 # Jabot data
 jabot_files <- list.files("data-input/Occurrences/JABOT", pattern = "*.csv", full.names = TRUE)
-jabot_data_raw <- lapply(jabot_files, read.csv, sep="|", na.strings = c("", "NA"))
-jabot <- formatJabot(jabot_data_raw[[1]])
-if(length(jabot_data_raw) > 1) {
-    print("Merging JABOT databases...")
-    for(i in 2:length(jabot_data_raw)){
-        #merge
-        jabot <- merge(jabot, formatJabot(jabot_data_raw[[i]]), all=T)
-    }
+if(length(jabot_files) > 0) {
+    jabot_data_raw <- lapply(jabot_files, readJabot)
+    jabot <- lapply(jabot_data_raw, formatJabot)
+} else {
+    jabot <- list()
 }
-
-print(paste("Found",nrow(jabot), "observations."))
 
 save(jabot,file="data-tmp/jabot.RData")

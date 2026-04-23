@@ -44,7 +44,7 @@ readReflora <- function(file, ...) {
 #' @return data.frame
 #' @export
 readSpLink <- function(file, ...) {
-    readOccurrence(file, sep = "\t", quote = NULL, ...)
+    readOccurrence(file, sep = "\t", quote = "", ...)
 }
 
 #' Read darwin core data
@@ -111,21 +111,10 @@ formatJabot <- function(x) {
 #' @output A data.frame formatted with formatDwc
 formatReflora <- function(x) {
     x <- parseReflora(x)
-    # Fix names
-    x <- consolidateCase(x)
 
     # fix year data
-    x$year <- sub("^.*/","", x$year)
-    year <- x$year
-    correct <- nchar(year)==4
-    incomplete <- nchar(year)==2
-    date <- nchar(year)==6
-
-    year[date] <- getYear(as.Date(year[date], "%d%m%y"))
-    year[incomplete] <- ifelse(as.integer(year[incomplete]) > 25, paste0("19", year[incomplete]), year[incomplete])
-    x$year <- as.numeric(year)
-
-    x$month <- as.numeric(x$month)
+    # dt <- as.Date(x$dateCollected, tryFormats=c("%d/%m/%Y","--/%d/%m%Y"))
+    x$year <- getYear(x$dateCollected)
 
     x$basisOfRecord <- "PRESERVED_SPECIMEN"
     x$basisOfRecord <- as.basisOfRecord(x$basisOfRecord)
@@ -172,9 +161,16 @@ formatOccurrence <- function(x) {
     x <- consolidateCase(x)
 
     # Normalize basisOfRecord
-    x$verbatimBasisOfRecord <- x$basisOfRecord
-    x$basisOfRecord <- toupper(x$basisOfRecord)
-    x$basisOfRecord <- as.basisOfRecord(x$basisOfRecord)
+    if("basisOfRecord" %in% names(x)) {
+        x$verbatimBasisOfRecord <- x$basisOfRecord
+        x$basisOfRecord <- toupper(x$basisOfRecord)
+        x$basisOfRecord <- as.basisOfRecord(x$basisOfRecord)
+    } else {
+        x$basisOfRecord <- NA
+    }
+    if(!"county" %in% names(x)) {
+        x$county <- NA
+    }
 
     x <- plantR::formatDwc(user_data = x)
     x <- selectDesiredFields(x)

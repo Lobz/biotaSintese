@@ -46,11 +46,6 @@ parseReflora <- function(data) {
 
         scientificName = substr(verbatimScientificName, nchar(family)+2, nchar(verbatimScientificName)),
 
-
-        year = substr(dateCollected, 7, 12),
-        month = substr(dateCollected, 4, 5),
-        day = substr(dateCollected, 1, 2),
-
         decimalLatitude = verbatimLatitude,
         decimalLongitude = verbatimLongitude,
         county = NA,
