@@ -1,4 +1,4 @@
-Package: biotaSintese
+Package: integraFlora
 Title: Build species list for any conservation unit in Brazil
 Version: 1.0.0
 Authors@R: c(person("Mali Oz", "Salles", email = "malicsalles@gmail.com", role = c("aut", "cre")))
