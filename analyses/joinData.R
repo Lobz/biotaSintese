@@ -1,31 +1,66 @@
 devtools::load_all()
 library(plantR)
 
+reflora <- reflora_data_parsed[[1]]
+if(length(reflora_data_raw) > 1) {
+    print("Merging reflora databases...")
+    for(i in 2:length(reflora_data_raw)){
+        reflora <- merge(reflora, reflora_data_parsed[[i]], all=T)
+    }
+}
 load("data-tmp/gbif.RData")
-gbif$downloadedFrom <- "GBIF"
-goodNames <- names(gbif)
-gbif <- remove_fields(gbif)
 load("data-tmp/reflora.RData")
-reflora$downloadedFrom <- "Reflora"
-reflora <- consolidateCase(reflora, goodNames)
-goodNames <- union(goodNames, names(reflora))
-reflora <- remove_fields(reflora)
 load("data-tmp/jabot.RData")
-jabot$downloadedFrom <- "JABOT"
-jabot <- consolidateCase(jabot, goodNames)
-goodNames <- union(goodNames, names(jabot))
-jabot <- remove_fields(jabot)
 load("data-tmp/splink.RData")
-splink$downloadedFrom <- "Splink"
-splink <- consolidateCase(splink, goodNames)
-splink <- remove_fields(splink)
+load("data-tmp/other.RData")
 
-# Join all this together
-saopaulo1 <- formatDwc(gbif_data = gbif, user_data = jabot)
-saopaulo2 <- formatDwc(splink_data = splink, user_data = reflora)
-saopaulo <- dplyr::bind_rows(saopaulo1, saopaulo2)
+# Join in a single list
+all_data <- c(gbif, reflora, jabot, splink, other)
+print(paste("Found", sum(sapply(all_data, nrow)), "records in", length(all_data), "files"))
 
-rm(gbif, reflora, jabot, splink, goodNames, saopaulo1, saopaulo2)
+# Organize into bite-sized chunks (size from config? ~500k?)
+chunk_size <- 1e5
+sizes <- sapply(all_data, nrow)
+if(any(sizes > chunk_size)) {
+    print("Splitting large files into chunks...")
+    small <- all_data[sizes <= chunk_size]
+    large <- all_data[sizes > chunk_size]
+    spl <- lapply(large, function(x) {
+        split(x, rep(1:ceiling(nrow(x)/chunk_size), each=chunk_size))
+    })
+    all_data <- c(small,do.call(c, spl))
+    sizes <- sapply(all_data, nrow)
+}
+if(any(sizes < chunk_size/2)) {
+    print("Joining small files...")
+    small <- all_data[sizes < chunk_size]
+    large <- all_data[sizes >= chunk_size]
+    small <- small[order(sapply(small, nrow))]
+    while((l <- length(small))>1) {
+        sum <- nrow(small[[1]]) + nrow(small[[l]])
+        if(sum <= chunk_size) {
+            small[[l]] <- dplyr::full_join(small[[1]], small[[l]])
+            small <- small[2:l]
+        } else {
+            large <- c(large, small[l])
+            small <- small[1:(l-1)]
+        }
+    }
+    all_data <- c(small, large)
+}
+
+print(paste("Organized", sum(sapply(all_data, nrow)), "records in", length(all_data), "chunks of", as.integer(chunk_size), "records"))
+save(all_data, file="data-tmp/all_data.RData")
+
+# Apply workflow
+treated_data <- lapply(all_data, plantRWorkflow)
+save(treated_data, file="data-tmp/treated_data.RData")
+
+# Join
+corpus <- treated_data[[1]]
+for(x in treated_data[2:length(treated_data)]) {
+    corpus <- dplyr::bind_rows(corpus, x)
+}
 
 # Subset country
 print(dim(saopaulo))
