@@ -1,4 +1,4 @@
-devtools::load_all()
+require(integraFlora)
 folder <- "data-input/Locations/info/"
 info_files <- read.csv("data-input/Locations/info/file_descriptions.csv", na.strings = c("", "NA"))
 filenames <- paste0("data-input/Locations/info/", info_files$arquivo)
@@ -85,7 +85,7 @@ merge_info <- function(A, B) {
     return(r)
 }
 
-print("Mergung info...")
+print("Merging info...")
 dt <- info_data_list[[1]]
 for(i in 2:length(info_data_list)) {
     print(paste("Merging", filenames[i], "..."))

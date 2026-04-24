@@ -1,11 +1,14 @@
-devtools::load_all()
+require(integraFlora)
 library(plantR)
+
+# load("data-tmp/corpus-full.rda")
 
 print("Removing duplicates...")
 loc.names <- c(loc.cols, paste0(loc.cols, ".new"), "longitude.gazetteer", "latitude.gazetteer")
 names(loc.names) <- loc.names
 loc.names <- c(loc.str = "loc.correct", res.gazet = "resolution.gazetteer", res.orig =
     "resol.orig", loc.check = "loc.check", loc.names)
+
 my_valDup <- function(x) validateDup(x, noNumb = NA, noYear = NA, noName = NA, prop=0.6,
   comb.fields = list(
     c("family", "col.last.name", "col.number", "col.loc"),
@@ -22,7 +25,7 @@ my_valDup <- function(x) validateDup(x, noNumb = NA, noYear = NA, noName = NA, p
     "origin.coord", prec.coord = "precision.coord", geo.check = "geo.check", datum = "geodeticDatum"),
   loc.names = loc.names, ignore.miss = T)
 
-sp_deduped <- my_valDup(saopaulo)
+corpus <- my_valDup(corpus)
 
 print("Saving...")
-save(sp_deduped,file="data-tmp/reflora_gbif_jabot_splink_saopaulo_deduped.RData")
+save(corpus, file="data-tmp/corpus.rda")

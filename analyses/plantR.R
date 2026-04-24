@@ -1,5 +1,5 @@
 
-devtools::load_all()
+require(integraFlora)
 
 library("plantR")
 

@@ -1,4 +1,4 @@
-devtools::load_all()
+require(integraFlora)
 # splink data
 splink_files <- list.files("data-input/Occurrences/splink", pattern = "*.txt$", full.names = TRUE)
 if(length(splink_files) > 0) {

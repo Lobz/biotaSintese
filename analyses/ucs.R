@@ -1,4 +1,4 @@
-devtools::load_all()
+require(integraFlora)
 library(sf) # used for spatial operations
 library(plantR) # used foi reading and cleaning occurrence data
 

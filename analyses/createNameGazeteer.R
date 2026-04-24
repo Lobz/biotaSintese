@@ -1,4 +1,4 @@
-devtools::load_all()
+require(integraFlora)
 library(plantR) # used for reading and cleaning occurrence data
 library(stringr)
 

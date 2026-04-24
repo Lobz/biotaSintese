@@ -1,4 +1,4 @@
-devtools::load_all()
+require(integraFlora)
 library(stringr)
 library(parallel)
 library(sf)

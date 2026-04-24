@@ -1,5 +1,5 @@
 library(plantR) # used foi reading and cleaning occurrence data
-devtools::load_all()
+require(integraFlora)
 
 # Read list from Catalogo das Plantas das UCs do Brasil
 cl0 <- read.csv(("data/raw-data/Dados_Catalogo_UCs_Brasil.csv"))
