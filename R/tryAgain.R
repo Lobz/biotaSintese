@@ -4,11 +4,15 @@
 #'
 #' @param x A data.frame
 #' @param condition A function that checks which lines must be tried again
-#' @param FUN A function
+#' @param FUN A function that takes a data frame, alters it and returns it
 #' @param add_cols Logical. If TRUE, cols added by the function FUN will be added to the result. Defaults to FALSE.
 #' @param ... Aditional parameters to pass to FUN
 #'
 #' @details You may pass aditional parameters to the function FUN. This function assumes that FUN preserves the order of the rows of x, and that condition() may be applied to both x and FUN(x). FUN may change the values of any columns of x, but only on rows that pass condition before FUN and do not pass condition after FUN.
+#' @examples
+#'
+#' x <- data.frame(a = 1:100, b = 100:1)
+#' y <- tryAgain(x, function(x) {x$a > x$b}, function(x) {x$b <- x$b*2; x})
 tryAgain <- function(x, condition, FUN, success_condition = function(x) !condition(x), add_cols = FALSE, label = NULL, ...) {
     # Label
     if(is.null(label)) {
