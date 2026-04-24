@@ -170,7 +170,7 @@ getTaxonId <- function(total, complete = TRUE, rm.miss = FALSE, na.values = c("I
             saved2 <- x$scientificNameAuthorship
             x$scientificName <- x$scientificName.new
             x$scientificNameAuthorship <- x$scientificNameAuthorship.new
-            x <- formatTax(x, sug.dist=1.0)
+            x <- formatTax(x)
             x$scientificName <- saved
             x$scientificNameAuthorship <- saved2
             x
