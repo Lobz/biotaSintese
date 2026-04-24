@@ -1,13 +1,6 @@
-devtools::load_all()
+require(integraFlora)
 library(plantR)
 
-reflora <- reflora_data_parsed[[1]]
-if(length(reflora_data_raw) > 1) {
-    print("Merging reflora databases...")
-    for(i in 2:length(reflora_data_raw)){
-        reflora <- merge(reflora, reflora_data_parsed[[i]], all=T)
-    }
-}
 load("data-tmp/gbif.RData")
 load("data-tmp/reflora.RData")
 load("data-tmp/jabot.RData")
@@ -53,13 +46,15 @@ print(paste("Organized", sum(sapply(all_data, nrow)), "records in", length(all_d
 save(all_data, file="data-tmp/all_data.RData")
 
 # Apply workflow
+print("Treating data...")
 treated_data <- lapply(all_data, plantRWorkflow)
 save(treated_data, file="data-tmp/treated_data.RData")
 
 # Join
+print("Joining in a single data.frame...")
 corpus <- treated_data[[1]]
 for(x in treated_data[2:length(treated_data)]) {
     corpus <- dplyr::bind_rows(corpus, x)
 }
 
-save(corpus, file="data-tmp/corpus.rda")
+save(corpus, file="data-tmp/corpus-full.rda")
