@@ -1,34 +1,19 @@
 
 plantRWorkflow <- function(x) {
-    x
-# Standardize missing information
-saopaulo[saopaulo==""] <- NA
-# Subset country
-print(dim(saopaulo))
-saopaulo <- subset(saopaulo, is.na(country) | grepl("br", tolower(country), fixed=T))
+    # Standardize missing information
+    x[x==""] <- NA
 
-# Standardize missing information
-saopaulo[saopaulo==""] <- NA
+    # # Subset country
+    # print(dim(x))
+    # x <- subset(x, is.na(country) | grepl("br", tolower(country), fixed=T))
 
-# Select fields
-f <-  plantR:::fieldNames
-plantR_fields <- f[!is.na(f$type),c("plantr")]
-extra_mine <- c("taxonRank", "verbatimScientificName", "acceptedScientificName", "species", "taxonID", "typeStatus", "recordID", "eventDate", "verbatimEventDate", "geodeticDatum", "associatedMedia",  "virtualDuplicates", "duplicates", "barcode", "downloadedFrom")
-desired_fields <- union(plantR_fields, extra_mine)
+    # Lets format this
+    print("Formatting occs")
+    x <- formatOcc(x, noNumb = NA, noYear = NA, noName = NA)
 
-saopaulo <- saopaulo[, intersect(desired_fields, names(saopaulo))]
-print(dim(saopaulo))
+    print("Formatting locs")
+    x <- formatLoc(x)
 
-# Lets format this
-print("Formatting occs")
-saopaulo <- formatOcc(saopaulo, noNumb = NA, noYear = NA, noName = NA)
-
-print("Formatting locs")
-saopaulo <- formatLoc(saopaulo)
-
-# ###### PAUSE
-print("Saving")
-save(saopaulo, file="data-tmp/saopaulo_occs.RData")
-save(saopaulo, file="data-tmp/reflora_gbif_jabot_splink_saopaulo.RData")
+    x <- fixLocation(x)
 
 }
