@@ -1,4 +1,5 @@
 # Please read the README before running this
+devtools::load_all()
 
 # Format data from each source
 source("analyses/formatData/GBIF.R")
